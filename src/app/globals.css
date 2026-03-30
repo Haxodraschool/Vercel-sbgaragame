@@ -1,0 +1,294 @@
+@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap");
+@import "tailwindcss";
+
+/* ─── Tailwind v4 custom theme ─── */
+@theme {
+  --font-pixel: "VT323", monospace;
+}
+
+/* ============================================
+   SB-GARAGE — Design System Variables
+   ============================================ */
+
+:root {
+  /* ─── Fonts ─── */
+  --font-primary: "Outfit", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+
+  /* ─── Rarity Colors ─── */
+  --rarity-1: #9ca3af; /* Common — Xám */
+  --rarity-2: #22c55e; /* Uncommon — Xanh lá */
+  --rarity-3: #3b82f6; /* Rare — Xanh dương */
+  --rarity-4: #a855f7; /* Epic — Tím */
+  --rarity-5: #eab308; /* Legendary — Vàng */
+
+  --rarity-1-glow: rgba(156, 163, 175, 0.4);
+  --rarity-2-glow: rgba(34, 197, 94, 0.5);
+  --rarity-3-glow: rgba(59, 130, 246, 0.5);
+  --rarity-4-glow: rgba(168, 85, 247, 0.6);
+  --rarity-5-glow: rgba(234, 179, 8, 0.7);
+
+  /* ─── Game Colors ─── */
+  --color-gold: #fbbf24;
+  --color-power: #22c55e;
+  --color-heat: #ef4444;
+  --color-stability: #3b82f6;
+  --color-uytin: #06b6d4;
+  --color-exp: #a78bfa;
+  --color-tech: #f97316;
+
+  /* ─── UI Colors ─── */
+  --bg-primary: #0f0f14;
+  --bg-secondary: #1a1a24;
+  --bg-card: #22222e;
+  --bg-overlay: rgba(0, 0, 0, 0.6);
+  --text-primary: #f0f0f5;
+  --text-secondary: #a0a0b5;
+  --text-muted: #606075;
+  --border-color: #2a2a3a;
+  --accent-cyan: #06b6d4;
+  --accent-orange: #f97316;
+
+  /* ─── Heat Bar Gradient Stops ─── */
+  --heat-0: #22c55e;
+  --heat-50: #3b82f6;
+  --heat-80: #f59e0b;
+  --heat-100: #ef4444;
+
+  /* ─── Neon Sign Colors ─── */
+  --neon-cyan: #00e5ff;
+  --neon-dim: #1a4a52;
+  --neon-off: #0a1a1d;
+
+  /* ─── Spacing ─── */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+
+  /* ─── Border Radius ─── */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+
+  /* ─── Transitions ─── */
+  --transition-fast: 0.15s ease;
+  --transition-normal: 0.3s ease;
+  --transition-slow: 0.5s ease;
+
+  /* ─── Z-Index ─── */
+  --z-base: 1;
+  --z-dropdown: 10;
+  --z-modal: 100;
+  --z-toast: 200;
+  --z-loading: 500;
+}
+
+/* ─── Reset & Base ─── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-primary);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ─── Scrollbar ─── */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-secondary);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* ─── Utility Classes ─── */
+.text-gold {
+  color: var(--color-gold);
+}
+.text-power {
+  color: var(--color-power);
+}
+.text-heat {
+  color: var(--color-heat);
+}
+.text-stability {
+  color: var(--color-stability);
+}
+.text-uytin {
+  color: var(--color-uytin);
+}
+.text-muted {
+  color: var(--text-muted);
+}
+
+.font-mono {
+  font-family: var(--font-mono);
+}
+
+/* ─── Rarity Border Classes ─── */
+.rarity-1 {
+  border-color: var(--rarity-1);
+}
+.rarity-2 {
+  border-color: var(--rarity-2);
+}
+.rarity-3 {
+  border-color: var(--rarity-3);
+}
+.rarity-4 {
+  border-color: var(--rarity-4);
+}
+.rarity-5 {
+  border-color: var(--rarity-5);
+}
+
+.rarity-glow-1 {
+  box-shadow: 0 0 8px var(--rarity-1-glow);
+}
+.rarity-glow-2 {
+  box-shadow: 0 0 12px var(--rarity-2-glow);
+}
+.rarity-glow-3 {
+  box-shadow: 0 0 16px var(--rarity-3-glow);
+}
+.rarity-glow-4 {
+  box-shadow: 0 0 20px var(--rarity-4-glow);
+}
+.rarity-glow-5 {
+  box-shadow:
+    0 0 28px var(--rarity-5-glow),
+    0 0 56px var(--rarity-5-glow);
+}
+
+/* ─── Animations ─── */
+@keyframes flicker {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  41% {
+    opacity: 1;
+  }
+  42% {
+    opacity: 0.3;
+  }
+  43% {
+    opacity: 1;
+  }
+  77% {
+    opacity: 1;
+  }
+  78% {
+    opacity: 0.2;
+  }
+  79% {
+    opacity: 1;
+  }
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-4px);
+  }
+  40% {
+    transform: translateX(4px);
+  }
+  60% {
+    transform: translateX(-3px);
+  }
+  80% {
+    transform: translateX(3px);
+  }
+}
+
+@keyframes pulse-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 8px var(--accent-cyan);
+  }
+  50% {
+    box-shadow:
+      0 0 20px var(--accent-cyan),
+      0 0 40px rgba(6, 182, 212, 0.3);
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes spin-reverse {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(-360deg);
+  }
+}
+
+@keyframes bolt-fall {
+  0% {
+    transform: translateY(0) rotate(0deg);
+    opacity: 1;
+  }
+  60% {
+    transform: translateY(80px) rotate(180deg);
+    opacity: 1;
+  }
+  80% {
+    transform: translateY(70px) rotate(200deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(80px) rotate(200deg);
+    opacity: 0;
+  }
+}
+
+.animate-flicker {
+  animation: flicker 3s infinite;
+}
+.animate-shake {
+  animation: shake 0.4s ease;
+}
+.animate-pulse-glow {
+  animation: pulse-glow 2s infinite;
+}
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
