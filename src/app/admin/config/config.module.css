@@ -1,0 +1,49 @@
+/* Admin Config Page Styles */
+.page { display:flex;flex-direction:column;gap:20px; }
+.title { font-family:'VT323',monospace;font-size:28px;color:var(--text-primary,#f0f0f5);letter-spacing:2px; }
+.message { padding:10px 16px;background:rgba(6,182,212,0.1);border:1px solid rgba(6,182,212,0.3);border-radius:6px;color:var(--neon-cyan,#00e5ff);font-family:var(--font-mono);font-size:12px;text-align:center; }
+.loading { display:flex;align-items:center;justify-content:center;min-height:40vh;color:var(--text-muted);font-family:var(--font-mono);font-size:14px; }
+
+/* Tabs */
+.tabs { display:flex;gap:4px;border-bottom:1px solid #1e1e2e;padding-bottom:0; }
+.tab { padding:10px 20px;background:none;border:none;border-bottom:2px solid transparent;color:var(--text-muted);font-family:var(--font-mono);font-size:13px;cursor:pointer;transition:all 0.15s; }
+.tab:hover { color:var(--text-secondary); }
+.tabActive { color:var(--neon-cyan,#00e5ff);border-bottom-color:var(--neon-cyan,#00e5ff); }
+
+/* Section */
+.section { background:rgba(22,22,34,0.8);border:1px solid #1e1e2e;border-radius:10px;padding:20px;overflow:auto; }
+
+/* Table */
+.table { width:100%;border-collapse:collapse; }
+.table th { font-family:var(--font-mono);font-size:10px;color:var(--text-muted);text-transform:uppercase;letter-spacing:1px;text-align:left;padding:10px 12px;border-bottom:1px solid #1e1e2e; }
+.table td { font-family:var(--font-mono);font-size:12px;color:var(--text-secondary);padding:8px 12px;border-bottom:1px solid rgba(30,30,46,0.5); }
+.table tr:hover td { background:rgba(255,255,255,0.02); }
+.bossName { color:var(--text-primary);font-weight:600; }
+.goldCell { color:var(--color-gold,#fbbf24); }
+.specialCell { color:var(--rarity-4,#a855f7);font-size:10px; }
+.typeBadge { padding:2px 8px;background:rgba(255,255,255,0.05);border:1px solid #2a2a3a;border-radius:3px;font-size:9px; }
+.inlineInput { width:80px;padding:4px 8px;background:rgba(0,0,0,0.3);border:1px solid var(--neon-cyan);border-radius:4px;color:var(--text-primary);font-family:var(--font-mono);font-size:12px;outline:none; }
+
+/* Action Buttons */
+.editBtn { background:none;border:none;cursor:pointer;font-size:14px;opacity:0.6;transition:opacity 0.15s; }
+.editBtn:hover { opacity:1; }
+.saveBtn { background:none;border:none;cursor:pointer;font-size:14px;color:#22c55e;margin-right:4px; }
+.cancelBtn { background:none;border:none;cursor:pointer;font-size:12px;color:#ef4444; }
+
+/* Constants Grid */
+.constantsGrid { display:grid;grid-template-columns:1fr 1fr;gap:8px; }
+.constantItem { display:flex;justify-content:space-between;padding:8px 12px;background:rgba(0,0,0,0.2);border-radius:4px;font-family:var(--font-mono);font-size:11px; }
+.constantKey { color:var(--text-muted); }
+.constantValue { color:var(--neon-cyan,#00e5ff);font-weight:600; }
+.note { margin-top:16px;padding:12px;background:rgba(168,85,247,0.06);border:1px solid rgba(168,85,247,0.15);border-radius:6px;font-family:var(--font-mono);font-size:11px;color:var(--text-secondary); }
+.note code { background:rgba(0,0,0,0.3);padding:2px 6px;border-radius:3px;color:var(--neon-cyan); }
+
+/* Database Actions */
+.dbActions { display:grid;grid-template-columns:1fr 1fr;gap:20px; }
+.dbCard { display:flex;flex-direction:column;align-items:center;gap:12px;padding:32px 24px;background:rgba(0,0,0,0.2);border:1px solid #2a2a3a;border-radius:10px;text-align:center; }
+.dbCard h3 { font-family:'VT323',monospace;font-size:20px;color:var(--text-primary); }
+.dbCard p { font-family:var(--font-mono);font-size:11px;color:var(--text-muted);line-height:1.6;max-width:250px; }
+.dbIcon { font-size:48px; }
+.dbBtn { padding:10px 24px;background:linear-gradient(135deg,#06b6d4,#0891b2);border:none;border-radius:6px;color:white;font-family:'VT323',monospace;font-size:16px;cursor:pointer;transition:all 0.2s;letter-spacing:1px; }
+.dbBtn:hover:not(:disabled) { opacity:0.9;transform:translateY(-1px); }
+.dbBtn:disabled { opacity:0.5;cursor:not-allowed; }

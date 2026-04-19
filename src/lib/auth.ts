@@ -72,7 +72,7 @@ export const GAME_CONSTANTS = {
   FINAL_ROUND_BOSSES: 10,
   SHOP_UNLOCK_DAY: 2,
   PACK_CARDS_COUNT: 5,
-  PACK_CHANCE_IN_SHOP: 0.4, // 40% chance pack xuất hiện
+  PACK_CHANCE_IN_SHOP: 0.1, // 10% chance pack xuất hiện
   SHOP_ITEMS_COUNT: 6,
 
   // Drop rates

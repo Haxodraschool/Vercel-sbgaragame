@@ -2,12 +2,11 @@
 
 import { useEffect } from "react";
 import { useGameStore } from "@/stores/useGameStore";
-import { LoginScreen, LobbyScreen, DevTool } from "@/components";
+import { LoadingScreen, LoginScreen, LobbyScreen, ShopScreen, WorkshopScreen, DevTool } from "@/components";
 
 export default function Home() {
   const currentScreen = useGameStore((state) => state.currentScreen);
-  const user = useGameStore((state) => state.user);
-  const logout = useGameStore((state) => state.logout);
+  const isTransitioning = useGameStore((state) => state.isTransitioning);
   const initializeStore = useGameStore((state) => state.initializeStore);
 
   useEffect(() => {
@@ -17,13 +16,20 @@ export default function Home() {
   return (
     <main style={{ minHeight: '100vh', position: 'relative' }}>
       {currentScreen === 'login' && <LoginScreen />}
-      
+
       {currentScreen === 'lobby' && <LobbyScreen />}
+
+      {currentScreen === 'shop' && <ShopScreen />}
+
+      {currentScreen === 'workshop' && <WorkshopScreen />}
+
+      {/* Global transition loading overlay — destination screens call markScreenReady()
+          when all their resources are fully loaded. Until then, this overlay covers
+          the destination entirely. */}
+      <LoadingScreen isLoading={isTransitioning} />
 
       {/* Dev / Cheat Tool (renders its own visibility checking) */}
       <DevTool />
-
-      {/* Các màn hình khác sẽ gắn vào đây ở các công đoạn sau */}
     </main>
   );
 }

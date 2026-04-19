@@ -112,6 +112,11 @@ export const api = {
         method: 'POST',
         body: JSON.stringify(data),
       }),
+    reroll: (data: Record<string, unknown>) =>
+      request<Record<string, unknown>>('/shop/reroll', {
+        method: 'POST',
+        body: JSON.stringify(data),
+      }),
   },
 
   // ─── Events ───

@@ -1,0 +1,800 @@
+/* ═══════════════════════════════════════════════
+   Workshop Overlay — Retro-futuristic / Cyberpunk
+   React UI layer floating above Phaser Canvas
+   ═══════════════════════════════════════════════ */
+
+/* ── Google Fonts ── */
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;800;900&family=Share+Tech+Mono&display=swap');
+
+/* ── Coin fly animation is defined in globals.css ── */
+
+
+/* ── Root container (full screen overlay, pointer-events-none except children) ── */
+.overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  pointer-events: none;
+  font-family: 'Share Tech Mono', 'Courier New', monospace;
+  color: #b0c8e8;
+  user-select: none;
+  overflow: hidden;
+}
+
+/* ═══ HEADER BAR ═══ */
+.header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 12px 20px;
+  pointer-events: auto;
+  z-index: 20;
+}
+
+.headerLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: linear-gradient(135deg, rgba(0, 8, 20, 0.85), rgba(0, 15, 35, 0.75));
+  padding: 12px 18px;
+  border: 1px solid rgba(0, 243, 255, 0.25);
+  border-radius: 2px;
+  clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+  backdrop-filter: blur(6px);
+  box-shadow:
+    0 0 20px rgba(0, 243, 255, 0.08),
+    inset 0 0 30px rgba(0, 243, 255, 0.03);
+}
+
+.title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 4px;
+  color: #00f3ff;
+  text-transform: uppercase;
+  text-shadow: 0 0 8px rgba(0, 243, 255, 0.5), 0 0 20px rgba(0, 243, 255, 0.2);
+  margin: 0;
+}
+
+.questInfo {
+  display: flex;
+  gap: 14px;
+  font-size: 11px;
+  color: #6688aa;
+}
+
+.questLabel {
+  color: #445566;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 9px;
+}
+
+.questValue {
+  color: #00f3ff;
+  font-family: 'Orbitron', sans-serif;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+/* ═══ STATS PANEL ═══ */
+.statsPanel {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 24px;
+  padding: 10px 24px;
+  background: linear-gradient(135deg, rgba(0, 8, 20, 0.8), rgba(0, 15, 35, 0.7));
+  border: 1px solid rgba(0, 243, 255, 0.15);
+  border-radius: 2px;
+  pointer-events: auto;
+  z-index: 20;
+  backdrop-filter: blur(8px);
+}
+
+.statItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 70px;
+}
+
+.statLabel {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: #445566;
+}
+
+.statValue {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.statPower {
+  color: #44ff88;
+  text-shadow: 0 0 6px rgba(68, 255, 136, 0.4);
+}
+
+.statStability {
+  color: #4488ff;
+  text-shadow: 0 0 6px rgba(68, 136, 255, 0.4);
+}
+
+.statHeat {
+  color: #ff8844;
+  text-shadow: 0 0 6px rgba(255, 136, 68, 0.4);
+}
+
+.statHeatDanger {
+  color: #ff3333;
+  text-shadow: 0 0 10px rgba(255, 50, 50, 0.6);
+  animation: heatPulse 0.5s ease-in-out infinite alternate;
+}
+
+.statHeatCritical {
+  color: #ff0000;
+  text-shadow: 0 0 15px rgba(255, 0, 0, 0.8);
+  animation: heatFlicker 0.15s steps(2) infinite;
+}
+
+/* ═══ HEAT BAR (Neon Tube Style) ═══ */
+.heatBarContainer {
+  position: absolute;
+  top: 75px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 500px;
+  pointer-events: auto;
+  z-index: 20;
+}
+
+.heatBarHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 4px;
+}
+
+.heatBarLabel {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  color: #665544;
+}
+
+.heatBarValue {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  color: #ff8844;
+}
+
+.heatBarTrack {
+  position: relative;
+  width: 100%;
+  height: 14px;
+  background: linear-gradient(180deg, #0a0808 0%, #1a1210 100%);
+  border: 1px solid #332820;
+  border-radius: 7px;
+  overflow: hidden;
+  box-shadow:
+    inset 0 2px 4px rgba(0, 0, 0, 0.5),
+    0 0 8px rgba(0, 0, 0, 0.3);
+}
+
+.heatBarFill {
+  height: 100%;
+  border-radius: 6px;
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1), background 0.3s ease;
+  box-shadow: 0 0 12px currentColor, inset 0 0 6px rgba(255, 255, 255, 0.1);
+  position: relative;
+}
+
+.heatBarFill::after {
+  content: '';
+  position: absolute;
+  top: 1px;
+  left: 4px;
+  right: 4px;
+  height: 4px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.3), transparent);
+  border-radius: 4px;
+}
+
+.heatSafe {
+  background: linear-gradient(90deg, #00cccc, #00f3ff);
+  color: #00f3ff;
+}
+
+.heatWarn {
+  background: linear-gradient(90deg, #ff8800, #ffaa00);
+  color: #ff8800;
+}
+
+.heatDanger {
+  background: linear-gradient(90deg, #ff4400, #ff0000);
+  color: #ff0000;
+  animation: heatPulse 0.4s ease-in-out infinite alternate;
+}
+
+.heatCritical {
+  background: linear-gradient(90deg, #ff0000, #ff0044);
+  color: #ff0000;
+  animation: heatFlicker 0.12s steps(2) infinite;
+}
+
+/* Neon tube segments */
+.heatBarSegments {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  gap: 2px;
+  padding: 1px;
+  pointer-events: none;
+}
+
+.heatSegment {
+  flex: 1;
+  border-right: 1px solid rgba(0, 0, 0, 0.3);
+}
+
+/* Threshold marker */
+.heatThreshold {
+  position: absolute;
+  top: -6px;
+  bottom: -6px;
+  width: 2px;
+  background: #ff0000;
+  box-shadow: 0 0 6px #ff0000;
+  z-index: 2;
+}
+
+.heatThresholdLabel {
+  position: absolute;
+  top: -16px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 8px;
+  color: #ff4444;
+  white-space: nowrap;
+}
+
+/* ═══ ACTION BUTTONS ═══ */
+.actionButtons {
+  position: absolute;
+  top: 12px;
+  right: 20px;
+  display: flex;
+  gap: 8px;
+  pointer-events: auto;
+  z-index: 20;
+}
+
+.btnBase {
+  padding: 10px 20px;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  border: 1.5px solid;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+  position: relative;
+  overflow: hidden;
+}
+
+.btnBase::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), transparent);
+  pointer-events: none;
+}
+
+.btnReset {
+  background: rgba(60, 10, 10, 0.6);
+  color: #ff4444;
+  border-color: rgba(255, 68, 68, 0.4);
+}
+
+.btnReset:hover {
+  background: rgba(100, 20, 20, 0.8);
+  border-color: rgba(255, 68, 68, 0.7);
+  box-shadow: 0 0 16px rgba(255, 68, 68, 0.3);
+  color: #ff6666;
+}
+
+.btnStart {
+  background: rgba(0, 30, 40, 0.7);
+  color: #00f3ff;
+  border-color: rgba(0, 243, 255, 0.4);
+}
+
+.btnStart:hover {
+  background: rgba(0, 50, 70, 0.9);
+  border-color: rgba(0, 243, 255, 0.7);
+  box-shadow: 0 0 20px rgba(0, 243, 255, 0.3);
+  color: #ffffff;
+}
+
+.btnStartActive {
+  background: rgba(100, 0, 0, 0.8);
+  color: #ff4444;
+  border-color: rgba(255, 68, 68, 0.7);
+  animation: enginePulse 0.8s ease-in-out infinite;
+  box-shadow: 0 0 25px rgba(255, 0, 0, 0.4);
+}
+
+.btnBack {
+  background: rgba(20, 20, 30, 0.7);
+  color: #8899aa;
+  border-color: rgba(136, 153, 170, 0.3);
+}
+
+.btnBack:hover {
+  background: rgba(30, 30, 50, 0.9);
+  border-color: rgba(136, 153, 170, 0.5);
+  color: #aabbcc;
+}
+
+/* ═══ CREW ZONE ═══ */
+.crewZone {
+  position: absolute;
+  top: 110px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 12px;
+  background: rgba(0, 8, 20, 0.75);
+  border: 1px solid rgba(0, 243, 255, 0.1);
+  border-radius: 2px;
+  pointer-events: auto;
+  z-index: 15;
+  backdrop-filter: blur(4px);
+}
+
+.crewTitle {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  color: #00f3ff;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.crewSlot {
+  width: 50px;
+  height: 50px;
+  border: 1px dashed rgba(0, 243, 255, 0.2);
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  color: #334455;
+  position: relative;
+  background: rgba(0, 15, 30, 0.5);
+}
+
+.crewSlotFilled {
+  border-style: solid;
+  border-color: rgba(0, 243, 255, 0.4);
+  background: rgba(0, 20, 40, 0.7);
+}
+
+.crewSlotLocked {
+  opacity: 0.3;
+  border-color: rgba(100, 100, 100, 0.2);
+}
+
+/* ═══ BOTTOM INFO BAR ═══ */
+.bottomBar {
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
+  font-size: 10px;
+  letter-spacing: 3px;
+  color: rgba(100, 130, 160, 0.4);
+  text-transform: uppercase;
+  pointer-events: none;
+  z-index: 15;
+}
+
+/* ═══ CHROMATIC ABERRATION (Heat > 80%) ═══ */
+.chromaticOverlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 100;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  background:
+    radial-gradient(ellipse at center, transparent 60%, rgba(255, 0, 0, 0.05) 100%);
+  box-shadow: inset 0 0 80px rgba(255, 0, 0, 0.1);
+}
+
+.chromaticActive {
+  opacity: 1;
+  animation: chromaticFlicker 0.2s steps(3) infinite;
+}
+
+/* ═══ COMBO INDICATOR ═══ */
+.comboIndicator {
+  position: absolute;
+  top: 76px;
+  right: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  pointer-events: none;
+  z-index: 15;
+}
+
+.comboBadge {
+  padding: 4px 10px;
+  background: rgba(255, 0, 255, 0.15);
+  border: 1px solid rgba(255, 0, 255, 0.3);
+  border-radius: 2px;
+  font-size: 9px;
+  color: #ff00ff;
+  letter-spacing: 1px;
+  text-shadow: 0 0 4px rgba(255, 0, 255, 0.4);
+}
+
+/* ═══ INSTALL VFX (khi lắp thẻ vào slot) ═══ */
+@keyframes installFlash {
+  0% { opacity: 0; }
+  15% { opacity: 0.7; }
+  100% { opacity: 0; }
+}
+
+@keyframes installShake {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  10%     { transform: translate3d(-4px, 2px, 0) rotate(-0.3deg); }
+  25%     { transform: translate3d(5px, -3px, 0) rotate(0.4deg); }
+  40%     { transform: translate3d(-3px, 3px, 0); }
+  55%     { transform: translate3d(4px, -2px, 0); }
+  70%     { transform: translate3d(-2px, 1px, 0); }
+  85%     { transform: translate3d(2px, -1px, 0); }
+}
+
+@keyframes installSpark {
+  0%   { transform: scale(0.3) translate(0, 0);   opacity: 0; }
+  15%  { transform: scale(1.4) translate(0, 0);   opacity: 1; }
+  60%  { transform: scale(1.1) translate(var(--sx, 0), var(--sy, 0)); opacity: 0.9; }
+  100% { transform: scale(0.4) translate(calc(var(--sx, 0) * 1.8), calc(var(--sy, 0) * 1.8)); opacity: 0; }
+}
+
+.installFlashOverlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 200;
+  background: radial-gradient(ellipse at center, rgba(255, 255, 230, 0.85) 0%, rgba(255, 200, 80, 0.4) 30%, transparent 70%);
+  animation: installFlash 260ms ease-out forwards;
+  mix-blend-mode: screen;
+}
+
+.installShakeRoot {
+  animation: installShake 380ms cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+  transform-origin: center;
+}
+
+.installSparkBurst {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.installSparkBurst span {
+  position: absolute;
+  display: inline-block;
+  filter: drop-shadow(0 0 6px rgba(255, 220, 120, 0.9));
+  animation: installSpark 650ms ease-out forwards;
+}
+
+/* ═══ ANIMATIONS ═══ */
+@keyframes heatPulse {
+  from { opacity: 0.85; }
+  to { opacity: 1; }
+}
+
+@keyframes heatFlicker {
+  0% { opacity: 1; }
+  50% { opacity: 0.6; }
+  100% { opacity: 1; }
+}
+
+@keyframes enginePulse {
+  0% { box-shadow: 0 0 15px rgba(255, 0, 0, 0.3); }
+  50% { box-shadow: 0 0 30px rgba(255, 0, 0, 0.6); }
+  100% { box-shadow: 0 0 15px rgba(255, 0, 0, 0.3); }
+}
+
+@keyframes chromaticFlicker {
+  0% { opacity: 0.6; }
+  33% { opacity: 0.8; }
+  66% { opacity: 0.5; }
+  100% { opacity: 0.7; }
+}
+
+@keyframes neonFlicker {
+  0%, 19%, 21%, 23%, 25%, 54%, 56%, 100% {
+    text-shadow: 0 0 4px #00f3ff, 0 0 11px #00f3ff, 0 0 19px #00f3ff;
+  }
+  20%, 24%, 55% {
+    text-shadow: none;
+  }
+}
+
+/* ═══ COMBO SYSTEM ═══ */
+
+/* Golden glow pulse on combo slots */
+@keyframes comboGlowPulse {
+  0% {
+    box-shadow:
+      0 0 8px rgba(251, 191, 36, 0.4),
+      0 0 16px rgba(251, 191, 36, 0.2),
+      inset 0 0 6px rgba(251, 191, 36, 0.1);
+  }
+  50% {
+    box-shadow:
+      0 0 16px rgba(251, 191, 36, 0.7),
+      0 0 32px rgba(251, 191, 36, 0.4),
+      0 0 48px rgba(251, 191, 36, 0.15),
+      inset 0 0 12px rgba(251, 191, 36, 0.2);
+  }
+  100% {
+    box-shadow:
+      0 0 8px rgba(251, 191, 36, 0.4),
+      0 0 16px rgba(251, 191, 36, 0.2),
+      inset 0 0 6px rgba(251, 191, 36, 0.1);
+  }
+}
+
+.comboGlowSlot {
+  animation: comboGlowPulse 2s ease-in-out infinite;
+  border-color: rgba(251, 191, 36, 0.7) !important;
+  background: rgba(251, 191, 36, 0.08) !important;
+}
+
+/* SVG neon connecting line animation */
+@keyframes comboLineDash {
+  0% {
+    stroke-dashoffset: 24;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes comboLineGlow {
+  0%, 100% {
+    filter: drop-shadow(0 0 3px rgba(251, 191, 36, 0.5));
+    opacity: 0.7;
+  }
+  50% {
+    filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.9))
+            drop-shadow(0 0 16px rgba(251, 191, 36, 0.4));
+    opacity: 1;
+  }
+}
+
+.comboSvgOverlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 25;
+}
+
+.comboSvgLine {
+  stroke: url(#comboGradient);
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-dasharray: 8 4;
+  fill: none;
+  animation:
+    comboLineDash 0.8s linear infinite,
+    comboLineGlow 2s ease-in-out infinite;
+}
+
+/* Combo badge floating above connected slots */
+@keyframes comboBadgeFloat {
+  0%, 100% { transform: translateX(-50%) translateY(0); }
+  50% { transform: translateX(-50%) translateY(-3px); }
+}
+
+.comboSlotBadge {
+  position: absolute;
+  top: -28px;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  padding: 2px 6px;
+  background: linear-gradient(135deg, rgba(30, 20, 0, 0.95), rgba(50, 35, 0, 0.9));
+  border: 1px solid rgba(251, 191, 36, 0.6);
+  border-radius: 3px;
+  color: #fbbf24;
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-shadow: 0 0 6px rgba(251, 191, 36, 0.6);
+  box-shadow: 0 0 12px rgba(251, 191, 36, 0.3);
+  z-index: 30;
+  animation: comboBadgeFloat 2.5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+/* ═══ COMBO TOOLTIP (right side of hovered card) ═══ */
+.comboTooltipRight {
+  position: absolute;
+  left: calc(100% + 8px);
+  top: 0;
+  width: 200px;
+  background: linear-gradient(135deg,
+    rgba(15, 10, 0, 0.97) 0%,
+    rgba(25, 18, 0, 0.97) 100%
+  );
+  border: 1px solid rgba(251, 191, 36, 0.4);
+  border-radius: 6px;
+  padding: 8px;
+  z-index: 100;
+  backdrop-filter: blur(12px);
+  box-shadow:
+    0 0 20px rgba(251, 191, 36, 0.15),
+    0 8px 32px rgba(0, 0, 0, 0.6);
+  max-height: 280px;
+  overflow-y: auto;
+  pointer-events: none;
+  animation: comboTooltipIn 0.15s ease-out;
+}
+
+@keyframes comboTooltipIn {
+  from { opacity: 0; transform: translateX(-4px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+.comboTooltipRight::-webkit-scrollbar { width: 3px; }
+.comboTooltipRight::-webkit-scrollbar-thumb { background: rgba(251, 191, 36, 0.3); border-radius: 2px; }
+
+.comboHoverTitle {
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #fbbf24;
+  text-shadow: 0 0 8px rgba(251, 191, 36, 0.5);
+  margin-bottom: 8px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.comboHoverItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  margin-bottom: 6px;
+  background: rgba(251, 191, 36, 0.06);
+  border: 1px solid rgba(251, 191, 36, 0.15);
+  border-radius: 4px;
+  transition: border-color 0.2s;
+}
+
+.comboHoverItem:hover {
+  border-color: rgba(251, 191, 36, 0.4);
+}
+
+/* Chain link SVG between card images */
+@keyframes chainSwing {
+  0%, 100% { transform: rotate(0deg); }
+  25% { transform: rotate(5deg); }
+  75% { transform: rotate(-5deg); }
+}
+
+.comboChainIcon {
+  flex-shrink: 0;
+  color: #fbbf24;
+  filter: drop-shadow(0 0 4px rgba(251, 191, 36, 0.6));
+  animation: chainSwing 2s ease-in-out infinite;
+}
+
+/* Partner card at 70% brightness */
+.comboPartnerCard {
+  filter: brightness(0.7);
+  transition: filter 0.3s ease;
+}
+
+.comboPartnerCard:hover {
+  filter: brightness(0.9);
+}
+
+.comboCardThumb {
+  width: 40px;
+  height: 56px;
+  object-fit: contain;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.comboCurrentCard {
+  border: 1px solid rgba(251, 191, 36, 0.5);
+  box-shadow: 0 0 8px rgba(251, 191, 36, 0.3);
+}
+
+.comboEffectText {
+  font-size: 8px;
+  color: rgba(251, 191, 36, 0.8);
+  line-height: 1.3;
+  flex: 1;
+  min-width: 0;
+}
+
+.comboEffectName {
+  font-weight: 700;
+  font-size: 9px;
+  color: #fbbf24;
+  display: block;
+  margin-bottom: 2px;
+  text-shadow: 0 0 4px rgba(251, 191, 36, 0.3);
+}
+
+.comboEffectDesc {
+  color: rgba(200, 180, 120, 0.7);
+  font-size: 8px;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+/* ═══ RESPONSIVE ═══ */
+@media (max-width: 900px) {
+  .statsPanel {
+    gap: 12px;
+    padding: 8px 16px;
+  }
+
+  .statValue {
+    font-size: 16px;
+  }
+
+  .heatBarContainer {
+    width: 80%;
+  }
+
+  .actionButtons {
+    gap: 4px;
+  }
+
+  .btnBase {
+    padding: 8px 14px;
+    font-size: 10px;
+  }
+}

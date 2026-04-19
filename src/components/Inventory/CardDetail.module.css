@@ -1,0 +1,313 @@
+/* ============================================
+   CardDetail — Blueprint Side Panel
+   Technical Drawing Aesthetic
+   ============================================ */
+
+.panel {
+  padding: 28px 24px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  position: relative;
+  z-index: 1;
+  animation: slideInRight 0.3s ease;
+  overflow-y: auto;
+}
+
+@keyframes slideInRight {
+  from {
+    opacity: 0;
+    transform: translateX(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* ─── Empty/Placeholder State ─── */
+.emptyPanel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 40px;
+  text-align: center;
+  gap: 16px;
+  position: relative;
+  z-index: 1;
+}
+
+.emptyPanel .icon {
+  font-size: 48px;
+  opacity: 0.2;
+}
+
+.emptyPanel .hint {
+  font-family: 'VT323', monospace;
+  font-size: 14px;
+  color: var(--text-muted);
+  line-height: 2.2;
+  max-width: 200px;
+}
+
+/* ─── Card Image Large ─── */
+.imageContainer {
+  width: 100%;
+  max-width: 280px;
+  margin: 0 auto;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 2px solid #2a2a3a;
+  background: #0a0a12;
+  position: relative;
+  aspect-ratio: 0.9 / 1;
+  flex-shrink: 0;
+}
+
+.imageContainer img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Rarity borders for detail image */
+.imgRarity1 { border-color: var(--rarity-1); }
+.imgRarity2 { border-color: var(--rarity-2); }
+.imgRarity3 { border-color: var(--rarity-3); }
+.imgRarity4 { border-color: var(--rarity-4); box-shadow: 0 0 20px var(--rarity-4-glow); }
+.imgRarity5 { border-color: var(--rarity-5); box-shadow: 0 0 24px var(--rarity-5-glow), 0 0 48px rgba(234,179,8,0.15); }
+
+/* ─── Card Info ─── */
+.cardInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cardName {
+  font-family: 'VT323', monospace;
+  font-size: 20px;
+  color: var(--text-primary);
+  line-height: 1.8;
+  text-align: center;
+}
+
+.rarityLine {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.stars {
+  letter-spacing: 2px;
+}
+
+.typeBadge {
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.1);
+  color: var(--text-secondary);
+}
+
+.costLine {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--color-gold);
+}
+
+.quantityLine {
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.quantityLine strong {
+  color: var(--neon-cyan);
+  font-size: 14px;
+}
+
+/* ─── Stat Bars ─── */
+.statsSection {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+  background: rgba(0,0,0,0.3);
+  border: 1px solid #1e1e2e;
+  border-radius: 6px;
+}
+
+.statsTitle {
+  font-family: 'VT323', monospace;
+  font-size: 14px;
+  color: var(--text-muted);
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.statRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.statLabel {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  min-width: 72px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.statPower { color: var(--color-power); }
+.statHeat { color: var(--color-heat); }
+.statStability { color: var(--color-stability); }
+
+.statBarTrack {
+  flex: 1;
+  height: 10px;
+  background: #0a0a14;
+  border: 1px solid #1e1e2e;
+  border-radius: 2px;
+  overflow: hidden;
+  position: relative;
+}
+
+.statBarFill {
+  height: 100%;
+  border-radius: 1px;
+  transition: width 0.4s ease;
+  position: relative;
+}
+
+.statBarFill::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    90deg,
+    transparent,
+    transparent 3px,
+    rgba(0,0,0,0.2) 3px,
+    rgba(0,0,0,0.2) 4px
+  );
+}
+
+.fillPower { background: linear-gradient(90deg, #16a34a, #22c55e); }
+.fillHeat { background: linear-gradient(90deg, #dc2626, #ef4444); }
+.fillStability { background: linear-gradient(90deg, #2563eb, #3b82f6); }
+.fillNegative { background: linear-gradient(90deg, #7c3aed, #a855f7); }
+
+.statValue {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  min-width: 36px;
+  text-align: right;
+}
+
+/* ─── Effects Section ─── */
+.effectsSection {
+  padding: 14px;
+  background: rgba(168,85,247,0.04);
+  border: 1px solid rgba(168,85,247,0.15);
+  border-radius: 6px;
+}
+
+.effectTitle {
+  font-family: 'VT323', monospace;
+  font-size: 14px;
+  color: var(--rarity-4);
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+}
+
+.effectItem {
+  font-family: var(--font-primary);
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.7;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.03);
+}
+
+.effectItem:last-child {
+  border-bottom: none;
+}
+
+.effectTrigger {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 2px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  font-weight: 700;
+  margin-right: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.triggerPassive {
+  background: rgba(34,197,94,0.15);
+  color: #22c55e;
+  border: 1px solid rgba(34,197,94,0.3);
+}
+
+.triggerOnTest {
+  background: rgba(245,158,11,0.15);
+  color: #f59e0b;
+  border: 1px solid rgba(245,158,11,0.3);
+}
+
+.triggerAdjacent {
+  background: rgba(59,130,246,0.15);
+  color: #3b82f6;
+  border: 1px solid rgba(59,130,246,0.3);
+}
+
+/* ─── Description ─── */
+.description {
+  font-family: var(--font-primary);
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.7;
+  font-style: italic;
+  padding: 12px 14px;
+  background: rgba(255,255,255,0.02);
+  border-left: 2px solid #2a2a3a;
+  border-radius: 0 4px 4px 0;
+}
+
+/* ─── Unowned Notice ─── */
+.unownedNotice {
+  text-align: center;
+  padding: 12px;
+  font-family: 'VT323', monospace;
+  font-size: 14px;
+  color: #ef4444;
+  background: rgba(239,68,68,0.06);
+  border: 1px solid rgba(239,68,68,0.15);
+  border-radius: 4px;
+  line-height: 2;
+}

@@ -13,6 +13,8 @@ const DevTool = () => {
 
   const user = useGameStore((state) => state.user);
   const setUser = useGameStore((state) => state.setUser);
+  const currentScreen = useGameStore((state) => state.currentScreen);
+  const setScreen = useGameStore((state) => state.setScreen);
 
   // Keyboard shortcut (Ctrl + Shift + D) to toggle visibility
   useEffect(() => {
@@ -195,6 +197,26 @@ const DevTool = () => {
           </button>
         </div>
         <p className="text-[10px] text-gray-500 mt-1">If quests look bugged, reload page after clearing.</p>
+      </div>
+
+      {/* Screen Switcher */}
+      <div className="mb-2 border-t border-gray-700 pt-3 mt-3">
+        <label className="block text-xs mb-2 text-gray-400">Switch Screen <span className="text-yellow-400">[{currentScreen}]</span></label>
+        <div className="grid grid-cols-3 gap-1">
+          {(['login', 'lobby', 'shop', 'workshop', 'testrun', 'event', 'endday', 'ending'] as const).map((screen) => (
+            <button
+              key={screen}
+              onClick={() => setScreen(screen)}
+              className={`text-[10px] px-1 py-1 rounded font-bold uppercase ${
+                currentScreen === screen
+                  ? 'bg-green-700 text-white'
+                  : 'bg-gray-800 hover:bg-gray-700 text-gray-300'
+              }`}
+            >
+              {screen}
+            </button>
+          ))}
+        </div>
       </div>
 
     </div>

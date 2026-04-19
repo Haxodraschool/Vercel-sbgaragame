@@ -1,0 +1,35 @@
+/* Admin Dashboard Styles */
+.loading { display:flex;align-items:center;justify-content:center;min-height:60vh;font-family:var(--font-mono,'JetBrains Mono',monospace);font-size:14px;color:var(--text-muted,#606075); }
+.dashboard { display:flex;flex-direction:column;gap:28px; }
+.pageTitle { font-family:'VT323',monospace;font-size:28px;color:var(--text-primary,#f0f0f5);letter-spacing:2px; }
+
+/* Stats Grid */
+.statsGrid { display:grid;grid-template-columns:repeat(4,1fr);gap:16px; }
+.statCard { display:flex;align-items:center;gap:14px;padding:20px;background:rgba(22,22,34,0.8);border:1px solid #1e1e2e;border-radius:10px;transition:all 0.2s ease; }
+.statCard:hover { border-color:#2a2a3a;transform:translateY(-2px);box-shadow:0 4px 20px rgba(0,0,0,0.3); }
+.statIcon { font-size:32px;flex-shrink:0; }
+.statInfo { display:flex;flex-direction:column;gap:2px; }
+.statValue { font-family:'VT323',monospace;font-size:24px;line-height:1; }
+.statLabel { font-family:var(--font-mono,'JetBrains Mono',monospace);font-size:11px;color:var(--text-muted,#606075);text-transform:uppercase;letter-spacing:1px; }
+.statSub { font-family:var(--font-mono,'JetBrains Mono',monospace);font-size:10px;color:var(--text-secondary,#a0a0b5); }
+
+/* Bottom Grid */
+.bottomGrid { display:grid;grid-template-columns:1fr 1fr;gap:20px; }
+.panel { background:rgba(22,22,34,0.8);border:1px solid #1e1e2e;border-radius:10px;padding:20px; }
+.panelTitle { font-family:'VT323',monospace;font-size:18px;color:var(--text-primary,#f0f0f5);margin-bottom:16px;letter-spacing:1px; }
+
+/* Table */
+.table { width:100%;border-collapse:collapse; }
+.table th { font-family:var(--font-mono,'JetBrains Mono',monospace);font-size:10px;color:var(--text-muted,#606075);text-transform:uppercase;letter-spacing:1px;text-align:left;padding:8px 10px;border-bottom:1px solid #1e1e2e; }
+.table td { font-family:var(--font-mono,'JetBrains Mono',monospace);font-size:12px;color:var(--text-secondary,#a0a0b5);padding:8px 10px;border-bottom:1px solid rgba(30,30,46,0.5); }
+.table tr:hover td { background:rgba(255,255,255,0.02); }
+.idCell { color:var(--text-muted,#606075); }
+.goldCell { color:var(--color-gold,#fbbf24); }
+
+/* Popular Cards */
+.cardList { display:flex;flex-direction:column;gap:8px; }
+.cardRow { display:flex;align-items:center;gap:10px;padding:8px 12px;background:rgba(0,0,0,0.2);border-radius:6px;font-family:var(--font-mono,'JetBrains Mono',monospace);font-size:12px; }
+.rank { color:var(--text-muted,#606075);font-size:11px;min-width:24px; }
+.cardName { flex:1; }
+.cardType { font-size:10px;color:var(--text-muted,#606075);padding:2px 6px;background:rgba(255,255,255,0.05);border-radius:3px; }
+.cardCount { color:var(--neon-cyan,#00e5ff);font-size:11px; }

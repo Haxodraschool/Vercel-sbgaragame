@@ -5,6 +5,7 @@ import styles from './ShadowCustomer.module.css';
 import ShadowCustomer from './ShadowCustomer';
 import QuestDialog from './QuestDialog';
 import { useGameStore } from '@/stores/useGameStore';
+import type { BossChoiceData } from '@/stores/useGameStore';
 import type { QuestData } from './ShadowCustomer';
 
 /**
@@ -64,10 +65,15 @@ export default function ShadowManager({ quests, onQuestAccepted }: Props) {
   const [removedQuestIds, setRemovedQuestIds] = useState<Set<number>>(new Set());
   const [leavingQuestIds, setLeavingQuestIds] = useState<Set<number>>(new Set());
   const [angryInfo, setAngryInfo] = useState<{ questId: number; text: string } | null>(null);
+  const [lastPenalty, setLastPenalty] = useState(10); // Actual penalty from backend
 
   const token = useGameStore((s) => s.token);
   const updateGarageHealth = useGameStore((s) => s.updateGarageHealth);
   const user = useGameStore((s) => s.user);
+  const setBossChoice = useGameStore((s) => s.setBossChoice);
+  const setScreen = useGameStore((s) => s.setScreen);
+  const skipShadowIntro = useGameStore((s) => s.skipShadowIntro);
+  const setSkipShadowIntro = useGameStore((s) => s.setSkipShadowIntro);
 
   // Show quests that are PENDING or currently in 'leaving' animation
   const visibleQuests = quests.filter(
@@ -78,8 +84,18 @@ export default function ShadowManager({ quests, onQuestAccepted }: Props) {
   );
 
   // ═══ Phase 1: Start the big shadow walking after mount ═══
+  // Nếu skipShadowIntro = true (quay lại từ workshop) → bỏ qua toàn bộ intro
+  // và spawn cá nhân ngay lập tức.
   useEffect(() => {
     if (pendingQuests.length === 0) return;
+
+    if (skipShadowIntro) {
+      setPhase('spawningInteractive');
+      setShowIndividuals(true);
+      setSpawnedCount(pendingQuests.length); // Hiện tất cả cùng lúc, không delay
+      setSkipShadowIntro(false); // reset cờ
+      return;
+    }
 
     const timer = setTimeout(() => {
       setPhase('bigWalking');
@@ -150,12 +166,30 @@ export default function ShadowManager({ quests, onQuestAccepted }: Props) {
   }, [phase, removedQuestIds]);
 
   // ═══ Accept quest → switch to workshop ═══
-  const handleAccept = useCallback(() => {
+  // For boss with choices (EP, Baby Oil, Kim, Russia), YES = accept with bossChoice
+  const handleAccept = useCallback((bossChoiceOverride?: BossChoiceData) => {
     if (!selectedQuest) return;
     const quest = selectedQuest;
     setSelectedQuest(null);
+
+    // Store boss choice for workshop to use
+    const condition = quest.bossConfig?.specialCondition;
+    if (condition && bossChoiceOverride) {
+      setBossChoice(bossChoiceOverride);
+    } else if (condition === 'EP_ISLAND_CHOICE') {
+      setBossChoice({ epIslandChoice: 'YES' }); // Default YES when accepting EP
+    } else if (condition === 'BABY_OIL_CHOICE') {
+      setBossChoice({ babyOilChoice: 'YES' });
+    } else if (condition === 'KIM_JONG_UN') {
+      setBossChoice({ kimChoice: 'YES' });
+    } else if (condition === 'RUSSIA_EMPEROR') {
+      setBossChoice({ russiaPhase: 1 });
+    } else {
+      setBossChoice(null); // Normal quest, no boss choice
+    }
+
     onQuestAccepted(quest);
-  }, [selectedQuest, onQuestAccepted]);
+  }, [selectedQuest, onQuestAccepted, setBossChoice]);
 
   // ═══ Final Close (called by QuestDialog after angry phase) ═══
   const handleCloseDialog = useCallback(() => {
@@ -163,35 +197,151 @@ export default function ShadowManager({ quests, onQuestAccepted }: Props) {
     setAngryInfo(null);
   }, []);
 
-  // ═══ Reject quest → logic (reputation, status), dialog stays open ═══
+  // ═══════════════════════════════════════════════════════════════
+  // REJECT HANDLER — Boss-specific flows per Game Bible
+  // ═══════════════════════════════════════════════════════════════
   const handleReject = useCallback(async () => {
     if (!selectedQuest) return;
     const quest = selectedQuest;
+    const condition = quest.bossConfig?.specialCondition;
+    const isInNorthKorea = (user as any)?.isInNorthKorea;
 
-    // Mark as leaving (triggers CSS leaving animation)
+    // ─── EP ISLAND: NO = +15 Uy Tín, still goes to workshop (harder conditions) ───
+    if (condition === 'EP_ISLAND_CHOICE') {
+      // EP NO doesn't reject — it accepts with different conditions
+      setSelectedQuest(null);
+      setBossChoice({ epIslandChoice: 'NO' });
+      onQuestAccepted(quest); // Goes to workshop with EP NO conditions
+      return;
+    }
+
+    // ─── KIM (first encounter): NO = GAME OVER ───
+    if (condition === 'KIM_JONG_UN' && !isInNorthKorea) {
+      // Mark as leaving
+      setLeavingQuestIds((prev) => new Set(prev).add(quest.id));
+      const line = '☠️ Chủ Tịch nổi giận... Không ai từ chối Chủ Tịch mà sống sót!';
+      setAngryInfo({ questId: quest.id, text: line });
+
+      if (token && user) {
+        try {
+          const res = await fetch(`/api/quest/${quest.id}/complete`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: 'FAILED', kimChoice: 'NO' }),
+          });
+          if (res.ok) {
+            const data = await res.json();
+            if (data.userState?.garageHealth !== undefined) {
+              updateGarageHealth(data.userState.garageHealth);
+            }
+            setLastPenalty(0); // Kim NO doesn't show normal penalty
+            // Game Over → redirect to ending screen after delay
+            if (data.gameOver) {
+              setTimeout(() => {
+                setScreen('ending');
+              }, 3500);
+              return;
+            }
+          }
+        } catch (err) {
+          console.error('Error rejecting Kim:', err);
+        }
+      }
+      return;
+    }
+
+    // ─── BABY OIL: NO = -45% Uy Tín + all customers auto-fail ───
+    if (condition === 'BABY_OIL_CHOICE') {
+      setLeavingQuestIds((prev) => new Set(prev).add(quest.id));
+      const line = '💀 Chúa Tể Dầu Em Bé nổi cơn thịnh nộ! Đổ dầu lên khắp garage!';
+      setAngryInfo({ questId: quest.id, text: line });
+
+      if (token && user) {
+        try {
+          const res = await fetch(`/api/quest/${quest.id}/complete`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: 'FAILED', babyOilChoice: 'NO' }),
+          });
+          if (res.ok) {
+            const data = await res.json();
+            if (data.userState?.garageHealth !== undefined) {
+              updateGarageHealth(data.userState.garageHealth);
+            }
+            const oldHealth = user.garageHealth || 0;
+            const newHealth = data.userState?.garageHealth ?? oldHealth;
+            const actualPenalty = oldHealth - newHealth;
+            setLastPenalty(actualPenalty > 0 ? actualPenalty : Math.floor(oldHealth * 0.45));
+
+            // Check for game over (uy tín = 0 after -45%)
+            if (data.gameOver) {
+              setTimeout(() => { setScreen('ending'); }, 3500);
+              return;
+            }
+          }
+        } catch (err) {
+          console.error('Error rejecting Baby Oil:', err);
+        }
+      }
+
+      // After animation, remove ALL pending shadows (baby oil makes everyone leave)
+      setTimeout(() => {
+        // Mark all pending quests as removed
+        quests.forEach((q) => {
+          if (q.status === 'PENDING') {
+            setRemovedQuestIds((prev) => new Set(prev).add(q.id));
+          }
+        });
+        setLeavingQuestIds(new Set());
+      }, 2500);
+      return;
+    }
+
+    // ─── STANDARD REJECT: All other bosses and NPC ───
+    // Trump (DONALD_TRUMP): penalty=0 on backend, just tax increase
+    // Russia (RUSSIA_EMPEROR): standard -20
+    // Boss thường (Drift, F1, Collector, Daredevil, Bí Ẩn): -20
+    // NPC thường: -10
     setLeavingQuestIds((prev) => new Set(prev).add(quest.id));
 
-    // Show legacy angry text for non-dialog views (fallback)
     const line = ANGRY_LINES[Math.floor(Math.random() * ANGRY_LINES.length)];
     setAngryInfo({ questId: quest.id, text: line });
 
-    // Update backend: -5 reputation
     if (token && user) {
       try {
-        const newHealth = Math.max(0, (user.garageHealth || 0) - 5);
-        updateGarageHealth(newHealth);
-
-        // Mark quest as FAILED
-        await fetch(`/api/quest/${quest.id}/complete`, {
+        const res = await fetch(`/api/quest/${quest.id}/complete`, {
           method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
+          headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
           body: JSON.stringify({ status: 'FAILED' }),
         });
+
+        if (res.ok) {
+          const data = await res.json();
+          if (data.userState?.garageHealth !== undefined) {
+            updateGarageHealth(data.userState.garageHealth);
+          }
+          const oldHealth = user.garageHealth || 0;
+          const newHealth = data.userState?.garageHealth ?? oldHealth;
+          const actualPenalty = oldHealth - newHealth;
+          setLastPenalty(actualPenalty > 0 ? actualPenalty : (quest.isBoss ? 20 : 10));
+
+          // Check for game over (uy tín = 0)
+          if (data.gameOver) {
+            setTimeout(() => { setScreen('ending'); }, 3500);
+            return;
+          }
+        } else {
+          const fallbackPenalty = quest.isBoss ? 20 : 10;
+          const newHealth = Math.max(0, (user.garageHealth || 0) - fallbackPenalty);
+          updateGarageHealth(newHealth);
+          setLastPenalty(fallbackPenalty);
+        }
       } catch (err) {
         console.error('Error rejecting quest:', err);
+        const fallbackPenalty = quest.isBoss ? 20 : 10;
+        const newHealth = Math.max(0, (user.garageHealth || 0) - fallbackPenalty);
+        updateGarageHealth(newHealth);
+        setLastPenalty(fallbackPenalty);
       }
     }
 
@@ -204,7 +354,7 @@ export default function ShadowManager({ quests, onQuestAccepted }: Props) {
         return next;
       });
     }, 2500);
-  }, [selectedQuest, token, user, updateGarageHealth]);
+  }, [selectedQuest, token, user, updateGarageHealth, setBossChoice, onQuestAccepted, setScreen, quests]);
 
   if (pendingQuests.length === 0 && phase === 'idle') return null;
 
@@ -261,6 +411,7 @@ export default function ShadowManager({ quests, onQuestAccepted }: Props) {
           onAccept={handleAccept}
           onReject={handleReject}
           onClose={handleCloseDialog}
+          penaltyAmount={lastPenalty}
         />
       )}
     </>

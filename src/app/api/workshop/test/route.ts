@@ -32,10 +32,18 @@ export async function POST(request: NextRequest) {
 
     const { cardIds, questId, crewCardIds, epIslandChoice, babyOilChoice, russiaPhase, vodkaChoice } = await request.json();
 
-    // Validate 10 cards
+    // Validate 10 slot array (cho phép slot trống = null/0). Phải đúng 10 phần tử.
     if (!Array.isArray(cardIds) || cardIds.length !== GAME_CONSTANTS.SLOTS_PER_CAR) {
       return NextResponse.json(
-        { error: `Phải xếp đủ ${GAME_CONSTANTS.SLOTS_PER_CAR} thẻ lên khung xe!` },
+        { error: `Khung xe phải có đúng ${GAME_CONSTANTS.SLOTS_PER_CAR} ô (slot trống = null).` },
+        { status: 400 }
+      );
+    }
+    // Phải có ít nhất 1 thẻ
+    const filledCardIds = (cardIds as (number | null)[]).filter((c): c is number => !!c);
+    if (filledCardIds.length === 0) {
+      return NextResponse.json(
+        { error: 'Phải lắp ít nhất 1 thẻ lên khung xe!' },
         { status: 400 }
       );
     }
@@ -56,9 +64,9 @@ export async function POST(request: NextRequest) {
     // ============================================================
     // INVENTORY OWNERSHIP CHECK - Kiểm tra user có sở hữu thẻ không
     // ============================================================
-    const allCardIds = [...(cardIds as number[])];
+    const allCardIds: number[] = [...filledCardIds];
     if (crewCardIds && Array.isArray(crewCardIds)) {
-      allCardIds.push(...(crewCardIds as number[]));
+      allCardIds.push(...(crewCardIds as number[]).filter((c): c is number => !!c));
     }
 
     const inventory = await prisma.userInventory.findMany({
@@ -87,9 +95,9 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Fetch all cards
+    // Fetch all cards (chỉ slot có thẻ)
     const cards = await prisma.card.findMany({
-      where: { id: { in: cardIds as number[] } },
+      where: { id: { in: filledCardIds } },
       include: { effects: true },
     });
 
@@ -101,12 +109,12 @@ export async function POST(request: NextRequest) {
     // ============================================================
     if (quest.bossConfig?.specialCondition) {
       const condition = quest.bossConfig.specialCondition;
-      const cardTypes = (cardIds as number[]).map((id: number) => cardMap.get(id)?.type);
-      const cardRarities = (cardIds as number[]).map((id: number) => cardMap.get(id)?.rarity);
+      const cardTypes = filledCardIds.map((id: number) => cardMap.get(id)?.type);
+      const cardRarities = filledCardIds.map((id: number) => cardMap.get(id)?.rarity);
 
       // DRIFT_KING_CHALLENGE: Cấm dùng thẻ SUSPENSION ≥ 3 sao
       if (condition === 'DRIFT_KING_CHALLENGE') {
-        const invalidSuspension = (cardIds as number[]).find((id: number) => {
+        const invalidSuspension = filledCardIds.find((id: number) => {
           const card = cardMap.get(id);
           return card && card.type === 'SUSPENSION' && card.rarity >= 3;
         });
@@ -129,7 +137,7 @@ export async function POST(request: NextRequest) {
 
       // MIN_RARITY_3: Chỉ thẻ ≥ 3 sao
       if (condition === 'MIN_RARITY_3') {
-        const lowRarityCard = (cardIds as number[]).find((id: number) => {
+        const lowRarityCard = filledCardIds.find((id: number) => {
           const card = cardMap.get(id);
           return card && card.rarity < 3;
         });
@@ -189,7 +197,7 @@ export async function POST(request: NextRequest) {
     const combos = await prisma.cardCombo.findMany({
       where: {
         OR: [
-          { cardId1: { in: cardIds as number[] }, cardId2: { in: cardIds as number[] } },
+          { cardId1: { in: filledCardIds }, cardId2: { in: filledCardIds } },
         ],
       },
     });
@@ -237,9 +245,9 @@ export async function POST(request: NextRequest) {
       bearPandaActive = true;
       bearPolarActive = true;
 
-      // Gấu trúc ngứa mồm: 30% mỗi slot bị xoá thẻ (trước khi chạy)
-      for (let i = 0; i < (cardIds as number[]).length; i++) {
-        if (Math.random() < 0.3) {
+      // Gấu trúc ngứa mồm: 30% mỗi slot CÓ thẻ bị xoá thẻ (trước khi chạy)
+      for (let i = 0; i < (cardIds as (number | null)[]).length; i++) {
+        if ((cardIds as (number | null)[])[i] && Math.random() < 0.3) {
           removedSlots.push(i);
         }
       }
@@ -247,9 +255,11 @@ export async function POST(request: NextRequest) {
       // Gấu trắng gian trá: tìm thẻ cao sao nhất và đóng băng
       let maxRarity = 0;
       let maxRarityCardId: number | null = null;
-      for (const cid of cardIds as number[]) {
+      for (let i = 0; i < (cardIds as (number | null)[]).length; i++) {
+        const cid = (cardIds as (number | null)[])[i];
+        if (!cid) continue;
         const c = cardMap.get(cid);
-        if (c && c.rarity > maxRarity && !removedSlots.includes((cardIds as number[]).indexOf(cid))) {
+        if (c && c.rarity > maxRarity && !removedSlots.includes(i)) {
           maxRarity = c.rarity;
           maxRarityCardId = cid;
         }
@@ -263,7 +273,24 @@ export async function POST(request: NextRequest) {
     const moscowBuffActive = (user as any)?.hasMoscowBuff && (user as any)?.moscowBuffDay === user?.currentDay;
 
     for (let i = 0; i < cardIds.length; i++) {
-      const cardId = cardIds[i] as number;
+      const cardId = (cardIds as (number | null)[])[i];
+
+      // Slot trống → push step rỗng để frontend animate đúng index
+      if (!cardId) {
+        steps.push({
+          slot: i + 1,
+          cardId: 0,
+          cardName: '(trống)',
+          cardType: 'EMPTY',
+          rarity: 0,
+          powerAdded: 0, heatAdded: 0, stabilityReduced: 0,
+          comboTriggered: false, comboEffect: null, comboValue: 0,
+          effectTriggered: false, effectDescription: null,
+          totalPower, currentHeat: Math.round(currentHeat), exploded: false,
+        });
+        continue;
+      }
+
       const card = cardMap.get(cardId);
 
       if (!card) {
@@ -315,13 +342,37 @@ export async function POST(request: NextRequest) {
       heatAdded = Math.max(0, heatAdded + crewBuffs.heat);
       stabilityReduced += crewBuffs.stability;
 
+      // ============================================================
+      // PASSIVE EFFECTS của chính thẻ (luôn có hiệu lực khi được lắp)
+      //   SKILL.md §2.4: PASSIVE = luôn luôn có hiệu lực
+      // Áp dụng theo effectType (BUFF/DEBUFF) lên powerAdded / heatAdded /
+      // stabilityReduced của slot này.
+      // ============================================================
+      let passiveTriggered = false;
+      const passiveDescs: string[] = [];
+      for (const effect of card.effects) {
+        if (effect.triggerCondition !== 'PASSIVE') continue;
+        passiveTriggered = true;
+        if (effect.description) passiveDescs.push(effect.description);
+        const sign = effect.effectType === 'DEBUFF' ? -1 : 1;
+        if (effect.targetStat === 'POWER') {
+          powerAdded += sign * effect.effectValue;
+        } else if (effect.targetStat === 'HEAT') {
+          heatAdded += sign * effect.effectValue;
+        } else if (effect.targetStat === 'STABILITY') {
+          stabilityReduced += sign * effect.effectValue;
+        }
+      }
+
       // Check for combos with adjacent card
       let comboTriggered = false;
       let comboEffect: string | null = null;
       let comboValue = 0;
 
-      if (i > 0) {
-        const prevCardId = cardIds[i - 1] as number;
+      // Combo chỉ check nếu slot trước CÓ thẻ
+      const prevCardIdRaw = (cardIds as (number | null)[])[i - 1];
+      if (i > 0 && prevCardIdRaw) {
+        const prevCardId = prevCardIdRaw as number;
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const combo = combos.find((c: any) =>
           (c.cardId1 === prevCardId && c.cardId2 === cardId) ||
@@ -344,19 +395,28 @@ export async function POST(request: NextRequest) {
       }
 
       // Check card effects (ON_TEST type)
-      let effectTriggered = false;
-      let effectDescription: string | null = null;
+      let effectTriggered = passiveTriggered;
+      let effectDescription: string | null = passiveDescs.length ? passiveDescs.join(' | ') : null;
 
       for (const effect of card.effects) {
         if (effect.triggerCondition === 'ON_TEST') {
           effectTriggered = true;
-          effectDescription = effect.description;
-
+          const onTestDesc = effect.description || '';
           if (effect.targetStat === 'POWER') {
             if (effect.effectType === 'BUFF') {
-              powerAdded += effect.effectValue;
+              // KERS Faster Faster: +5 Power per card scanned before this card, max 9 stacks
+              if (onTestDesc.includes('KERS')) {
+                const stacks = Math.min(i, 9); // i = number of cards scanned before this one
+                const kersBonus = stacks * effect.effectValue;
+                powerAdded += kersBonus;
+                effectDescription = (effectDescription ? effectDescription + ' | ' : '') + `${onTestDesc} (${stacks} stack${stacks !== 1 ? 's' : ''} = +${kersBonus} Power)`;
+              } else {
+                powerAdded += effect.effectValue;
+                effectDescription = (effectDescription ? effectDescription + ' | ' : '') + onTestDesc;
+              }
             } else {
               powerAdded -= effect.effectValue;
+              effectDescription = (effectDescription ? effectDescription + ' | ' : '') + onTestDesc;
             }
           } else if (effect.targetStat === 'HEAT') {
             if (effect.effectType === 'DEBUFF') {
@@ -364,8 +424,10 @@ export async function POST(request: NextRequest) {
             } else {
               heatAdded -= effect.effectValue;
             }
+            effectDescription = (effectDescription ? effectDescription + ' | ' : '') + onTestDesc;
           } else if (effect.targetStat === 'STABILITY') {
             stabilityReduced += effect.effectValue;
+            effectDescription = (effectDescription ? effectDescription + ' | ' : '') + onTestDesc;
           }
         }
       }

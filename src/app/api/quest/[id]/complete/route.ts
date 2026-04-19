@@ -128,8 +128,12 @@ export async function POST(
         updates.gold = { increment: currentGoldInc + profit };
         actualGoldReward = (actualGoldReward || 0) + profit;
       }
-    } else {
-      // FAILED - trừ uy tín
+    }
+
+    // ============================================================
+    // FAILED - trừ uy tín (CHỈ ÁP DỤNG KHI STATUS = FAILED)
+    // ============================================================
+    if (status === 'FAILED') {
       let penalty = quest.isBoss
         ? GAME_CONSTANTS.BOSS_FAIL_HEALTH_PENALTY
         : GAME_CONSTANTS.FAIL_HEALTH_PENALTY;

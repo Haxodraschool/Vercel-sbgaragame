@@ -1,0 +1,179 @@
+/* ============================================
+   CardThumbnail — Individual Card in Grid
+   Rarity Glow + Hover Effects
+   ============================================ */
+
+.card {
+  position: relative;
+  border-radius: 6px;
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  aspect-ratio: 3 / 4.2;
+  background: #12121c;
+  border: 2px solid #2a2a3a;
+}
+
+.card:hover {
+  transform: scale(1.05) translateY(-4px);
+  z-index: 5;
+}
+
+.card:active {
+  transform: scale(1.02);
+}
+
+.cardSelected {
+  border-color: var(--neon-cyan) !important;
+  box-shadow:
+    0 0 12px rgba(0,229,255,0.4),
+    0 0 24px rgba(0,229,255,0.15) !important;
+}
+
+/* ─── Card Image ─── */
+.cardImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  image-rendering: auto;
+  transition: filter 0.2s;
+}
+
+/* ─── Unowned Card ─── */
+.unowned {
+  border-color: #1a1a22;
+}
+
+.unowned .cardImage {
+  filter: brightness(0.25) saturate(0);
+}
+
+.unowned:hover .cardImage {
+  filter: brightness(0.35) saturate(0.2);
+}
+
+.unownedBadge {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-family: 'VT323', monospace;
+  font-size: 28px;
+  color: rgba(255,255,255,0.15);
+  pointer-events: none;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+}
+
+/* ─── Quantity Badge ─── */
+.quantityBadge {
+  position: absolute;
+  bottom: 6px;
+  right: 6px;
+  background: rgba(0,0,0,0.85);
+  backdrop-filter: blur(4px);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 3px;
+  padding: 2px 6px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  color: #e0e0e8;
+  letter-spacing: 0.5px;
+  pointer-events: none;
+  z-index: 3;
+}
+
+/* ─── Rarity Border Colors ─── */
+.rarity1 { border-color: var(--rarity-1); }
+.rarity2 { border-color: var(--rarity-2); }
+.rarity3 { border-color: var(--rarity-3); }
+.rarity4 { border-color: var(--rarity-4); }
+.rarity5 { border-color: var(--rarity-5); }
+
+/* ─── Rarity Hover Glow ─── */
+.rarity1:hover { box-shadow: 0 4px 16px var(--rarity-1-glow), 0 0 4px var(--rarity-1-glow); }
+.rarity2:hover { box-shadow: 0 4px 16px var(--rarity-2-glow), 0 0 8px var(--rarity-2-glow); }
+.rarity3:hover { box-shadow: 0 4px 20px var(--rarity-3-glow), 0 0 10px var(--rarity-3-glow); }
+.rarity4:hover { box-shadow: 0 4px 24px var(--rarity-4-glow), 0 0 14px var(--rarity-4-glow); }
+.rarity5:hover {
+  box-shadow:
+    0 4px 28px var(--rarity-5-glow),
+    0 0 20px var(--rarity-5-glow),
+    0 0 40px rgba(234,179,8,0.2);
+}
+
+/* ─── Legendary Sparkle ─── */
+.legendary::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 8px;
+  pointer-events: none;
+  background:
+    conic-gradient(
+      from var(--sparkle-angle, 0deg),
+      transparent 0%,
+      rgba(234,179,8,0.3) 10%,
+      transparent 20%,
+      transparent 45%,
+      rgba(255,215,0,0.2) 50%,
+      transparent 55%,
+      transparent 80%,
+      rgba(234,179,8,0.15) 90%,
+      transparent 100%
+    );
+  animation: sparkleRotate 3s linear infinite;
+  z-index: 2;
+}
+
+@keyframes sparkleRotate {
+  from { --sparkle-angle: 0deg; }
+  to { --sparkle-angle: 360deg; }
+}
+
+@property --sparkle-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+/* ─── Hover Overlay ─── */
+.hoverOverlay {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 0.2s;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.card:hover .hoverOverlay {
+  opacity: 1;
+}
+
+/* ─── Card Name Tooltip on Hover ─── */
+.cardName {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 20px 6px 6px;
+  background: linear-gradient(transparent, rgba(0,0,0,0.85));
+  font-family: var(--font-primary);
+  font-size: 10px;
+  font-weight: 600;
+  color: #e8e8f0;
+  text-align: center;
+  pointer-events: none;
+  line-height: 1.3;
+  z-index: 2;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.card:hover .cardName {
+  opacity: 1;
+  transform: translateY(0);
+}

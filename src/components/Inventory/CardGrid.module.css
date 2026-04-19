@@ -1,0 +1,99 @@
+/* ============================================
+   CardGrid — Card Display Grid
+   Steel Mesh + Rusty Scrollbar
+   ============================================ */
+
+.gridContainer {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 4px;
+  position: relative;
+  border-radius: 4px;
+  background: #0a0a12;
+  border: 1px solid #1e1e2e;
+}
+
+/* Steel mesh background */
+.gridContainer::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.025;
+  background-image:
+    radial-gradient(circle, #666 0.8px, transparent 0.8px);
+  background-size: 12px 12px;
+  z-index: 0;
+}
+
+/* Rusty scrollbar */
+.gridContainer::-webkit-scrollbar {
+  width: 8px;
+}
+
+.gridContainer::-webkit-scrollbar-track {
+  background: #0e0e16;
+  border-left: 1px solid #1a1a2a;
+}
+
+.gridContainer::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #3a3032 0%, #2a2224 50%, #3a3032 100%);
+  border-radius: 2px;
+  border: 1px solid #4a3a3c;
+}
+
+.gridContainer::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #4a4042 0%, #3a3234 50%, #4a4042 100%);
+}
+
+/* ─── Grid ─── */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+  padding: 12px;
+  position: relative;
+  z-index: 1;
+}
+
+/* ─── Results Info ─── */
+.resultsInfo {
+  padding: 8px 12px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-muted);
+  border-bottom: 1px solid #1a1a2a;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+}
+
+.resultsInfo strong {
+  color: var(--neon-cyan);
+}
+
+/* ─── No Results ─── */
+.noResults {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 20px;
+  gap: 12px;
+}
+
+.noResults .emoji {
+  font-size: 40px;
+  opacity: 0.4;
+}
+
+.noResults p {
+  font-family: 'VT323', monospace;
+  font-size: 16px;
+  color: var(--text-muted);
+  text-align: center;
+  line-height: 2;
+}

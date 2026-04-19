@@ -8,7 +8,7 @@ import { useInterval } from 'react-use';
 import { format } from 'date-fns';
 import { useTheme } from 'next-themes';
 import * as Progress from '@radix-ui/react-progress';
-import { ShadowManager } from '@/components';
+import { ShadowManager, DeckOverlay } from '@/components';
 import type { QuestData } from '@/components/ShadowCustomer/ShadowCustomer';
 
 /* ─── Inline SVG Icons ─── */
@@ -144,11 +144,63 @@ export default function LobbyScreen() {
   const [time, setTime] = useState(new Date());
   const [mounted, setMounted] = useState(false);
   const [quests, setQuests] = useState<QuestData[]>([]);
+  const [isDeckOpen, setIsDeckOpen] = useState(false);
 
-  const setScreen = useGameStore((s) => s.setScreen);
+  const transitionScreen = useGameStore((s) => s.transitionScreen);
   const setActiveQuest = useGameStore((s) => s.setActiveQuest);
+  const markScreenReady = useGameStore((s) => s.markScreenReady);
+
+  // --- Loading readiness tracking (tell global LoadingScreen when we're done) ---
+  const [questsLoaded, setQuestsLoaded] = useState(false);
+  const [bgImgLoaded, setBgImgLoaded] = useState(false);
+
+  // --- Background Music ref (swapped by currentDay: 1-25 vs 26-50) ---
+  const bgmRef = useRef<HTMLAudioElement | null>(null);
+  const bgmTrackRef = useRef<string | null>(null);
 
   useEffect(() => { setMounted(true); }, []);
+
+  // --- Lobby Background Music: day 1-25 → maingamemusic1, day 26-50 → maingamemusic2 ---
+  useEffect(() => {
+    if (!mounted) return;
+    const day = user?.currentDay ?? 1;
+    const trackSrc = day >= 26 ? '/gamemusic/maingamemusic2.mp3' : '/gamemusic/maingamemusic1.mp3';
+
+    // Skip if same track is already playing
+    if (bgmTrackRef.current === trackSrc && bgmRef.current) return;
+
+    // Stop old track (if any)
+    if (bgmRef.current) {
+      bgmRef.current.pause();
+      bgmRef.current.currentTime = 0;
+      bgmRef.current = null;
+    }
+
+    const bgm = new Audio(trackSrc);
+    bgm.loop = true;
+    bgm.volume = 0.4;
+    bgmRef.current = bgm;
+    bgmTrackRef.current = trackSrc;
+
+    const playMusic = () => {
+      bgm.play().catch((e) => console.error('Lobby BGM play blocked:', e));
+    };
+    playMusic();
+
+    // Fallback: play on first click if autoplay blocked
+    const onFirstClick = () => playMusic();
+    document.addEventListener('click', onFirstClick, { once: true });
+
+    return () => {
+      document.removeEventListener('click', onFirstClick);
+      bgm.pause();
+      bgm.currentTime = 0;
+      if (bgmRef.current === bgm) {
+        bgmRef.current = null;
+        bgmTrackRef.current = null;
+      }
+    };
+  }, [mounted, user?.currentDay]);
 
   // Fetch daily quests — get full quest data
   useEffect(() => {
@@ -160,7 +212,7 @@ export default function LobbyScreen() {
           headers: { 'Authorization': `Bearer ${token}` }
         });
         const data = await res.json();
-        
+
         if (data.quests && data.quests.length > 0) {
           setQuests(data.quests);
         } else if (res.ok && data.quests && data.quests.length === 0) {
@@ -180,11 +232,40 @@ export default function LobbyScreen() {
         }
       } catch (err) {
         console.error('Error fetching quests:', err);
+      } finally {
+        setQuestsLoaded(true);
       }
     };
 
     fetchQuests();
   }, [mounted, token, user?.currentDay]);
+
+  // --- Preload background images so the loader stays visible until assets are ready ---
+  useEffect(() => {
+    if (!mounted) return;
+    let cancelled = false;
+    const urls = ['/bg-lobby.jpg', '/table.png'];
+    let remaining = urls.length;
+    const done = () => {
+      if (cancelled) return;
+      remaining -= 1;
+      if (remaining <= 0) setBgImgLoaded(true);
+    };
+    urls.forEach((url) => {
+      const img = new window.Image();
+      img.onload = done;
+      img.onerror = done; // never block the UI on a missing asset
+      img.src = url;
+    });
+    return () => { cancelled = true; };
+  }, [mounted]);
+
+  // --- When all lobby resources are ready, dismiss the global loading overlay ---
+  useEffect(() => {
+    if (questsLoaded && bgImgLoaded) {
+      markScreenReady();
+    }
+  }, [questsLoaded, bgImgLoaded, markScreenReady]);
 
   // Update clock every second
   useInterval(() => setTime(new Date()), 1000);
@@ -245,8 +326,8 @@ export default function LobbyScreen() {
           <ShadowManager
             quests={quests}
             onQuestAccepted={(quest) => {
-              setActiveQuest(quest.id);
-              setScreen('workshop');
+              setActiveQuest(quest);
+              transitionScreen('workshop');
             }}
           />
         )}
@@ -513,6 +594,7 @@ export default function LobbyScreen() {
               className="pointer-events-auto active:translate-y-1 active:shadow-none transition-all group"
               whileHover={{ y: -2 }}
               whileTap={{ scale: 0.95 }}
+              onClick={() => setIsDeckOpen(true)}
             >
               <div className="relative flex items-center justify-center w-[200px] sm:w-[240px]">
                 <Image 
@@ -552,6 +634,9 @@ export default function LobbyScreen() {
         {/* end HUD BOTTOM overlay */}
       </div>
       {/* end game container */}
+
+      {/* Deck Overlay */}
+      <DeckOverlay isOpen={isDeckOpen} onClose={() => setIsDeckOpen(false)} />
     </motion.div>
   );
 }

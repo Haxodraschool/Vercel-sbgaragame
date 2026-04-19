@@ -319,7 +319,7 @@ Mỗi slot:
 | Loại             | Chance          | Chi tiết                                                    |
 | ---------------- | --------------- | ----------------------------------------------------------- |
 | **x2 Pack Deal** | 0.5%            | Mua giá 1 Pack, nhận 10 thẻ (gấp đôi). Cực hiếm!            |
-| **Pack thường**  | 40%             | Gói Thẻ Bí Ẩn: 5 thẻ random. Giá scale 350g→1000g theo ngày |
+| **Pack thường**  | 10%             | Gói Thẻ Bí Ẩn: 5 thẻ random. Giá scale 350g→1000g theo ngày |
 | **Cụm thẻ 1★**   | 20% (1/3 × 60%) | 3 thẻ giống nhau, giảm 10% tổng giá                         |
 | **Cụm thẻ 2★**   | ~7% (1/3 × 20%) | 2 thẻ giống nhau, giảm 10% tổng giá                         |
 | **Thẻ lẻ**       | Còn lại         | Theo drop rate gốc (không CREW)                             |
@@ -327,10 +327,10 @@ Mỗi slot:
 - **1 slot CREW riêng**: Random 1 crew chưa sở hữu (unlockType = 'SHOP')
 - **Tax modifier**: `shopTaxModifier` (boss Đỗ Nam Trung), Perk VIP_CARD (-20% 10 ngày đầu)
 
-### 6.3 Pity System (Pack thứ 8)
+### 6.3 Pity System (Pack thứ 10)
 
 - Field `totalPacksOpened` trong bảng users, đếm tổng pack đã mở
-- **Mỗi pack thứ 8** (modulo 8) → thẻ đầu tiên trong pack **đảm bảo 4★ hoặc 5★** (50/50)
+- **Mỗi pack thứ 10** (modulo 10) → thẻ đầu tiên trong pack **đảm bảo 4★ hoặc 5★** (50/50)
 - x2 Pack cũng đếm 2 lần vào pity counter
 - Response GET shop trả `pityCounter` và `nextPityAt` để frontend hiển thị
 
@@ -343,7 +343,14 @@ Hỗ trợ 4 type:
 - `PACK`: Mở pack 5 thẻ (có pity check)
 - `X2_PACK`: Mở x2 pack = 10 thẻ (có pity check, đếm 2 lần)
 
-### 6.5 Smuggler — Tay Buôn Lậu (GET/POST /api/events/smuggler)
+### 6.5 Reroll Shop (POST /api/shop/reroll)
+
+- **Giá reroll**: `50 × 2^count` (lần 1: 50g, lần 2: 100g, lần 3: 200g...)
+- **Chức năng**: Random lại toàn bộ 6 slot shop + crew slot
+- **Giữ nguyên**: Pity counter, tax modifier, ngày hiện tại
+- Response trả về `rerollCost` và `nextRerollCost` để frontend hiển thị
+
+### 6.6 Smuggler — Tay Buôn Lậu (GET/POST /api/events/smuggler)
 
 Chỉ khi event "Tay Buôn Lậu Gõ Cửa" đang active:
 
@@ -355,7 +362,7 @@ Chỉ khi event "Tay Buôn Lậu Gõ Cửa" đang active:
 | **Underworld Buff** | Nếu có `hasUnderworldBuff` → giảm giá mua thêm 20%                        |
 | **Rủi ro**          | Ngày sau có thể bị "Cảnh Sát Triều Tiên" kiểm tra (-80 Uy tín nếu bị bắt) |
 
-### 6.6 Nguồn thu nhập Gold
+### 6.7 Nguồn thu nhập Gold
 
 | Nguồn           | Chi tiết                                 |
 | --------------- | ---------------------------------------- |
@@ -561,7 +568,7 @@ Boss Kim Jong Un xuất hiện (ngày chia hết 5)
 
 ## 12. Hệ Thống Kết Cục (Endings)
 
-### 12.1 Danh sách 9 Endings
+### 12.1 Danh sách 8 Endings
 
 | Ending                        | Type        | Điều kiện                         |
 | ----------------------------- | ----------- | --------------------------------- |
@@ -612,8 +619,9 @@ GAME_CONSTANTS = {
   FINAL_ROUND_BOSSES: 10, // Số boss Final Round
   SHOP_UNLOCK_DAY: 2, // Shop mở Ngày 2
   PACK_CARDS_COUNT: 5, // Số thẻ trong pack
-  PACK_CHANCE_IN_SHOP: 0.4, // 40% pack trong shop
+  PACK_CHANCE_IN_SHOP: 0.1, // 10% pack trong shop
   SHOP_ITEMS_COUNT: 6, // Số slot shop
+  PITY_INTERVAL: 10, // Pack thứ 10 đảm bảo 4-5★
   FAIL_HEALTH_PENALTY: 10, // -10 uy tín fail quest
   BOSS_FAIL_HEALTH_PENALTY: 20, // -20 uy tín fail boss
   SUCCESS_EXP: 100, // EXP thắng quest
@@ -628,6 +636,14 @@ GAME_CONSTANTS = {
     3: 0.15, // Rare 15%
     4: 0.035, // Epic 3.5%
     5: 0.015, // Legendary 1.5%
+  },
+  PERK_CODES: {
+    STARTUP_FUND: 'STARTUP_FUND',     // +200 Gold
+    OLD_STASH: 'OLD_STASH',           // 5 thẻ 2-3★
+    HOT_HANDS: 'HOT_HANDS',           // Ngưỡng nổ +15 (115%)
+    CONNECTIONS: 'CONNECTIONS',       // +1 crew slot
+    VIP_CARD: 'VIP_CARD',             // Shop -20% 10 ngày đầu
+    TECH_GENIUS: 'TECH_GENIUS',       // +100 Tech Points
   },
 };
 ```
@@ -687,6 +703,7 @@ GAME_CONSTANTS = {
 | `/api/quest/[id]/complete` | POST   | Hoàn thành quest         |
 | `/api/shop/items`          | GET    | Xem shop (6 slot)        |
 | `/api/shop/items`          | POST   | Mua thẻ/pack             |
+| `/api/shop/reroll`         | POST   | Reroll shop (giá tăng dần) |
 | `/api/workshop/test`       | POST   | Chạy thử xe (core)       |
 | `/api/boss/configs`        | GET    | Danh sách/chi tiết Boss  |
 | `/api/game/end-day`        | GET    | Xem tổng kết ngày        |
@@ -710,12 +727,33 @@ GAME_CONSTANTS = {
 | `/api/achievements/secret` | POST   | Easter egg (midnight)    |
 | `/api/dev/cheat`          | POST   | Công cụ hỗ trợ (Cheat)   |
 
+### Admin Endpoints (yêu cầu role ADMIN)
+
+| Route                          | Method | Mô tả                              |
+| ------------------------------ | ------ | ---------------------------------- |
+| `/api/admin/cards`             | GET    | Danh sách tất cả thẻ               |
+| `/api/admin/cards`             | POST   | Tạo thẻ mới                        |
+| `/api/admin/cards/[id]`        | GET    | Chi tiết thẻ                       |
+| `/api/admin/cards/[id]`        | PUT    | Cập nhật thẻ                       |
+| `/api/admin/cards/[id]`        | DELETE | Xóa thẻ                            |
+| `/api/admin/cards/[id]/image`  | POST   | Upload ảnh thẻ                     |
+| `/api/admin/config`            | GET    | Xem cấu hình game                  |
+| `/api/admin/db`                | POST   | Reset database                     |
+| `/api/admin/stats`             | GET    | Thống kê hệ thống                  |
+| `/api/admin/users`             | GET    | Danh sách users                    |
+| `/api/admin/users/[id]`        | GET    | Chi tiết user                      |
+| `/api/admin/users/[id]`        | DELETE | Xóa user                           |
+| `/api/admin/users/[id]/inventory` | GET | Inventory của user              |
+| `/api/admin/verify`            | POST   | Verify admin token                 |
+
 ### 15.4 User Flags quan trọng (trong bảng users)
 
 | Flag                     | Ý nghĩa                                                            |
 | ------------------------ | ------------------------------------------------------------------ |
 | `isFinalRound`           | Đang trong Final Round                                             |
 | `totalExplosions`        | Tổng số lần nổ máy (cho achievement)                               |
+| `totalShopSpent`         | Tổng Gold đã chi tại Shop (cho unlock perk VIP_CARD)              |
+| `totalPacksOpened`       | Tổng số pack đã mở (cho Pity System)                               |
 | `smugglerPenalty`        | 0.15 = -15% Gold (từ event Tay Buôn Lậu)                           |
 | `hasDefeatedEP`          | Đã thắng Đảo Chủ EP → Unlock Donald Trump                          |
 | `shopTaxModifier`        | Hệ số thuế shop (default 1.0)                                      |
@@ -764,3 +802,11 @@ cmd /c "npx prisma db seed"
 ```
 
 ⚠️ **Cảnh báo:** Seed sẽ **xóa toàn bộ dữ liệu cũ** (cards, combos, bosses, events...) và tạo lại từ đầu. User data (users, inventory, quests) cũng có thể bị ảnh hưởng. Backup trước khi chạy.
+
+### Chạy Dev Server
+
+```bash
+npm run dev
+```
+
+Server sẽ chạy tại `http://localhost:3000`

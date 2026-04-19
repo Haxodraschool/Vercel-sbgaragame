@@ -43,6 +43,7 @@ export async function GET(request: NextRequest) {
         } : null,
         requiredPower: q.requiredPower,
         rewardGold: q.rewardGold,
+        customerBudget: q.customerBudget || 0,
         status: q.status,
       })),
       totalShadows: quests.length,

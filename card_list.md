@@ -1,6 +1,30 @@
 # Danh Sách Toàn Bộ Thẻ Bài SB-GARAGE
 
-Đây là danh sách trích xuất trực tiếp từ cơ sở dữ liệu của game, bao gồm 201 thẻ bài (bao gồm cả Crew ẩn).
+Đây là danh sách gốc trích xuất trực tiếp từ máy chủ backend (Cơ sở dữ liệu của game).
+Tất cả gồm 201 thẻ bài (bao gồm cả Crew ẩn). Các nhóm được sắp xếp theo đúng ID trong cơ sở dữ liệu.
+
+## Nhóm: FILTER
+
+| ID | Tên Thẻ | Độ Hiếm | Power | Heat | Stability | Giá | Mô Tả |
+| ---- | ----------------- | ------- | ----- | ------- | --------- | ----- | ---------------- |
+| 1 | **Lọc Gió Performance** | ★★ | 12 | **6** | 3 | 120g | Bộ lọc gió hiệu năng cao, tăng luồng gió đáng kể. |
+| 2 | **Lọc Gió Bằng Giấy** | ★ | 3 | **5** | 0 | 20g | Rất mỏng manh, dễ rách và bám bụi. |
+| 3 | **Lọc Gió Lưới Sắt** | ★ | 6 | **7** | 2 | 45g | Luồng gió mạnh nhưng hút cả khí nóng của máy. |
+| 4 | **Lọc Gió Xốp Dày** | ★ | 4 | **3** | 1 | 35g | Dày hơn nhưng làm giảm luồng không khí. |
+| 5 | **Lọc Gió Tái Chế** | ★ | 4 | **6** | 0 | 25g | Hàng rẻ tiền từ bãi rác, không bền. |
+| 6 | **Lọc Gió Cơ Bản** | ★ | 5 | **3** | 1 | 50g | Bộ lọc gió tiêu chuẩn, giúp không khí sạch vào động cơ. |
+| 7 | **Lọc Gió Cotton** | ★★ | 9 | **5** | 2 | 85g | Cản bụi tốt, giữ gió sạch và mát. |
+| 8 | **Lọc Gió Hình Nón** | ★★ | 14 | **8** | 1 | 110g | Cone cone intake - nạp nhanh nhưng nóng máy. |
+| 9 | **Lọc Gió Hộp Kín** | ★★ | 10 | **3** | 4 | 130g | Cách nhiệt tốt, hút không khí từ bên ngoài xe. |
+| 10 | **Lọc Gió Màng Dầu** | ★★ | 11 | **5** | 3 | 140g | Phủ dầu cản bụi siêu bụi, bảo vệ động cơ. |
+| 11 | **Lọc Gió Thể Thao K&N** | ★★★ | 20 | **6** | 5 | 220g | Thương hiệu uy tín, ngon bổ rẻ cho mọi dòng xe. |
+| 12 | **Cold Air Intake** | ★★★ | 22 | **2** | 8 | 280g | Ống dẫn hút khí lạnh trực tiếp từ gầm xe. |
+| 13 | **Lọc Gió Dual Cone** | ★★★ | 28 | **9** | 4 | 310g | Hai nón hút gió song song, luồng khí dồi dào mãnh liệt. |
+| 14 | **Lọc Gió Carbon Fiber** | ★★★ | 25 | **5** | 7 | 250g | Lọc gió sợi carbon siêu nhẹ, luồng gió cực mạnh. |
+| 15 | **Hệ Thống Ram Air** | ★★★★ | 40 | **7** | 12 | 650g | Ép gió tốc độ cao. ⚡ **Passive: Mát Mẻ** — Giảm 10 Heat cho tổng Heat toàn xe (áp dụng sau khi cộng tất cả slot). |
+| 16 | **Bộ Gió Big Bore** | ★★★★ | 45 | **12** | 8 | 720g | Hút khí cưỡng bức. ⚡ **On-Test: Rộng Mở** — Khi bắt đầu chạy thử (test run), cộng thêm +15 Power vào tổng Power xe. |
+| 17 | **Hyper-Flow Titanium** | ★★★★★ | 65 | **6** | 20 | 1400g | Khí động học Titan. ⚡ **Passive: Bão Táp** — Cứ mỗi 1 điểm Stability tổng của xe → cộng thêm +1 Power. (VD: xe có 80 Stability → +80 Power) |
+| 22 | **Quantum Intake** | ★★★★★ | 70 | **-4** | 25 | 1800g | Hút gió lượng tử khí âm sâu. ⚡ **Passive: Đóng Băng** — Giảm 50% tổng Heat tỏa ra từ tất cả thẻ ENGINE trên xe. |
 
 ## Nhóm: ENGINE
 
@@ -21,63 +45,16 @@
 | 31 | **V8 4.0L Nhỏ** | ★★★ | 65 | **40** | 8 | 360g | Sức mạnh cơ bắp của Mỹ đời đầu. |
 | 32 | **Rotary Wankel Đúc Xương** | ★★★ | 70 | **52** | 5 | 420g | Vòng tua cao ngất ngưởng, tốn nhớt tốn xăng. |
 | 33 | **V6 Twin-Turbo** | ★★★ | 85 | **35** | 7 | 400g | Động cơ V6 đôi tăng áp, sức mạnh vượt trội. |
-| 34 | **Động Cơ Inline-6 2JZ** | ★★★★ | 85 | **35** | 40 | 850g | Quái vật độ xe huyền thoại. (Hiệu ứng: Chịu Đựng - Trừ 15 Heat cho tất cả Turbo) |
-| 35 | **V8 5.0L N/A** | ★★★★ | 90 | **46** | 15 | 700g | Sức mạnh thuần túy, tiếng gầm đã tai. (Thuần sức mạnh) |
-| 36 | **Động Cơ Điện Dual-Motor** | ★★★★ | 100 | **57** | 35 | 750g | Đáp ứng momen xoắn tức thời. (Chỉ số thuần túy) |
-| 37 | **V10 5.2L Screamer** | ★★★★ | 110 | **69** | 20 | 950g | Tua máy 9000rpm chọc lủng màng nhĩ. (Hiệu ứng: V10 Screamer - +20 Power On-Test) |
-| 38 | **V8 Supercharged** | ★★★★ | 180 | **63** | 12 | 800g | Quái vật V8 siêu nạp! Công suất khổng lồ nhưng rất nóng. |
-| 39 | **I4 F1 Turbo-Hybrid 1.6L** | ★★★★★ | 140 | **81** | 50 | 1800g | Công nghệ đường đua F1 tân tiến nhất! (Hiệu ứng: KERS Hệ Thống) |
-| 40 | **Động Cơ V12 6.5L Ý** | ★★★★★ | 150 | **92** | 25 | 1500g | Tác phẩm nghệ thuật cơ khí đỉnh cao. (Chỉ số khổng lồ) |
-| 41 | **Động Cơ Điện Quad-Motor TriMax** | ★★★★★ | 180 | **115** | 60 | 2200g | Gia tốc 0-100km/h trong 1.9s! Nhiệt từ pin siêu cao. (Hiệu ứng: Tương Lai - Tự động x2 Stability) |
-| 42 | **W16 Quad-Turbo** | ★★★★★ | 250 | **52** | 20 | 2000g | Động cơ W16 huyền thoại - đỉnh cao kỹ thuật cơ khí. (Hiệu ứng đặc biệt!) |
-| 43 | **Động Cơ Phản Lực J58** | ★★★★★ | 250 | **173** | 0 | 1900g | SR-71 Blackbird nhét vào ô tô. Rất dễ nổ! (Thuần sát thương diện rộng) |
-
-## Nhóm: EXHAUST
-
-| ID | Tên Thẻ | Độ Hiếm | Power | Heat | Stability | Giá | Mô Tả |
-| ---- | ----------------- | ------- | ----- | ------- | --------- | ----- | ---------------- |
-| 62 | **Ống Bơ Hài Hước** | ★ | 1 | **0** | 1 | 15g | Chế từ ống bơ, kêu như bò rống, khách chê. |
-| 63 | **Ống Xả Gỉ Sét** | ★ | 3 | **-1** | 2 | 25g | Thoát khí kém, xả nhiệt ít, sắp rụng. |
-| 64 | **Ống Xả Xe Máy** | ★ | 4 | **-2** | 3 | 40g | Cố nhét pô xe máy vào ô tô, bí hơi. |
-| 65 | **Ống Xả Cắt Ngắn** | ★ | 12 | **-4** | 0 | 50g | Cắt thẳng cổ xả ra ngoài, ồn ào và rung lắc. |
-| 66 | **Ống Xả Tiêu Chuẩn** | ★ | 8 | **-3** | 4 | 60g | Ống xả mặc định, thoát khí ổn định. |
-| 67 | **Ống Xả Inox 304** | ★★ | 10 | **-6** | 8 | 110g | Bền bỉ, sáng bóng, chống rỉ sét rạn nứt tuyệt đối. |
-| 68 | **Ống Xả Cat-back** | ★★ | 12 | **-4** | 5 | 130g | Giữ lại bầu lọc khí thải nhưng ống to hơn. |
-| 69 | **Ống Xả Kép Dạng Y** | ★★ | 15 | **-7** | 4 | 145g | Phân luồng khí xả hai bên, tản nhiệt tốt. |
-| 70 | **Header Thép Cuộn** | ★★ | 20 | **-3** | 3 | 160g | Cổ pô uốn cong tối ưu hóa dòng khí xả. |
-| 71 | **Ống Xả Performance** | ★★ | 18 | **-5** | 7 | 150g | Ống xả thể thao, thoát khí nhanh giảm nhiệt. |
-| 72 | **Ống Xả Trị Liệu Âm** | ★★★ | 15 | **-8** | 15 | 250g | Âm thanh trầm ấm êm tai, cấu trúc vững chãi. |
-| 73 | **Titanium Nhiệt Tiêu** | ★★★ | 25 | **-13** | 8 | 350g | Mỏng nhẹ tản nhiệt cực nhanh vì chế tác bằng Titan. |
-| 74 | **Header Chéo Racing** | ★★★ | 30 | **-10** | 6 | 380g | Cổ xả phức tạp đồng bộ nhịp nổ của xi-lanh. |
-| 76 | **Hệ Thống Side-Exit** | ★★★★ | 45 | **-15** | 10 | 650g | Pô hông xe phong cách JDM! (Hiệu ứng: Lan tỏa - giảm 10 Heat cho thẻ ngay sau lưng) |
-| 77 | **Catless Downpipe** | ★★★★ | 60 | **-8** | 5 | 720g | Khạc lửa ầm ầm! (Hiệu ứng: Xả nhiệt toàn bộ xe -2 Heat mọi thẻ) |
-| 78 | **Ống Xả Titan Racing** | ★★★★ | 50 | **-17** | 18 | 600g | Ống xả titanium racing! Giảm nhiệt mạnh + tăng power. |
-| 79 | **Ghost Exhaust** | ★★★★★ | 55 | **-38** | 40 | 1600g | Công nghệ tàng hình âm thanh. (Hiệu ứng: Bypass "NO_EXHAUST", nhân đôi Stability gốc) |
-| 80 | **Plasma Đỏ Lửa** | ★★★★★ | 80 | **-25** | 25 | 2100g | Pô gốm vũ trụ plasma. (Hiệu ứng: Nhân đôi Heat âm thành -60 Heat!) |
-
-## Nhóm: COOLING
-
-| ID | Tên Thẻ | Độ Hiếm | Power | Heat | Stability | Giá | Mô Tả |
-| ---- | ----------------- | ------- | ----- | ------- | --------- | ----- | ---------------- |
-| 75 | **Quạt Chĩa Điều Hòa** | ★ | 0 | **-2** | 2 | 25g | Cột quạt điện vào lưới tản nhiệt. |
-| 81 | **Nước Lã Cây Xăng** | ★ | 0 | **-1** | 0 | 10g | Đổ nước máy cho két nước rỉ sét. |
-| 82 | **Két Nước Nhựa** | ★ | 0 | **-3** | 0 | 45g | Dễ bung mối nối khi vòng tua cao. |
-| 83 | **Quạt Làm Mát** | ★ | 0 | **-4** | 8 | 70g | Quạt tản nhiệt cơ bản, giúp hạ nhiệt động cơ. |
-| 84 | **Nước Làm Mát Pha Loãng** | ★★ | 0 | **-5** | 4 | 80g | Xanh lè nhưng nhiều cặn. |
-| 85 | **Ống Dẫn Nhiệt Silicon** | ★★ | 0 | **-7** | 8 | 110g | Tản nhiệt mạch máu bền bỉ. |
-| 86 | **Két Nước Đôi Nhôm Lớn** | ★★ | 2 | **-10** | 6 | 140g | Nặng nhưng khá mát. |
-| 87 | **Két Nước Racing** | ★★ | 3 | **-8** | 12 | 160g | Két nước cỡ lớn cho xe đua. |
-| 88 | **Quạt Điện Đôi Hiệu Năng** | ★★★ | 3 | **-15** | 10 | 260g | Giải nhiệt tức thì khi kẹt xe. |
-| 89 | **Dung Dịch Nước Đá** | ★★★ | 5 | **-19** | 8 | 320g | Chất lỏng đặc biệt siêu sủi bọt. |
-| 90 | **Bộ Két Nhôm CNC 3 Lõi** | ★★★ | 4 | **-21** | 15 | 390g | Hút gió đỉnh, chịu áp lực cao. |
-| 91 | **Intercooler Carbon** | ★★★ | 7 | **-15** | 18 | 380g | Bộ tản nhiệt trung gian carbon, giảm nhiệt cực mạnh. |
-| 92 | **Nước Làm Mát Ngoại Cỡ** | ★★★★ | 5 | **-34** | 20 | 650g | Sôi ở 190 độ C, không bao giờ trào. |
-| 93 | **Bộ Làm Mát Bằng Cồn Methanol** | ★★★★ | 15 | **-30** | 5 | 800g | Phun Methanol! (Hiệu ứng: Bốc Hơi Ác Liệt - +10 Power nhờ nạp khí lạnh) |
-| 94 | **Két Nước Khổng Lồ Tích Hợp** | ★★★★ | 0 | **-42** | 25 | 850g | Nhìn như chiếc khiên che hết đầu xe. |
-| 95 | **Khí Nito Lỏng Làm Mát Trực Tiếp** | ★★★★★ | 20 | **-68** | 10 | 1900g | Sương giá bủa vây động cơ! (Hiệu ứng: Deep Freeze - Bất bạo động Boss nhiệt) |
-| 96 | **Bộ Tản Nhiệt Graphene** | ★★★★★ | 10 | **-59** | 40 | 1800g | Siêu vật liệu dẫn nhiệt tuyệt đối. |
-| 97 | **Hệ Thống Từ Trường Lượng Tử** | ★★★★★ | 0 | **-85** | 50 | 2300g | Công nghệ ngoài vũ trụ. (Hiệu ứng: Không Độ Tuyệt Đối - Ép Heat toàn xe bằng 0) |
-| 98 | **Cryo Cooling System** | ★★★★★ | 15 | **-30** | 35 | 1800g | Hệ thống đóng băng mọi nhiệt độ. (Giảm 10 Heat toàn xe bằng Passive) |
+| 34 | **Động Cơ Inline-6 2JZ** | ★★★★ | 85 | **35** | 40 | 850g | Quái vật độ xe huyền thoại. ⚡ **Passive: Chịu Đựng** — Mỗi thẻ TURBO trên xe được giảm 15 Heat. (VD: 2 Turbo → -30 Heat tổng) |
+| 35 | **V8 5.0L N/A** | ★★★★ | 90 | **46** | 15 | 700g | Sức mạnh thuần túy, tiếng gầm đã tai. Không có hiệu ứng — thuần chỉ số cao. |
+| 36 | **Động Cơ Điện Dual-Motor** | ★★★★ | 100 | **57** | 35 | 750g | Đáp ứng momen xoắn tức thời. Không có hiệu ứng — thuần chỉ số cân bằng. |
+| 37 | **V10 5.2L Screamer** | ★★★★ | 110 | **69** | 20 | 950g | Tua máy 9000rpm chọc lủng màng nhĩ. ⚡ **On-Test: V10 Screamer** — Khi bắt đầu chạy thử, cộng thêm +20 Power vào tổng Power xe. |
+| 38 | **V8 Supercharged** | ★★★★ | 180 | **63** | 12 | 800g | Quái vật V8 siêu nạp! ⚡ **On-Test: V8 Rage** — Khi bắt đầu chạy thử, cộng thêm +30 Power vào tổng Power xe. Công suất khổng lồ nhưng Heat rất cao. |
+| 39 | **I4 F1 Turbo-Hybrid 1.6L** | ★★★★★ | 140 | **81** | 50 | 1800g | Công nghệ đường đua F1! ⚡ **On-Test: KERS Hệ Thống - Faster Faster** — Cứ mỗi thẻ được quét TRƯỚC thẻ này, cộng thêm +5 Power. Tối đa 9 stack = +45 Power. (VD: đặt ở Slot 6 → 5 thẻ trước = +25 Power. Slot 10 → 9 thẻ trước = +45 Power) |
+| 40 | **Động Cơ V12 6.5L Ý** | ★★★★★ | 150 | **92** | 25 | 1500g | Tác phẩm nghệ thuật cơ khí đỉnh cao. Không có hiệu ứng — thuần chỉ số Power/Heat cực lớn. |
+| 41 | **Động Cơ Điện Quad-Motor TriMax** | ★★★★★ | 180 | **115** | 60 | 2200g | Gia tốc 0-100km/h trong 1.9s! ⚡ **Passive: Tương Lai** — Tự động nhân đôi (x2) tổng Stability của toàn xe. (VD: 100 Stability → 200) |
+| 42 | **W16 Quad-Turbo** | ★★★★★ | 250 | **52** | 20 | 2000g | Động cơ W16 huyền thoại! ⚡ **On-Test: W16 Ultimate** — +50 Power khi chạy thử. **Passive:** +10 Stability cố định. |
+| 43 | **Động Cơ Phản Lực J58** | ★★★★★ | 250 | **173** | 0 | 1900g | SR-71 Blackbird nhét vào ô tô. Không có hiệu ứng — thuần Power/Heat cực đoan (173 Heat, rất dễ nổ máy!). |
 
 ## Nhóm: TURBO
 
@@ -96,34 +73,58 @@
 | 54 | **Supercharger Yếu** | ★★★ | 38 | **23** | 2 | 360g | Dây đai truyền động trục tiếp, không độ trễ nhưng ồn. |
 | 55 | **Turbo Biến Thiên** | ★★★ | 32 | **14** | 8 | 400g | VNT Turbo điều chỉnh khe hở gió, giữ mát tốt. |
 | 56 | **Turbo Tăng Áp Đôi** | ★★★ | 42 | **21** | 3 | 350g | Hệ thống tăng áp kép, boost mạnh mẽ! |
-| 57 | **Turbo Twin-Scroll** | ★★★★ | 55 | **29** | 10 | 750g | Đường xoắn kép nạp max hiệu suất. (Hiệu ứng: +20 Power ON_TEST) |
-| 58 | **Supercharger Roots** | ★★★★ | 65 | **40** | 5 | 850g | Siêu nạp khổng lồ nắp capo. (Hiệu ứng: x1.5 Power bản thân) |
-| 59 | **Vortex Hố Đen** | ★★★★★ | 120 | **46** | 0 | 1900g | Hút cả ánh sáng! (Hiệu ứng: Hút 50% Power từ Engine làm của mình, tăng 30 Heat) |
-| 60 | **Anti-Lag System** | ★★★★★ | 90 | **17** | 30 | 2200g | Bang-bang nổ pô liên thanh. (Hiệu ứng: Engine +50 Power, Ống Xả -20 Heat) |
-| 61 | **Turbo Titan X** | ★★★★★ | 100 | **23** | 15 | 1500g | Turbo cấp huyền thoại! (Hiệu ứng: Titan Boost - +30 Power khi chạy thử, không tăng Heat) |
+| 57 | **Turbo Twin-Scroll** | ★★★★ | 55 | **29** | 10 | 750g | Đường xoắn kép nạp max hiệu suất. ⚡ **On-Test: Phản Xạ Nhanh** — Khi bắt đầu chạy thử, cộng thêm +20 Power vào tổng. |
+| 58 | **Supercharger Roots** | ★★★★ | 65 | **40** | 5 | 850g | Siêu nạp khổng lồ nắp capo. ⚡ **Passive: Siêu Phàm** — Power gốc của chính thẻ này được nhân x1.5 (65 → 97 Power). |
+| 59 | **Vortex Hố Đen** | ★★★★★ | 120 | **46** | 0 | 1900g | Hút cả ánh sáng! ⚡ **Passive: Hút Cạn** — Lấy 50% Power từ thẻ ENGINE cộng vào Power Turbo này + tăng thêm 30 Heat tổng xe. Đánh đổi Engine yếu đi để Turbo mạnh vượt trội. |
+| 60 | **Anti-Lag System** | ★★★★★ | 90 | **17** | 30 | 2200g | Bang-bang nổ pô liên thanh. ⚡ **Passive: Liên Hoàn Nổ** — Cộng thêm +50 Power cho thẻ ENGINE trên xe. |
+| 61 | **Turbo Titan X** | ★★★★★ | 100 | **23** | 15 | 1500g | Turbo cấp huyền thoại! ⚡ **On-Test: Titan Boost** — Khi bắt đầu chạy thử, cộng +30 Power mà KHÔNG tăng thêm Heat. |
 
-## Nhóm: FILTER
+## Nhóm: EXHAUST
 
 | ID | Tên Thẻ | Độ Hiếm | Power | Heat | Stability | Giá | Mô Tả |
 | ---- | ----------------- | ------- | ----- | ------- | --------- | ----- | ---------------- |
-| 1 | **Lọc Gió Performance** | ★★ | 12 | **6** | 3 | 120g | Bộ lọc gió hiệu năng cao, tăng luồng gió đáng kể. |
-| 2 | **Lọc Gió Bằng Giấy** | ★ | 3 | **5** | 0 | 20g | Rất mỏng manh, dễ rách và bám bụi. |
-| 3 | **Lọc Gió Lưới Sắt** | ★ | 6 | **7** | 2 | 45g | Luồng gió mạnh nhưng hút cả khí nóng của máy. |
-| 4 | **Lọc Gió Xốp Dày** | ★ | 4 | **3** | 1 | 35g | Dày hơn nhưng làm giảm luồng không khí. |
-| 5 | **Lọc Gió Tái Chế** | ★ | 4 | **6** | 0 | 25g | Hàng rẻ tiền từ bãi rác, không bền. |
-| 6 | **Lọc Gió Cơ Bản** | ★ | 5 | **3** | 1 | 50g | Bộ lọc gió tiêu chuẩn, giúp không khí sạch vào động cơ. |
-| 7 | **Lọc Gió Cotton** | ★★ | 9 | **5** | 2 | 85g | Cản bụi tốt, giữ gió sạch và mát. |
-| 8 | **Lọc Gió Hình Nón** | ★★ | 14 | **8** | 1 | 110g | Cone cone intake - nạp nhanh nhưng nóng máy. |
-| 9 | **Lọc Gió Hộp Kín** | ★★ | 10 | **3** | 4 | 130g | Cách nhiệt tốt, hút không khí từ bên ngoài xe. |
-| 10 | **Lọc Gió Màng Dầu** | ★★ | 11 | **5** | 3 | 140g | Phủ dầu cản bụi siêu bụi, bảo vệ động cơ. |
-| 11 | **Lọc Gió Thể Thao K&N** | ★★★ | 20 | **6** | 5 | 220g | Thương hiệu uy tín, ngon bổ rẻ cho mọi dòng xe. |
-| 12 | **Cold Air Intake** | ★★★ | 22 | **2** | 8 | 280g | Ống dẫn hút khí lạnh trực tiếp từ gầm xe. |
-| 13 | **Lọc Gió Dual Cone** | ★★★ | 28 | **9** | 4 | 310g | Hai nón hút gió song song, luồng khí dồi dào mãnh liệt. |
-| 14 | **Lọc Gió Carbon Fiber** | ★★★ | 25 | **5** | 7 | 250g | Lọc gió sợi carbon siêu nhẹ, luồng gió cực mạnh. |
-| 15 | **Hệ Thống Ram Air** | ★★★★ | 40 | **7** | 12 | 650g | Ép gió tốc độ cao. (Hiệu ứng: Giảm 10 Heat cho xe) |
-| 16 | **Bộ Gió Big Bore** | ★★★★ | 45 | **12** | 8 | 720g | Hút khí cưỡng bức. (Hiệu ứng: +15 Power khi chạy thử) |
-| 17 | **Hyper-Flow Titanium** | ★★★★★ | 65 | **6** | 20 | 1400g | Khí động học Titan. (Hiệu ứng: +1 Power cho mỗi 1 Stability tổng) |
-| 22 | **Quantum Intake** | ★★★★★ | 70 | **-4** | 25 | 1800g | Hút gió lượng tử khí âm sâu. (Hiệu ứng: Giảm 50% Heat của Engine!) |
+| 62 | **Ống Bơ Hài Hước** | ★ | 1 | **0** | 1 | 15g | Chế từ ống bơ, kêu như bò rống, khách chê. |
+| 63 | **Ống Xả Gỉ Sét** | ★ | 3 | **-1** | 2 | 25g | Thoát khí kém, xả nhiệt ít, sắp rụng. |
+| 64 | **Ống Xả Xe Máy** | ★ | 4 | **-2** | 3 | 40g | Cố nhét pô xe máy vào ô tô, bí hơi. |
+| 65 | **Ống Xả Cắt Ngắn** | ★ | 12 | **-4** | 0 | 50g | Cắt thẳng cổ xả ra ngoài, ồn ào và rung lắc. |
+| 66 | **Ống Xả Tiêu Chuẩn** | ★ | 8 | **-3** | 4 | 60g | Ống xả mặc định, thoát khí ổn định. |
+| 67 | **Ống Xả Inox 304** | ★★ | 10 | **-6** | 8 | 110g | Bền bỉ, sáng bóng, chống rỉ sét rạn nứt tuyệt đối. |
+| 68 | **Ống Xả Cat-back** | ★★ | 12 | **-4** | 5 | 130g | Giữ lại bầu lọc khí thải nhưng ống to hơn. |
+| 69 | **Ống Xả Kép Dạng Y** | ★★ | 15 | **-7** | 4 | 145g | Phân luồng khí xả hai bên, tản nhiệt tốt. |
+| 70 | **Header Thép Cuộn** | ★★ | 20 | **-3** | 3 | 160g | Cổ pô uốn cong tối ưu hóa dòng khí xả. |
+| 71 | **Ống Xả Performance** | ★★ | 18 | **-5** | 7 | 150g | Ống xả thể thao, thoát khí nhanh giảm nhiệt. |
+| 72 | **Ống Xả Trị Liệu Âm** | ★★★ | 15 | **-8** | 15 | 250g | Âm thanh trầm ấm êm tai, cấu trúc vững chãi. |
+| 73 | **Titanium Nhiệt Tiêu** | ★★★ | 25 | **-13** | 8 | 350g | Mỏng nhẹ tản nhiệt cực nhanh vì chế tác bằng Titan. |
+| 74 | **Header Chéo Racing** | ★★★ | 30 | **-10** | 6 | 380g | Cổ xả phức tạp đồng bộ nhịp nổ của xi-lanh. |
+| 76 | **Hệ Thống Side-Exit** | ★★★★ | 45 | **-15** | 10 | 650g | Pô hông xe phong cách JDM! ⚡ **Adjacent: Lan Tỏa** — Thẻ được đặt ngay SAU thẻ này trong dãy slot được giảm 10 Heat. |
+| 77 | **Catless Downpipe** | ★★★★ | 60 | **-8** | 5 | 720g | Khạc lửa ầm ầm! ⚡ **Passive: Xả Nhiệt Toàn Bộ** — Mọi thẻ linh kiện trên xe đều được giảm 2 Heat. (VD: 10 thẻ → -20 Heat tổng) |
+| 78 | **Ống Xả Titan Racing** | ★★★★ | 50 | **-17** | 18 | 600g | Ống xả titanium racing! ⚡ **On-Test: Titan Exhaust** — Khi chạy thử, giảm thêm 15 Heat khỏi tổng Heat xe. |
+| 79 | **Ghost Exhaust** | ★★★★★ | 55 | **-38** | 40 | 1600g | Công nghệ tàng hình âm thanh. ⚡ **Passive: Tàng Hình** — Nhân đôi (x2) tổng Stability của toàn xe + Bypass luật Boss cấm dùng ống xả (NO_EXHAUST). |
+| 80 | **Plasma Đỏ Lửa** | ★★★★★ | 80 | **-25** | 25 | 2100g | Pô gốm vũ trụ plasma. ⚡ **Passive: Cột Lửa** — Nhân đôi bộ số âm Heat gốc của chính thẻ này (Heat -25 → -50). |
+
+## Nhóm: COOLING
+
+| ID | Tên Thẻ | Độ Hiếm | Power | Heat | Stability | Giá | Mô Tả |
+| ---- | ----------------- | ------- | ----- | ------- | --------- | ----- | ---------------- |
+| 75 | **Quạt Chĩa Điều Hòa** | ★ | 0 | **-2** | 2 | 25g | Cột quạt điện vào lưới tản nhiệt. |
+| 81 | **Nước Lã Cây Xăng** | ★ | 0 | **-1** | 0 | 10g | Đổ nước máy cho két nước rỉ sét. |
+| 82 | **Két Nước Nhựa** | ★ | 0 | **-3** | 0 | 45g | Dễ bung mối nối khi vòng tua cao. |
+| 83 | **Quạt Làm Mát** | ★ | 0 | **-4** | 8 | 70g | Quạt tản nhiệt cơ bản, giúp hạ nhiệt động cơ. |
+| 84 | **Nước Làm Mát Pha Loãng** | ★★ | 0 | **-5** | 4 | 80g | Xanh lè nhưng nhiều cặn. |
+| 85 | **Ống Dẫn Nhiệt Silicon** | ★★ | 0 | **-7** | 8 | 110g | Tản nhiệt mạch máu bền bỉ. |
+| 86 | **Két Nước Đôi Nhôm Lớn** | ★★ | 2 | **-10** | 6 | 140g | Nặng nhưng khá mát. |
+| 87 | **Két Nước Racing** | ★★ | 3 | **-8** | 12 | 160g | Két nước cỡ lớn cho xe đua. |
+| 88 | **Quạt Điện Đôi Hiệu Năng** | ★★★ | 3 | **-15** | 10 | 260g | Giải nhiệt tức thì khi kẹt xe. |
+| 89 | **Dung Dịch Nước Đá** | ★★★ | 5 | **-19** | 8 | 320g | Chất lỏng đặc biệt siêu sủi bọt. |
+| 90 | **Bộ Két Nhôm CNC 3 Lõi** | ★★★ | 4 | **-21** | 15 | 390g | Hút gió đỉnh, chịu áp lực cao. |
+| 91 | **Intercooler Carbon** | ★★★ | 7 | **-15** | 18 | 380g | Bộ tản nhiệt trung gian carbon, giảm nhiệt cực mạnh. |
+| 92 | **Nước Làm Mát Ngoại Cỡ** | ★★★★ | 5 | **-34** | 20 | 650g | Sôi ở 190 độ C, không bao giờ trào. |
+| 93 | **Bộ Làm Mát Bằng Cồn Methanol** | ★★★★ | 15 | **-30** | 5 | 800g | Phun Methanol! ⚡ **Passive: Bốc Hơi Ác Liệt** — Cộng thêm +10 Power vào tổng Power xe nhờ khí lạnh nạp thêm. |
+| 94 | **Két Nước Khổng Lồ Tích Hợp** | ★★★★ | 0 | **-42** | 25 | 850g | Nhìn như chiếc khiên che hết đầu xe. Không có hiệu ứng — thuần chỉ số Heat -42 rất cao. |
+| 95 | **Khí Nito Lỏng Làm Mát Trực Tiếp** | ★★★★★ | 20 | **-68** | 10 | 1900g | Sương giá bủa vây động cơ! ⚡ **Passive: Deep Freeze** — Vô hiệu hóa hoàn toàn luật Boss yêu cầu về nhiệt (điều kiện Heat của Boss bị bỏ qua). |
+| 96 | **Bộ Tản Nhiệt Graphene** | ★★★★★ | 10 | **-59** | 40 | 1800g | Siêu vật liệu dẫn nhiệt tuyệt đối. Không có hiệu ứng — thuần chỉ số Heat -59 + 40 Stability cực cân bằng. |
+| 97 | **Hệ Thống Từ Trường Lượng Tử** | ★★★★★ | 0 | **-85** | 50 | 2300g | Công nghệ ngoài vũ trụ. ⚡ **Passive: Không Độ Tuyệt Đối** — Tổng Heat cuối cùng của toàn xe luôn bị ép về 0, bất kể bao nhiêu thẻ được lắp. |
+| 98 | **Cryo Cooling System** | ★★★★★ | 15 | **-30** | 35 | 1800g | Hệ thống đóng băng mọi nhiệt độ. ⚡ **Passive: Cryo Freeze** — Giảm 10 Heat cố định cho tổng Heat toàn xe (cộng thêm vào chỉ số -30 sẵn có). |
 
 ## Nhóm: FUEL
 
@@ -141,12 +142,12 @@
 | 108 | **Nhiên Liệu Cồn Ethanol E85** | ★★★ | 40 | **17** | 8 | 290g | Cồn sinh học cháy lạnh, lấy Power cực cao! |
 | 109 | **Xăng Racing 100** | ★★★ | 32 | **12** | 5 | 300g | Xăng cao cấp cho xe đua, cháy sạch hơn. |
 | 110 | **Diesel Tàu Biển Rút Rọn** | ★★★★ | 50 | **35** | 15 | 550g | Khói mù mịt, lực kéo đẩy cả xe lu. |
-| 111 | **Hỗn Hợp Nitromethane** | ★★★★ | 75 | **52** | -10 | 850g | Chỉ dùng cho xe đua Top Fuel kéo sập đường. (Hiệu ứng: Cháy Kiệt Cực - Slot 1-3: +25 Power. Slot 8-10: +15 Heat) |
-| 112 | **Phụ Gia Đua Hexane Tinh Khiết** | ★★★★ | 60 | **29** | 20 | 680g | Đánh lửa siêu hoàn hảo. |
-| 113 | **Nhiên Liệu Tên Lửa** | ★★★★ | 70 | **35** | 5 | 700g | Nhiên liệu quân sự! (+20 Heat On-Test cực nguy hiểm) |
-| 114 | **Nhiên Liệu Ion Phản Tích Tụ** | ★★★★★ | 100 | **23** | 50 | 1800g | Đóng gói Power cực cao mà ít nhiệt dư thừa! |
-| 115 | **Xăng Nhựa Thông Cực Đoan** | ★★★★★ | 130 | **92** | -20 | 2000g | Khét lẹt! (Hiệu ứng: Khi Heat vượt 90%, nhân đôi Power toàn xe!) |
-| 116 | **Hoạt Chất Lõi Mặt Trời** | ★★★★★ | 200 | **138** | 0 | 2500g | Lõi Plasma. (Hiệu ứng: Mặt Trời Thu Nhỏ - Giảm 80% Stability tổng toàn xe) |
+| 111 | **Hỗn Hợp Nitromethane** | ★★★★ | 75 | **52** | -10 | 850g | Chỉ dùng cho xe đua Top Fuel! ⚡ **On-Test: Cháy Kiệt Cực** — Nếu lắp ở Slot 1–3: cộng thêm +25 Power. Nếu lắp ở Slot 8–10: tăng thêm +15 Heat. |
+| 112 | **Phụ Gia Đua Hexane Tinh Khiết** | ★★★★ | 60 | **29** | 20 | 680g | Đánh lửa siêu hoàn hảo. Không có hiệu ứng — thuần chỉ số cao cân bằng. |
+| 113 | **Nhiên Liệu Tên Lửa** | ★★★★ | 70 | **35** | 5 | 700g | Nhiên liệu quân sự! ⚡ **On-Test: Rocket Burn** — Khi chạy thử, tăng thêm +20 Heat vào tổng Heat xe. Cực nguy hiểm! |
+| 114 | **Nhiên Liệu Ion Phản Tích Tụ** | ★★★★★ | 100 | **23** | 50 | 1800g | Đóng gói Power cực cao mà ít nhiệt dư thừa! Không có hiệu ứng — thuần chỉ số 100 Power + 50 Stability tuyệt vời. |
+| 115 | **Xăng Nhựa Thông Cực Đoan** | ★★★★★ | 130 | **92** | -20 | 2000g | Khét lẹt! ⚡ **Passive: Hủy Diệt** — Khi tổng Heat toàn xe vượt 90% ngưỡng nổ (≥ 90 Heat), nhân đôi (x2) tổng Power toàn xe. Gamble cực lớn! |
+| 116 | **Hoạt Chất Lõi Mặt Trời** | ★★★★★ | 200 | **138** | 0 | 2500g | Lõi Plasma. ⚡ **Passive: Mặt Trời Thu Nhỏ** — Giảm 80% tổng Stability toàn xe (chỉ giữ lại 20%). Power 200 nhưng xe cực kỳ mất ổn định. |
 
 ## Nhóm: SUSPENSION
 
@@ -164,11 +165,11 @@
 | 126 | **Phuộc Offroad Giảm Lực** | ★★★ | 0 | **0** | 32 | 380g | Lút gầm vào cua vẫn không lật xe. |
 | 127 | **Coilover Racing** | ★★★ | 10 | **0** | 15 | 350g | Hệ thống treo có thể chỉnh độ cao và độ cứng. |
 | 128 | **Coilover Trục Lồng Replica** | ★★★★ | 12 | **0** | 45 | 650g | Chất lượng Thụy Điển nhưng bản sao, ôm đường chuẩn. |
-| 129 | **Khí Nén Tự Động Phân Bổ** | ★★★★ | 0 | **-4** | 55 | 850g | Bơm AI tự phân bổ lực. (Hiệu ứng: Xóa sạch mọi yếu tố trừ điểm Stability trên xe) |
-| 130 | **Giảm Xóc Thanh Xoắn Track-Use** | ★★★★ | 15 | **0** | 50 | 720g | Cực kì xóc, bám đường như keo 502. |
-| 131 | **Treo Thủy Lực Nhảy Múa** | ★★★★★ | 0 | **12** | 70 | 1600g | Lowrider bơm nhảy nhót! (Hiệu ứng: Trình Diễn Thu Hút - Cuối màn x2 Gold) |
-| 132 | **Treo Điện Từ MagneRide** | ★★★★★ | 25 | **6** | 80 | 1850g | Vật chất từ tính biến thiên độ cứng từng mili-giây. |
-| 133 | **Cân Bằng Lực Hấp Dẫn Anti-G** | ★★★★★ | 50 | **0** | 120 | 2400g | Phi thuyền UFO bám đất dẫu chạy ở 500km/h. (Hiệu ứng: Không lật xe, x1.5 Stability gốc) |
+| 129 | **Khí Nén Tự Động Phân Bổ** | ★★★★ | 0 | **-4** | 55 | 850g | Bơm AI tự phân bổ lực. ⚡ **Passive: Tự Động Định Tuyến** — Xóa toàn bộ chỉ số Stability âm (trừ điểm) của mọi thẻ trên xe. Chỉ giữ lại Stability dương. |
+| 130 | **Giảm Xóc Thanh Xoắn Track-Use** | ★★★★ | 15 | **0** | 50 | 720g | Cực kì xóc, bám đường như keo 502. Không có hiệu ứng — thuần chỉ số 50 Stability + 15 Power. |
+| 131 | **Treo Thủy Lực Nhảy Múa** | ★★★★★ | 0 | **12** | 70 | 1600g | Lowrider bơm nhảy nhót! ⚡ **Passive: Trình Diễn Thu Hút** — Khi hoàn thành màn thắng, số Gold nhận được được nhân đôi (x2 Gold). |
+| 132 | **Treo Điện Từ MagneRide** | ★★★★★ | 25 | **6** | 80 | 1850g | Vật chất từ tính biến thiên độ cứng từng mili-giây. Không có hiệu ứng — thuần chỉ số 80 Stability cực cao. |
+| 133 | **Cân Bằng Lực Hấp Dẫn Anti-G** | ★★★★★ | 50 | **0** | 120 | 2400g | Phi thuyền UFO bám đất! ⚡ **Passive: Khóa Tọa Độ** — Stability gốc của chính thẻ này được nhân x1.5 (120 → 180). Xe không thể bị lật. |
 
 ## Nhóm: TIRE
 
@@ -186,12 +187,12 @@
 | 143 | **Lốp Drifting Khói Mù** | ★★★ | 2 | **9** | 12 | 220g | Sinh ma sát cao để tạo khói nghệ thuật. |
 | 144 | **Lốp Off-Road Gai To** | ★★★ | -5 | **0** | 22 | 280g | Không lún bùn, bò trên đá. |
 | 145 | **Lốp Track-Day Bán Chuyên** | ★★★★ | 10 | **6** | 28 | 500g | Cao su mềm bám đường đua. (Không có hiệu ứng) |
-| 146 | **Lốp Mùa Đông Đinh Tán** | ★★★★ | -5 | **-8** | 25 | 480g | Đinh tản nhiệt truyền băng giá lên xe. (Hiệu ứng: Giới hạn -10 Heat) |
-| 147 | **Lốp Compound Bề Mặt Kép** | ★★★★ | 8 | **2** | 32 | 550g | Chuyên dụng góc cua gắt. (Không có hiệu ứng) |
-| 148 | **Lốp Racing Slick** | ★★★★ | 25 | **6** | 35 | 650g | Lốp đua chuyên nghiệp! Bám cực tốt nhưng nóng nhẹ. |
-| 149 | **Lốp Cao Su Chảy Siêu Bám** | ★★★★★ | 15 | **12** | 42 | 1200g | Ma sát nung chảy lốp. (Hiệu ứng: Đốt Lốp - Thêm 15 Power khi On-Test) |
-| 150 | **Lốp Thủy Tinh Khí Động Học** | ★★★★★ | 20 | **0** | 28 | 1500g | Triệt tiêu lực cản gió hoàn toàn. (Không có hiệu ứng) |
-| 151 | **Lốp Từ Tính Nam Châm Điện** | ★★★★★ | 5 | **0** | 65 | 2000g | Bám dính mặt đường. (Hiệu ứng: Lực Từ Tính - Nhân đôi Stability gốc) |
+| 146 | **Lốp Mùa Đông Đinh Tán** | ★★★★ | -5 | **-8** | 25 | 480g | Đinh tản nhiệt truyền băng giá lên xe. ⚡ **Passive: Băng Giá** — Giảm 10 Heat cố định cho tổng Heat toàn xe. |
+| 147 | **Lốp Compound Bề Mặt Kép** | ★★★★ | 8 | **2** | 32 | 550g | Chuyên dụng góc cua gắt. Không có hiệu ứng — thuần chỉ số 32 Stability. |
+| 148 | **Lốp Racing Slick** | ★★★★ | 25 | **6** | 35 | 650g | Lốp đua chuyên nghiệp! Không có hiệu ứng — thuần chỉ số Power + Stability cao. |
+| 149 | **Lốp Cao Su Chảy Siêu Bám** | ★★★★★ | 15 | **12** | 42 | 1200g | Ma sát nung chảy lốp. ⚡ **On-Test: Đốt Lốp** — Khi bắt đầu chạy thử, cộng thêm +15 Power vào tổng Power xe. |
+| 150 | **Lốp Thủy Tinh Khí Động Học** | ★★★★★ | 20 | **0** | 28 | 1500g | Triệt tiêu lực cản gió hoàn toàn. Không có hiệu ứng — thuần chỉ số. |
+| 151 | **Lốp Từ Tính Nam Châm Điện** | ★★★★★ | 5 | **0** | 65 | 2000g | Bám dính mặt đường. ⚡ **Passive: Lực Từ Tính** — Nhân đôi (x2) tổng Stability gốc của toàn bộ xe. (VD: 100 Stability → 200) |
 
 ## Nhóm: NITROUS
 
@@ -208,12 +209,12 @@
 | 160 | **Hệ Thống Phun Khô Cũ** | ★★★ | 20 | **12** | -2 | 250g | Phun không cầu kỳ, cực cháy. |
 | 161 | **Hệ Thống Phun Ướt Đi Phố** | ★★★ | 25 | **17** | -5 | 320g | Đục đường xăng trộn chung NOS. |
 | 162 | **NOS Dual-Stage Tiêu Chuẩn** | ★★★★ | 35 | **23** | -5 | 500g | Xịt hai giai đoạn chuẩn thi đấu. (Không có hiệu ứng) |
-| 163 | **Bình NOS Sợi Carbon** | ★★★★ | 30 | **12** | 0 | 580g | Nhẹ nhàng điều tốc an toàn. (Hiệu ứng: Bình Ổn - Không bị trừ Stability) |
-| 164 | **NOS Tri-Stage Xịt Liên Tục** | ★★★★ | 45 | **40** | -15 | 750g | Liên hoàn xịt ba nấc đầy bạo lực. (Không có hiệu ứng) |
-| 165 | **NOS Mega** | ★★★★ | 80 | **46** | -20 | 650g | Bình NOS cỡ lớn! Bùng nổ cực đoan. |
-| 166 | **NOS Hỗn Hợp Oxy Lỏng** | ★★★★★ | 60 | **35** | -10 | 1300g | Biến buồng đốt thành dung nham. (Hiệu ứng: Hút 10 Stability thành 40 Power) |
-| 167 | **Nitro Kích Quang Pha Lê** | ★★★★★ | 85 | **52** | -20 | 1800g | Khoa học viễn tưởng siêu tưởng. (Không có hiệu ứng) |
-| 168 | **Lõi Phản Vật Chất Xịt Cấp Tốc** | ★★★★★ | 120 | **103** | -40 | 2500g | Chạm là nổ, tốc độ ánh sáng! (Hiệu ứng: Đỉnh Điểm - +100 Power rủi ro cực lớn) |
+| 163 | **Bình NOS Sợi Carbon** | ★★★★ | 30 | **12** | 0 | 580g | Nhẹ nhàng điều tốc an toàn. ⚡ **Passive: Bình Ổn** — Xóa hoàn toàn chỉ số âm Stability của bình NOS này (đưa về 0 thay vì trừ). |
+| 164 | **NOS Tri-Stage Xịt Liên Tục** | ★★★★ | 45 | **40** | -15 | 750g | Liên hoàn xịt ba nấc đầy bạo lực. Không có hiệu ứng — thuần chỉ số Power 45 cao. |
+| 165 | **NOS Mega** | ★★★★ | 80 | **46** | -20 | 650g | Bình NOS cỡ lớn! Không có hiệu ứng — thuần Power 80 nhưng Heat 46 và -20 Stability rất nguy hiểm. |
+| 166 | **NOS Hỗn Hợp Oxy Lỏng** | ★★★★★ | 60 | **35** | -10 | 1300g | Biến buồng đốt thành dung nham. ⚡ **On-Test: Xung Lực Vi Dấu** — Lấy 10 Stability từ tổng Stability xe để chuyển thành +40 Power. Đánh đổi ổn định lấy sức mạnh. |
+| 167 | **Nitro Kích Quang Pha Lê** | ★★★★★ | 85 | **52** | -20 | 1800g | Khoa học viễn tưởng siêu tưởng. Không có hiệu ứng — thuần chỉ số Power 85 cao. |
+| 168 | **Lõi Phản Vật Chất Xịt Cấp Tốc** | ★★★★★ | 120 | **103** | -40 | 2500g | Chạm là nổ! ⚡ **On-Test: Đỉnh Điểm** — Khi chạy thử, cộng thêm +100 Power vào tổng xe. Nhưng 103 Heat + -40 Stability = rủi ro cực đại! |
 
 ## Nhóm: TOOL
 
@@ -232,28 +233,28 @@
 | 179 | **Bộ Chỉnh ECU Bỏ Túi** | ★★★ | 10 | **6** | 5 | 380g | Hack map engine nhẹ. |
 | 180 | **Cánh Gió Gắn Tạm (Canards)** | ★★★★ | 0 | **0** | 25 | 450g | Lắp canard 3M. (Không có hiệu ứng) |
 | 181 | **Bản Đồ Mạch Điện Tử** | ★★★★ | 18 | **0** | 0 | 550g | Khơi thông dòng đánh lửa. (Không có hiệu ứng) |
-| 182 | **Hệ Thống Đo Lường Từ Xa** | ★★★★ | 5 | **0** | 20 | 680g | Telemetry xe đua. (Hiệu ứng: Hoàn thành màn thưởng 15% Vàng) |
-| 183 | **Hộp Đồ Nghề Dát Vàng** | ★★★★★ | 0 | **-17** | 45 | 4000g | Snap-On Gold. (Hiệu ứng: Hoàn trả 100% Gold mua sắm) |
-| 184 | **Drone Phân Tích Đường Đua** | ★★★★★ | 10 | **-8** | 30 | 1200g | Drone bay soi đường. (Không có hiệu ứng) |
-| 185 | **Thiết Bị Hack Trụ Trạm** | ★★★★★ | 50 | **57** | -10 | 3500g | Cướp quyền trạm xăng, thay luật đỏ. (Hiệu ứng: Cướp Quyền Boss) |
+| 182 | **Hệ Thống Đo Lường Từ Xa** | ★★★★ | 5 | **0** | 20 | 680g | Telemetry xe đua. ⚡ **Passive: Định Giá Dữ Liệu** — Khi lắp thẻ này và hoàn thành màn thắng, nhận thêm +15% Gold thưởng. |
+| 183 | **Hộp Đồ Nghề Dát Vàng** | ★★★★★ | 0 | **-17** | 45 | 4000g | Snap-On Gold. ⚡ **Passive: Xa Xỉ Phẩm** — Khi hoàn thành màn thắng, hoàn trả 100% số Gold đã chi mua linh kiện trong màn đó (x2 Gold bonus). |
+| 184 | **Drone Phân Tích Đường Đua** | ★★★★★ | 10 | **-8** | 30 | 1200g | Drone bay soi đường. Không có hiệu ứng — thuần chỉ số cân bằng: 10 Power, -8 Heat, 30 Stability. |
+| 185 | **Thiết Bị Hack Trụ Trạm** | ★★★★★ | 50 | **57** | -10 | 3500g | Cướp quyền trạm xăng! ⚡ **Passive: Cướp Quyền Boss** — Bypass hoàn toàn mọi luật lệ khắt khe của Boss (VD: cấm dùng Cooling, yêu cầu tối thiểu sao, v.v). |
 
 ## Nhóm: CREW
 
 | ID | Tên Thẻ | Độ Hiếm | Power | Heat | Stability | Giá | Mô Tả |
 | ---- | ----------------- | ------- | ----- | ------- | --------- | ----- | ---------------- |
-| 186 | **Kỹ Sư Nhiệt (The Cooler)** | ★★ | 0 | **0** | 0 | 300g | "Giải nhiệt cấp tốc": Giảm 10% Nhiệt độ tổng cho mọi Turbo được lắp. |
-| 187 | **Chuyên Gia Ống Xả (The Flow)** | ★★★ | 0 | **0** | 0 | 800g | "Luồng khí mượt mà": Thẻ Ống xả +15 Power, không tăng thêm Heat. |
-| 188 | **Kế Toán Trưởng (The Accountant)** | ★★ | 0 | **0** | 0 | 500g | "Tối ưu ngân sách": Hoàn trả 10% tiền mua linh kiện sau mỗi màn thắng. |
-| 189 | **Tay Lái Thử (The Stuntman)** | ★★★ | 0 | **0** | 0 | 1000g | "Kiểm soát giới hạn": Ngưỡng nổ máy tăng thêm +5 điểm (105 thay vì 100) khi Heat vượt 95%. |
-| 190 | **Thợ Sơn (The Artist)** | ★★ | 0 | **0** | 0 | 400g | "Vẻ ngoài hào nhoáng": +15% sự hài lòng khách, nhận thêm tiền tip ngẫu nhiên. |
-| 191 | **Chuyên Gia Lốp (The Grip)** | ★★★ | 0 | **0** | 0 | 1200g | "Bám đường tuyệt đối": +20 Stability cho xe có động cơ trên 400 mã lực. |
-| 192 | **Bác Sĩ Xăng (The Fuel Doctor)** | ★★★ | 0 | **0** | 0 | 900g | "Pha Chế Hoàn Hảo": Slot FUEL tăng gấp đôi Power, nhưng Heat của slot FUEL cũng tăng x1.5. Đánh đổi sức mạnh lấy rủi ro. |
-| 193 | **Thợ Hàn Ngầm (The Welder)** | ★★ | 0 | **0** | 0 | 350g | "Mối Hàn Hoàn Hảo": Slot EXHAUST nhận thêm +10 Stability. Hệ thống xả được hàn chắc chắn, xe bám đường hơn. |
-| 194 | **Thợ Điện Ngầm (The Wireman)** | ★★★★ | 0 | **0** | 0 | 1800g | "Đấu Nối Thần Tốc": Slot NITROUS xoá hoàn toàn chỉ số trừ Stability. Hệ thống điện giữ xe ổn định khi bơm NOS. |
-| 195 | **Chiến Binh Đêm (The Night Rider)** | ★★★★ | 0 | **0** | 0 | 2500g | "Bóng Đêm Tốc Độ": Từ Ngày 25 trở đi, slot TIRE và slot TURBO đều nhận thêm +15 Power. Đường đêm là sân chơi của hắn. |
-| 196 | **Thầy Phong Thuỷ Xe (The Feng Shui)** | ★★ | 0 | **0** | 0 | 450g | "Ngũ Hành Cân Bằng": Nếu cả 3 slot FILTER + ENGINE + COOLING đều có thẻ cùng độ hiếm → +25 Stability tổng. |
-| 197 | **Kẻ Đào Tẩu (The Fugitive)** | ★★★★ | 0 | **0** | 0 | 0g | "Chạy trốn": Bỏ qua mọi yêu cầu khắt khe của Boss. |
-| 198 | **Linh Hồn Gara (Ghost Mechanic)** | ★★★★★ | 0 | **0** | 0 | 0g | "Hồi sinh": 1 lần/màn, cứu xe khi nổ máy. Xe hoàn thành với 1 HP. |
-| 199 | **Chủ Tịch Tập Đoàn (The CEO)** | ★★★★ | 0 | **0** | 0 | 0g | "Đầu tư mạo hiểm": Mượn 1 linh kiện Legendary (5 sao) dùng thử 1 màn. |
-| 200 | **Hacker Mũ Đen (Black-Hat)** | ★★★★★ | 0 | **0** | 0 | 0g | "Chỉnh sửa mã nguồn": Đảo ngược chỉ số Heat ↔ Stability của mọi thẻ trên xe. (VD: 100 Heat + 50 Stability → 50 Heat + 100 Stability) |
-| 201 | **Huyền Thoại Giải Nghệ (The Legend)** | ★★★★★ | 0 | **0** | 0 | 0g | "Bàn tay vàng": Common/Uncommon tự động nâng chỉ số lên ngang Rare. |
+| 186 | **Kỹ Sư Nhiệt (The Cooler)** | ★★ | 0 | **0** | 0 | 300g | ⚡ **Passive: Giải Nhiệt Cấp Tốc** — Giảm 10% tổng Heat của tất cả thẻ TURBO được lắp trên xe. |
+| 187 | **Chuyên Gia Ống Xả (The Flow)** | ★★★ | 0 | **0** | 0 | 800g | ⚡ **Passive: Luồng Khí Mượt Mà** — Tất cả thẻ ỐNG XẢ được cộng thêm +15 Power mà KHÔNG tăng thêm Heat. |
+| 188 | **Kế Toán Trưởng (The Accountant)** | ★★ | 0 | **0** | 0 | 500g | ⚡ **Passive: Tối Ưu Ngân Sách** — Sau mỗi màn thắng, hoàn trả 10% tổng số Gold đã chi mua linh kiện trong màn đó. |
+| 189 | **Tay Lái Thử (The Stuntman)** | ★★★ | 0 | **0** | 0 | 1000g | ⚡ **Passive: Kiểm Soát Giới Hạn** — Ngưỡng nổ máy tăng thêm +5 điểm (từ 100 lên 105). Chỉ kích hoạt khi currentHeat vượt 95. |
+| 190 | **Thợ Sơn (The Artist)** | ★★ | 0 | **0** | 0 | 400g | ⚡ **Passive: Vẻ Ngoài Hào Nhoáng** — +15% sự hài lòng khách hàng, có cơ hội nhận thêm tiền tip ngẫu nhiên khi hoàn thành quest. |
+| 191 | **Chuyên Gia Lốp (The Grip)** | ★★★ | 0 | **0** | 0 | 1200g | ⚡ **Passive: Bám Đường Tuyệt Đối** — Nếu tổng Power xe vượt 400, cộng thêm +20 Stability. |
+| 192 | **Bác Sĩ Xăng (The Fuel Doctor)** | ★★★ | 0 | **0** | 0 | 900g | ⚡ **Passive: Pha Chế Hoàn Hảo** — Tất cả slot FUEL được nhân đôi (x2) Power, nhưng Heat của các slot FUEL cũng tăng x1.5. Đánh đổi sức mạnh lấy nhiệt. |
+| 193 | **Thợ Hàn Ngầm (The Welder)** | ★★ | 0 | **0** | 0 | 350g | ⚡ **Passive: Mối Hàn Hoàn Hảo** — Tất cả slot EXHAUST được cộng thêm +10 Stability. |
+| 194 | **Thợ Điện Ngầm (The Wireman)** | ★★★★ | 0 | **0** | 0 | 1800g | ⚡ **Passive: Đấu Nối Thần Tốc** — Tất cả slot NITROUS được xóa hoàn toàn chỉ số âm Stability (giữ Stability ≥ 0). |
+| 195 | **Chiến Binh Đêm (The Night Rider)** | ★★★★ | 0 | **0** | 0 | 2500g | ⚡ **Passive: Bóng Đêm Tốc Độ** — Từ Ngày 25 trở đi, mỗi slot TIRE và slot TURBO đều được cộng thêm +15 Power. |
+| 196 | **Thầy Phong Thuỷ Xe (The Feng Shui)** | ★★ | 0 | **0** | 0 | 450g | ⚡ **Passive: Ngũ Hành Cân Bằng** — Nếu cả 3 slot FILTER + ENGINE + COOLING đều có thẻ cùng độ hiếm (rarity) → cộng thêm +25 Stability tổng xe. |
+| 197 | **Kẻ Đào Tẩu (The Fugitive)** | ★★★★ | 0 | **0** | 0 | 0g | 🔒Ẩn (Achievement). ⚡ **Passive: Chạy Trốn** — Bypass hoàn toàn mọi điều kiện đặc biệt của Boss (cấm thẻ, yêu cầu rarity tối thiểu, v.v). |
+| 198 | **Linh Hồn Gara (Ghost Mechanic)** | ★★★★★ | 0 | **0** | 0 | 0g | 🔒Ẩn (Achievement). ⚡ **Passive: Hồi Sinh** — 1 lần/lượt chạy thử, khi currentHeat vượt 100 (nổ máy), tự động reset Heat về 50 và tiếp tục duyệt slot kế tiếp thay vì kết thúc sớm. |
+| 199 | **Chủ Tịch Tập Đoàn (The CEO)** | ★★★★ | 0 | **0** | 0 | 0g | 🔒Ẩn (Achievement). ⚡ **Passive: Đầu Tư Mạo Hiểm** — Mỗi màn, được mượn miễn phí 1 linh kiện Legendary (5 sao) ngẫu nhiên để dùng. Hết màn trả lại. |
+| 200 | **Hacker Mũ Đen (Black-Hat)** | ★★★★★ | 0 | **0** | 0 | 0g | 🔒Ẩn (Achievement). ⚡ **Passive: Chỉnh Sửa Mã Nguồn** — Đảo ngược chỉ số Heat ↔ Stability của MỌI thẻ trên xe. (VD: thẻ có 100 Heat + 50 Stability → 50 Heat + 100 Stability) |
+| 201 | **Huyền Thoại Giải Nghệ (The Legend)** | ★★★★★ | 0 | **0** | 0 | 0g | 🔒Ẩn (Achievement). ⚡ **Passive: Bàn Tay Vàng** — Tự động nâng chỉ số của mọi thẻ Common (★) và Uncommon (★★) lên ngang bằng mức Rare (★★★). |

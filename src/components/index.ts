@@ -5,3 +5,6 @@ export { default as ShadowCustomer } from './ShadowCustomer/ShadowCustomer';
 export { default as ShadowManager } from './ShadowCustomer/ShadowManager';
 export { default as QuestDialog } from './ShadowCustomer/QuestDialog';
 export { default as DevTool } from './DevTool';
+export { default as DeckOverlay } from './Inventory/DeckOverlay';
+export { default as ShopScreen } from './Shop/ShopScreen';
+export { default as WorkshopScreen } from './Workshop/WorkshopScreen';

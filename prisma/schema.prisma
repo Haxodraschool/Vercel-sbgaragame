@@ -18,6 +18,7 @@ model User {
   id              Int      @id @default(autoincrement())
   username        String   @unique @db.VarChar(50)
   password        String   @db.VarChar(255)
+  role            String   @default("PLAYER") @db.VarChar(20) // PLAYER | ADMIN
   gold            BigInt   @default(500)
   level           Int      @default(1)
   exp             BigInt   @default(0)

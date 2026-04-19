@@ -1,0 +1,368 @@
+/* ============================================
+   DeckOverlay — "Sổ Tay Kỹ Thuật" Overlay
+   Dieselpunk Retro-Mechanical Aesthetic
+   ============================================ */
+
+/* ─── Backdrop ─── */
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-modal);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0);
+  backdrop-filter: blur(0px);
+  transition: background 0.4s ease, backdrop-filter 0.4s ease;
+  pointer-events: none;
+}
+
+.backdrop.open {
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(12px);
+  pointer-events: all;
+}
+
+/* ─── Main Frame — Steel Plate ─── */
+.frame {
+  position: relative;
+  width: 92vw;
+  max-width: 1400px;
+  height: 85vh;
+  max-height: 900px;
+  display: flex;
+  overflow: hidden;
+  border-radius: 6px;
+
+  /* Steel plate effect */
+  background:
+    linear-gradient(135deg, #1e1e2a 0%, #14141e 50%, #1a1a26 100%);
+  border: 3px solid #3a3a4e;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.04),
+    inset 0 -2px 0 rgba(0,0,0,0.4),
+    0 0 0 1px rgba(0,0,0,0.8),
+    0 8px 32px rgba(0,0,0,0.6),
+    0 0 80px rgba(0,229,255,0.05);
+
+  /* Book-opening animation */
+  transform: scaleX(0);
+  opacity: 0;
+  transform-origin: center center;
+}
+
+.frame.open {
+  animation: deckOpen 0.65s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.frame.closing {
+  animation: deckClose 0.45s cubic-bezier(0.7, 0, 0.84, 0) forwards;
+}
+
+@keyframes deckOpen {
+  0% {
+    transform: scaleX(0);
+    opacity: 0;
+  }
+  15% {
+    transform: scaleX(0.015);
+    opacity: 1;
+  }
+  100% {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+}
+
+@keyframes deckClose {
+  0% {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+  85% {
+    transform: scaleX(0.015);
+    opacity: 1;
+  }
+  100% {
+    transform: scaleX(0);
+    opacity: 0;
+  }
+}
+
+/* ─── Steel Mesh Background Pattern ─── */
+.frame::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.03;
+  background-image:
+    radial-gradient(circle, #888 1px, transparent 1px);
+  background-size: 8px 8px;
+  z-index: 0;
+}
+
+/* ─── Corner Rivets ─── */
+.rivet {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #707080, #3a3a48);
+  border: 1px solid #2a2a38;
+  box-shadow:
+    inset 0 1px 2px rgba(255,255,255,0.15),
+    inset 0 -1px 1px rgba(0,0,0,0.4),
+    0 1px 3px rgba(0,0,0,0.6);
+  z-index: 10;
+}
+
+.rivet::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 5px;
+  width: 4px;
+  height: 1.5px;
+  background: rgba(255,255,255,0.2);
+  border-radius: 1px;
+  transform: rotate(-30deg);
+}
+
+.rivetTL { top: 6px; left: 6px; }
+.rivetTR { top: 6px; right: 6px; }
+.rivetBL { bottom: 6px; left: 6px; }
+.rivetBR { bottom: 6px; right: 6px; }
+
+/* Spine removed */
+
+/* ─── Content Wrapper with fade-in delay ─── */
+.content {
+  position: relative;
+  display: flex;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  opacity: 0;
+  transition: opacity 0.3s ease 0.3s;
+}
+
+.frame.open .content {
+  opacity: 1;
+}
+
+.frame.closing .content {
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+/* ─── Left Panel (Card Grid) ─── */
+.leftPanel {
+  flex: 1 1 62%;
+  display: flex;
+  flex-direction: column;
+  padding: 24px 20px 24px 28px;
+  overflow: hidden;
+  min-width: 0;
+}
+
+/* ─── Right Panel (Card Detail Blueprint) ─── */
+.rightPanel {
+  flex: 0 0 38%;
+  max-width: 38%;
+  border-left: 2px solid #2a2a3a;
+  background:
+    linear-gradient(135deg, #12121c 0%, #0e0e16 100%);
+  overflow-y: auto;
+  overflow-x: hidden;
+  position: relative;
+}
+
+.rightPanel::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.015;
+  background-image:
+    linear-gradient(rgba(0,229,255,0.5) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,229,255,0.5) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+/* ─── Header ─── */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #2a2a3a;
+}
+
+.title {
+  font-family: 'VT323', monospace;
+  font-size: 26px;
+  letter-spacing: 3px;
+  color: var(--neon-cyan);
+  text-shadow: 0 0 8px rgba(0,229,255,0.5);
+  line-height: 1.4;
+}
+
+.collectionStats {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.collectionStats span {
+  color: var(--neon-cyan);
+  font-weight: 600;
+}
+
+/* ─── Close Button ─── */
+.closeBtn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 20px;
+  background: linear-gradient(135deg, #2a1a1a 0%, #1a0e0e 100%);
+  border: 2px solid #5a2a2a;
+  border-radius: 4px;
+  color: #ff6b6b;
+  font-family: 'VT323', monospace;
+  font-size: 16px;
+  letter-spacing: 2px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-transform: uppercase;
+}
+
+.closeBtn:hover {
+  background: linear-gradient(135deg, #3a2020 0%, #2a1414 100%);
+  border-color: #ff4444;
+  color: #ff4444;
+  box-shadow: 0 0 16px rgba(255,68,68,0.3);
+  transform: translateY(-1px);
+}
+
+.closeBtn:active {
+  transform: translateY(1px);
+}
+
+/* ─── Search & Filter Bar ─── */
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.searchBox {
+  flex: 1;
+  min-width: 160px;
+  position: relative;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 8px 12px 8px 34px;
+  background: #0e0e18;
+  border: 1px solid #2a2a3e;
+  border-radius: 4px;
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.searchInput:focus {
+  border-color: var(--neon-cyan);
+  box-shadow: 0 0 8px rgba(0,229,255,0.2);
+}
+
+.searchInput::placeholder {
+  color: var(--text-muted);
+}
+
+.searchIcon {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  font-size: 14px;
+  pointer-events: none;
+}
+
+.selectWrap {
+  position: relative;
+}
+
+.selectControl {
+  padding: 8px 28px 8px 10px;
+  background: #0e0e18;
+  border: 1px solid #2a2a3e;
+  border-radius: 4px;
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  cursor: pointer;
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  transition: border-color 0.2s;
+}
+
+.selectControl:focus {
+  border-color: var(--neon-cyan);
+}
+
+.selectArrow {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: var(--text-muted);
+  font-size: 10px;
+}
+
+/* ─── Empty State ─── */
+.emptyState {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 40px;
+  text-align: center;
+}
+
+.emptyState p {
+  font-family: 'VT323', monospace;
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 2;
+}
+
+/* ─── Rust Streaks ─── */
+.rustStreak {
+  position: absolute;
+  width: 40px;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, rgba(139,69,19,0.15), transparent);
+  border-radius: 2px;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.rust1 { top: 30px; left: 40px; transform: rotate(-5deg); }
+.rust2 { bottom: 50px; right: 30px; transform: rotate(3deg); width: 50px; }
+.rust3 { top: 60%; left: 20px; transform: rotate(-2deg); width: 35px; }

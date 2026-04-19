@@ -10,7 +10,7 @@ import { authenticateRequest, GAME_CONSTANTS, rollRarity } from '@/lib/auth';
 const BUNDLE_DISCOUNT = 0.9; // Giảm 10% tổng giá cụm
 const BUNDLE_CHANCE_RATIO = 1 / 3; // Tỉ lệ cụm = 1/3 drop rate gốc
 const X2_PACK_CHANCE = 0.005; // 0.5% chance x2 Pack
-const PITY_INTERVAL = 8; // Pack thứ 8 đảm bảo 4-5★
+const PITY_INTERVAL = 10; // Pack thứ 8 đảm bảo 4-5★
 
 const CARD_TYPES_FOR_PRIORITY = [
   'ENGINE', 'TURBO', 'EXHAUST', 'COOLING', 'FILTER',
@@ -113,8 +113,8 @@ export async function GET(request: NextRequest) {
         continue;
       }
 
-      // --- 40% chance: Pack thường ---
-      if (roll < X2_PACK_CHANCE + GAME_CONSTANTS.PACK_CHANCE_IN_SHOP) {
+      // --- 10% chance: Pack thường ---
+      if (roll < X2_PACK_CHANCE + 0.1) {
         const packPrice = calcPackPrice(user.currentDay, activeTaxModifier);
         shopItems.push({
           slotIndex: i,

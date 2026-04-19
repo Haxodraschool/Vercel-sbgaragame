@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&family=VT323&display=swap");
 @import "tailwindcss";
 
 /* ─── Tailwind v4 custom theme ─── */
@@ -291,4 +291,55 @@ body {
 }
 .animate-float {
   animation: float 3s ease-in-out infinite;
+}
+
+/* ─── Shop Animations ─── */
+@keyframes price-swing {
+  0%, 100% { transform: rotate(-2deg); }
+  50% { transform: rotate(2deg); }
+}
+
+@keyframes card-fly {
+  0% { transform: scale(1) translateY(0); opacity: 1; }
+  50% { transform: scale(0.6) translateY(-40px); opacity: 0.7; }
+  100% { transform: scale(0.2) translateY(-120px); opacity: 0; }
+}
+
+@keyframes gold-pulse {
+  0%, 100% { color: var(--color-gold); }
+  50% { color: #fff; text-shadow: 0 0 12px var(--color-gold); }
+}
+
+@keyframes lootbox-glow {
+  0%, 100% { filter: drop-shadow(0 0 8px rgba(234,179,8,0.3)); }
+  50% { filter: drop-shadow(0 0 20px rgba(234,179,8,0.7)); }
+}
+
+.animate-price-swing {
+  animation: price-swing 3s ease-in-out infinite;
+  transform-origin: top center;
+}
+.animate-card-fly {
+  animation: card-fly 0.6s ease-in forwards;
+}
+.animate-gold-pulse {
+  animation: gold-pulse 0.6s ease;
+}
+.animate-lootbox-glow {
+  animation: lootbox-glow 2s ease-in-out infinite;
+}
+
+/* ─── Workshop: Coin Fly Animation ─── */
+@keyframes coinFly {
+  0% {
+    transform: translate(0, 0) scale(1.4) rotate(0deg);
+    opacity: 1;
+  }
+  40% {
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-55vw, -50vh) scale(0.1) rotate(900deg);
+    opacity: 0;
+  }
 }

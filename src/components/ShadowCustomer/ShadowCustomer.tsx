@@ -12,8 +12,10 @@ export interface QuestData {
     name: string;
     description?: string;
     imageUrl?: string;
+    specialCondition?: string;
   } | null;
   status: string;
+  customerBudget?: number;
 }
 
 interface Props {
