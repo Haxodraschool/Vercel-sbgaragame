@@ -44,6 +44,11 @@ interface GameState {
   bossChoice: BossChoiceData | null; // Stores boss-specific choices for workshop
   skipShadowIntro: boolean; // Skip shadow-walking animation khi quay lại lobby từ workshop
 
+  // Loading progress tracking (cho LoadingScreen)
+  loadingPending: string[]; // list of pending task IDs
+  loadingTotal: number;      // total tasks registered in current transition
+  loadingLabel: string;      // latest status label ("Đang tải thuộc tính...")
+
   // Actions
   initializeStore: () => void;
   setToken: (token: string | null) => void;
@@ -52,6 +57,10 @@ interface GameState {
   /** Transition to a destination screen WITH a loading overlay; call markScreenReady() from destination when its resources are fully loaded. */
   transitionScreen: (screen: GameState['currentScreen']) => void;
   markScreenReady: () => void;
+  /** Register a loading task (shows in progress bar). Call completeTask(id) when done. */
+  registerTask: (taskId: string, label?: string) => void;
+  /** Mark a loading task complete. When all tasks complete, automatically marks screen ready. */
+  completeTask: (taskId: string) => void;
   setLoading: (loading: boolean) => void;
   setActiveQuest: (quest: any | null) => void;
   setBossChoice: (choice: BossChoiceData | null) => void;
@@ -74,6 +83,9 @@ export const useGameStore = create<GameState>((set) => ({
   activeQuest: null,
   bossChoice: null,
   skipShadowIntro: false,
+  loadingPending: [],
+  loadingTotal: 0,
+  loadingLabel: '',
 
   // Actions
   initializeStore: () => {
@@ -100,9 +112,36 @@ export const useGameStore = create<GameState>((set) => ({
       currentScreen: screen,
       isTransitioning: true,
       transitionKey: state.transitionKey + 1,
+      loadingPending: [],
+      loadingTotal: 0,
+      loadingLabel: '',
     })),
 
-  markScreenReady: () => set({ isTransitioning: false }),
+  markScreenReady: () =>
+    set({ isTransitioning: false, loadingPending: [], loadingTotal: 0, loadingLabel: '' }),
+
+  registerTask: (taskId, label) =>
+    set((state) => {
+      if (state.loadingPending.includes(taskId)) return state;
+      return {
+        loadingPending: [...state.loadingPending, taskId],
+        loadingTotal: state.loadingTotal + 1,
+        loadingLabel: label || state.loadingLabel,
+      };
+    }),
+
+  completeTask: (taskId) =>
+    set((state) => {
+      const nextPending = state.loadingPending.filter((t) => t !== taskId);
+      // Auto-mark ready when all tasks complete during a transition
+      const allDone = state.isTransitioning && state.loadingTotal > 0 && nextPending.length === 0;
+      return {
+        loadingPending: nextPending,
+        isTransitioning: allDone ? false : state.isTransitioning,
+        loadingTotal: allDone ? 0 : state.loadingTotal,
+        loadingLabel: allDone ? '' : state.loadingLabel,
+      };
+    }),
 
   setLoading: (loading) => set({ isLoading: loading }),
 

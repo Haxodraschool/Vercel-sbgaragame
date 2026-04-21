@@ -1,15 +1,17 @@
-// Prisma Client Singleton with MySQL Adapter (Prisma 7)
+// Prisma Client Singleton (PostgreSQL)
 // Đảm bảo chỉ tạo một instance duy nhất trong development (hot-reload)
 
 import { PrismaClient } from '@prisma/client';
-import { PrismaMariaDb } from '@prisma/adapter-mariadb';
+import { PrismaPg } from '@prisma/adapter-pg';
+import pg from 'pg';
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
 };
 
 function createPrismaClient(): PrismaClient {
-  const adapter = new PrismaMariaDb(process.env.DATABASE_URL!);
+  const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
+  const adapter = new PrismaPg(pool);
   return new PrismaClient({ adapter });
 }
 

@@ -1,22 +1,35 @@
 .overlay {
   position: fixed;
   inset: 0;
-  background:
-    radial-gradient(ellipse at 50% 40%, #101827 0%, #070b12 70%, #03060a 100%);
+  background: radial-gradient(ellipse at 50% 40%, #101827 0%, #070b12 70%, #03060a 100%);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: var(--z-loading, 500);
+  z-index: 500;
   overflow: hidden;
-  isolation: isolate;
+  animation: fadeIn 0.3s ease;
 }
 
-/* Subtle scanlines for retro-futuristic feel */
+.fadeOut {
+  animation: fadeOut 0.8s ease forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+/* Scanlines */
 .scanlines {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background-image: repeating-linear-gradient(
+  background: repeating-linear-gradient(
     transparent 0,
     transparent 2px,
     rgba(6, 182, 212, 0.05) 3px,
@@ -24,173 +37,149 @@
   );
   mix-blend-mode: screen;
   opacity: 0.6;
-  animation: lsScan 4s linear infinite;
+  animation: scan 4s linear infinite;
 }
 
-@keyframes lsScan {
+@keyframes scan {
   from { background-position: 0 0; }
   to { background-position: 0 120px; }
 }
 
-.container {
-  position: relative;
+/* Container */
+.box {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1.25rem;
-  padding: 2rem 3rem;
-  z-index: 2;
+  gap: 1rem;
+  padding: 2rem;
 }
 
-/* ── Cờ lê + Ốc vít ── */
-.wrenchArea {
+/* Gear area */
+.gearBox {
   position: relative;
-  width: 160px;
-  height: 160px;
+  width: 140px;
+  height: 140px;
   display: flex;
   align-items: center;
   justify-content: center;
-  filter: drop-shadow(0 0 12px rgba(6, 182, 212, 0.25));
 }
 
+/* Wrench spinning */
 .wrench {
   position: absolute;
   top: 50%;
   left: 50%;
   transform-origin: 50% 50%;
-  transform: translate(-50%, -50%) rotate(0deg);
-  animation: lsWrenchSpin 2s linear infinite;
+  transform: translate(-50%, -50%);
+  animation: spin 2s linear infinite;
+  filter: drop-shadow(0 0 12px rgba(6, 182, 212, 0.25));
 }
 
-@keyframes lsWrenchSpin {
+@keyframes spin {
   from { transform: translate(-50%, -50%) rotate(0deg); }
   to { transform: translate(-50%, -50%) rotate(-360deg); }
 }
 
+/* Bolt counter-spinning */
 .bolt {
   position: absolute;
-  /* Centered at the wrench pivot, so the wrench appears to spin AROUND the bolt */
   top: 50%;
   left: 50%;
   transform-origin: 50% 50%;
-  transform: translate(-50%, -50%) rotate(0deg);
-  animation: lsBoltUnscrew 2.4s linear infinite;
-  filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.5));
-  will-change: transform, opacity;
+  transform: translate(-50%, -50%);
+  animation: boltSpin 2.4s linear infinite;
+  filter: drop-shadow(0 2px 2px rgba(0,0,0,0.5));
 }
 
-/* Bolt rotates opposite to wrench + "unscrews" outward slightly */
-@keyframes lsBoltUnscrew {
-  0%   { transform: translate(-50%, -50%) rotate(0deg)   translateY(0); }
-  50%  { transform: translate(-50%, -50%) rotate(180deg) translateY(-3px); }
-  100% { transform: translate(-50%, -50%) rotate(360deg) translateY(0); }
+@keyframes boltSpin {
+  0% { transform: translate(-50%, -50%) rotate(0deg); }
+  100% { transform: translate(-50%, -50%) rotate(360deg); }
 }
 
-/* When loading done → bolt detaches, falls + bounces */
-.boltFall {
-  animation: lsBoltDrop 0.9s cubic-bezier(0.34, 1.56, 0.64, 1) forwards !important;
+/* Bolt drop animation when exit */
+.drop {
+  animation: boltDrop 0.8s ease-out forwards !important;
 }
 
-@keyframes lsBoltDrop {
-  0%   { transform: translate(-50%, -50%) rotate(0deg); opacity: 1; }
-  30%  { transform: translate(-45%, 20%) rotate(140deg); opacity: 1; }
-  55%  { transform: translate(-40%, 120%) rotate(260deg); opacity: 1; }
-  70%  { transform: translate(-40%, 110%) rotate(290deg); opacity: 1; }  /* bounce up */
-  85%  { transform: translate(-42%, 135%) rotate(330deg); opacity: 0.95; }
-  100% { transform: translate(-42%, 150%) rotate(360deg); opacity: 0; }
+@keyframes boltDrop {
+  0% { transform: translate(-50%, -50%) rotate(0deg); opacity: 1; }
+  50% { transform: translate(-40%, 80%) rotate(180deg); opacity: 0.8; }
+  100% { transform: translate(-35%, 160%) rotate(360deg); opacity: 0; }
 }
 
-/* Spark burst where the bolt lands */
-.sparks {
-  position: absolute;
-  left: 50%;
-  top: 100%;
-  width: 0;
-  height: 0;
-  pointer-events: none;
-}
-
-.sparks span {
-  position: absolute;
-  width: 3px;
-  height: 3px;
-  border-radius: 50%;
-  background: #fde68a;
-  box-shadow: 0 0 8px #fbbf24, 0 0 2px #fff;
-  opacity: 0;
-  animation-duration: 0.65s;
-  animation-timing-function: ease-out;
-  animation-fill-mode: forwards;
-  animation-delay: 0.5s;
-}
-
-.sparks span:nth-child(1) { animation-name: lsSpark1; }
-.sparks span:nth-child(2) { animation-name: lsSpark2; }
-.sparks span:nth-child(3) { animation-name: lsSpark3; }
-.sparks span:nth-child(4) { animation-name: lsSpark4; }
-.sparks span:nth-child(5) { animation-name: lsSpark5; }
-
-@keyframes lsSpark1 {
-  0%   { transform: translate(0, 0) scale(0.4); opacity: 0; }
-  15%  { transform: translate(0, 0) scale(1); opacity: 1; }
-  100% { transform: translate(-40px, -14px) scale(0.2); opacity: 0; }
-}
-@keyframes lsSpark2 {
-  0%   { transform: translate(0, 0) scale(0.4); opacity: 0; }
-  15%  { transform: translate(0, 0) scale(1); opacity: 1; }
-  100% { transform: translate(-18px, -28px) scale(0.2); opacity: 0; }
-}
-@keyframes lsSpark3 {
-  0%   { transform: translate(0, 0) scale(0.4); opacity: 0; }
-  15%  { transform: translate(0, 0) scale(1); opacity: 1; }
-  100% { transform: translate(14px, -30px) scale(0.2); opacity: 0; }
-}
-@keyframes lsSpark4 {
-  0%   { transform: translate(0, 0) scale(0.4); opacity: 0; }
-  15%  { transform: translate(0, 0) scale(1); opacity: 1; }
-  100% { transform: translate(36px, -18px) scale(0.2); opacity: 0; }
-}
-@keyframes lsSpark5 {
-  0%   { transform: translate(0, 0) scale(0.4); opacity: 0; }
-  15%  { transform: translate(0, 0) scale(1); opacity: 1; }
-  100% { transform: translate(0, -34px) scale(0.2); opacity: 0; }
-}
-
-/* ── Title ── */
+/* Title */
 .title {
   font-family: 'Orbitron', 'Courier New', monospace;
-  font-size: 1.3rem;
+  font-size: 1.4rem;
   font-weight: 800;
-  letter-spacing: 0.5em;
+  letter-spacing: 0.4em;
   color: #06b6d4;
-  text-shadow:
-    0 0 6px rgba(6, 182, 212, 0.6),
-    0 0 18px rgba(6, 182, 212, 0.25);
-  opacity: 0.85;
+  text-shadow: 0 0 6px rgba(6, 182, 212, 0.6), 0 0 18px rgba(6, 182, 212, 0.25);
 }
 
-/* ── Text loading ── */
+/* Text */
 .text {
-  font-family: 'Share Tech Mono', var(--font-mono, monospace);
+  font-family: 'Share Tech Mono', monospace;
   font-size: 0.95rem;
   color: #cbd5e1;
   letter-spacing: 1px;
   text-shadow: 0 0 4px rgba(6, 182, 212, 0.25);
   min-height: 1.4em;
-  margin: 0;
 }
 
-/* ── Dots animation ── */
+/* Progress bar */
+.progressBox {
+  width: 240px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+}
+
+.track {
+  width: 100%;
+  height: 8px;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(6, 182, 212, 0.35);
+  border-radius: 999px;
+  overflow: hidden;
+  box-shadow: inset 0 0 6px rgba(0,0,0,0.6);
+}
+
+.bar {
+  height: 100%;
+  background: linear-gradient(90deg, #06b6d4 0%, #22d3ee 50%, #67e8f9 100%);
+  box-shadow: 0 0 12px rgba(6, 182, 212, 0.7);
+  transition: width 0.3s ease;
+  border-radius: 999px;
+}
+
+.percent {
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 0.8rem;
+  color: #67e8f9;
+  letter-spacing: 2px;
+}
+
+/* Dots */
 .dots {
   display: flex;
   gap: 8px;
-  margin-top: 4px;
 }
 
-.dot {
+.dots span {
   width: 6px;
   height: 6px;
   border-radius: 50%;
   background: #06b6d4;
   box-shadow: 0 0 6px rgba(6, 182, 212, 0.8);
+  animation: pulse 1.2s ease-in-out infinite;
+}
+
+.dots span:nth-child(2) { animation-delay: 0.2s; }
+.dots span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.2; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1); }
 }

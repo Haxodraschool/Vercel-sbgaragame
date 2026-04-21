@@ -148,11 +148,19 @@ export default function LobbyScreen() {
 
   const transitionScreen = useGameStore((s) => s.transitionScreen);
   const setActiveQuest = useGameStore((s) => s.setActiveQuest);
-  const markScreenReady = useGameStore((s) => s.markScreenReady);
+  const registerTask = useGameStore((s) => s.registerTask);
+  const completeTask = useGameStore((s) => s.completeTask);
 
   // --- Loading readiness tracking (tell global LoadingScreen when we're done) ---
   const [questsLoaded, setQuestsLoaded] = useState(false);
   const [bgImgLoaded, setBgImgLoaded] = useState(false);
+
+  // Đăng ký task ngay khi mount để progress bar hiển thị
+  useEffect(() => {
+    registerTask('lobby-quests', 'Đang tải danh sách khách hàng...');
+    registerTask('lobby-bg', 'Đang chuẩn bị gara...');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // --- Background Music ref (swapped by currentDay: 1-25 vs 26-50) ---
   const bgmRef = useRef<HTMLAudioElement | null>(null);
@@ -234,11 +242,12 @@ export default function LobbyScreen() {
         console.error('Error fetching quests:', err);
       } finally {
         setQuestsLoaded(true);
+        completeTask('lobby-quests');
       }
     };
 
     fetchQuests();
-  }, [mounted, token, user?.currentDay]);
+  }, [mounted, token, user?.currentDay, completeTask]);
 
   // --- Preload background images so the loader stays visible until assets are ready ---
   useEffect(() => {
@@ -249,7 +258,10 @@ export default function LobbyScreen() {
     const done = () => {
       if (cancelled) return;
       remaining -= 1;
-      if (remaining <= 0) setBgImgLoaded(true);
+      if (remaining <= 0) {
+        setBgImgLoaded(true);
+        completeTask('lobby-bg');
+      }
     };
     urls.forEach((url) => {
       const img = new window.Image();
@@ -258,14 +270,10 @@ export default function LobbyScreen() {
       img.src = url;
     });
     return () => { cancelled = true; };
-  }, [mounted]);
+  }, [mounted, completeTask]);
 
-  // --- When all lobby resources are ready, dismiss the global loading overlay ---
-  useEffect(() => {
-    if (questsLoaded && bgImgLoaded) {
-      markScreenReady();
-    }
-  }, [questsLoaded, bgImgLoaded, markScreenReady]);
+  // questsLoaded & bgImgLoaded kept for any other downstream logic
+  void questsLoaded; void bgImgLoaded;
 
   // Update clock every second
   useInterval(() => setTime(new Date()), 1000);

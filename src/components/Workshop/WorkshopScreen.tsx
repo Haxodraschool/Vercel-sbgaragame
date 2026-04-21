@@ -442,7 +442,8 @@ function ChainLinkSVG({ size = 20 }: { size?: number }) {
 export default function WorkshopScreen() {
     const setScreen = useGameStore((state) => state.setScreen);
     const transitionScreen = useGameStore((state) => state.transitionScreen);
-    const markScreenReady = useGameStore((state) => state.markScreenReady);
+    const registerTask = useGameStore((state) => state.registerTask);
+    const completeTask = useGameStore((state) => state.completeTask);
     const updateGarageHealth = useGameStore((state) => state.updateGarageHealth);
     const user = useGameStore((state) => state.user);
     const token = useGameStore((state) => state.token);
@@ -453,6 +454,14 @@ export default function WorkshopScreen() {
     const [inventoryLoaded, setInventoryLoaded] = useState(false);
     const [combosLoaded, setCombosLoaded] = useState(false);
     const [wsBgLoaded, setWsBgLoaded] = useState(false);
+
+    // Đăng ký task ngay khi mount
+    useEffect(() => {
+        registerTask('ws-inventory', 'Đang tải kho thẻ...');
+        registerTask('ws-combos', 'Đang nạp danh sách combo...');
+        registerTask('ws-bg', 'Đang bậy nắp capo...');
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     const [inventory, setInventory] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -542,10 +551,11 @@ export default function WorkshopScreen() {
             } finally {
                 setIsLoading(false);
                 setInventoryLoaded(true);
+                completeTask('ws-inventory');
             }
         };
         fetchInventory();
-    }, [token]);
+    }, [token, completeTask]);
 
     // ─── Fetch Combos ───
     useEffect(() => {
@@ -558,9 +568,11 @@ export default function WorkshopScreen() {
                 console.error('Lỗi khi tải combo:', e);
             } finally {
                 setCombosLoaded(true);
+                completeTask('ws-combos');
             }
         };
         fetchCombos();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     // ─── Preload workshop background image ───
@@ -571,7 +583,10 @@ export default function WorkshopScreen() {
         const done = () => {
             if (cancelled) return;
             remaining -= 1;
-            if (remaining <= 0) setWsBgLoaded(true);
+            if (remaining <= 0) {
+                setWsBgLoaded(true);
+                completeTask('ws-bg');
+            }
         };
         urls.forEach((url) => {
             const img = new window.Image();
@@ -580,14 +595,11 @@ export default function WorkshopScreen() {
             img.src = url;
         });
         return () => { cancelled = true; };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    // ─── Dismiss global LoadingScreen once all workshop resources are ready ───
-    useEffect(() => {
-        if (inventoryLoaded && combosLoaded && wsBgLoaded) {
-            markScreenReady();
-        }
-    }, [inventoryLoaded, combosLoaded, wsBgLoaded, markScreenReady]);
+    // Kept for any downstream logic
+    void inventoryLoaded; void combosLoaded; void wsBgLoaded;
 
     // ─── Detect Active Combos on Slots ───
     const activeSlotCombos = useMemo(() => {

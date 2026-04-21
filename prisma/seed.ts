@@ -1,9 +1,11 @@
 // Seed Data - Dữ liệu khởi tạo cho SB-GARAGE
 import 'dotenv/config';
 import { PrismaClient } from '@prisma/client';
-import { PrismaMariaDb } from '@prisma/adapter-mariadb';
+import { PrismaPg } from '@prisma/adapter-pg';
+import pg from 'pg';
 
-const adapter = new PrismaMariaDb(process.env.DATABASE_URL!);
+const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
+const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
 async function main() {
@@ -882,6 +884,33 @@ async function main() {
   console.log(`   - 4 quest configs`);
   console.log(`   - 6 level rewards`);
   console.log(`   - 5 achievements (crew ẩn)`);
+
+  // Reset PostgreSQL sequences sau khi seed với ID cố định
+  console.log('\n🔄 Reset PostgreSQL sequences...');
+  const sequences = [
+    { table: 'users', seq: 'users_id_seq' },
+    { table: 'user_inventory', seq: 'user_inventory_id_seq' },
+    { table: 'daily_quests', seq: 'daily_quests_id_seq' },
+    { table: 'user_active_events', seq: 'user_active_events_id_seq' },
+    { table: 'user_endings', seq: 'user_endings_id_seq' },
+    { table: 'cards', seq: 'cards_id_seq' },
+    { table: 'card_effects', seq: 'card_effects_id_seq' },
+    { table: 'card_combos', seq: 'card_combos_id_seq' },
+    { table: 'boss_configs', seq: 'boss_configs_id_seq' },
+    { table: 'game_events', seq: 'game_events_id_seq' },
+    { table: 'endings', seq: 'endings_id_seq' },
+    { table: 'quest_configs', seq: 'quest_configs_id_seq' },
+    { table: 'level_rewards', seq: 'level_rewards_id_seq' },
+    { table: 'achievements', seq: 'achievements_id_seq' },
+    { table: 'user_achievements', seq: 'user_achievements_id_seq' },
+    { table: 'starter_perks', seq: 'starter_perks_id_seq' },
+  ];
+  for (const { table, seq } of sequences) {
+    await prisma.$executeRawUnsafe(
+      `SELECT setval(pg_get_serial_sequence('"${table}"', 'id'), COALESCE((SELECT MAX(id) FROM "${table}"), 1));`
+    );
+  }
+  console.log('✅ Đã reset tất cả sequences\n');
 }
 
 main()

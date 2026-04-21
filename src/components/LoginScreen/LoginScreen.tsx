@@ -142,6 +142,7 @@ export default function LoginScreen() {
   const setToken = useGameStore((s) => s.setToken);
   const setUser = useGameStore((s) => s.setUser);
   const setScreen = useGameStore((s) => s.setScreen);
+  const transitionScreen = useGameStore((s) => s.transitionScreen);
   const doorControls = useAnimation();
   const lightControls = useAnimation();
 
@@ -224,7 +225,7 @@ export default function LoginScreen() {
         transition: { duration: 0.5 },
       });
 
-      setTimeout(() => setScreen('lobby'), 200);
+      setTimeout(() => transitionScreen('lobby'), 200);
     } catch (err: any) {
       setHasError(true);
       toast.error(err.message || 'Lỗi xác thực!');

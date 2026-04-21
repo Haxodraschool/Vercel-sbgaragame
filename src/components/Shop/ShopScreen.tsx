@@ -17,9 +17,17 @@ const REROLL_BASE_COST = 50;
 
 export default function ShopScreen() {
   const transitionScreen = useGameStore((s) => s.transitionScreen);
-  const markScreenReady = useGameStore((s) => s.markScreenReady);
+  const registerTask = useGameStore((s) => s.registerTask);
+  const completeTask = useGameStore((s) => s.completeTask);
   const updateGold = useGameStore((s) => s.updateGold);
   const user = useGameStore((s) => s.user);
+
+  // Đăng ký task ngay khi mount
+  useEffect(() => {
+    registerTask('shop-items', 'Đang nhập hàng vào shop...');
+    registerTask('shop-bg', 'Đang dán poster quảng cáo...');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Shop data — fallback gold from store
   const fallbackGold = useRef(user?.gold ?? 0);
@@ -52,19 +60,19 @@ export default function ShopScreen() {
   useEffect(() => {
     let cancelled = false;
     const img = new window.Image();
-    const done = () => { if (!cancelled) setShopBgLoaded(true); };
+    const done = () => {
+      if (cancelled) return;
+      setShopBgLoaded(true);
+      completeTask('shop-bg');
+    };
     img.onload = done;
     img.onerror = done;
     img.src = '/shopimg/shopbg.jpg';
     return () => { cancelled = true; };
-  }, []);
+  }, [completeTask]);
 
-  // --- Dismiss global LoadingScreen once all shop resources are ready ---
-  useEffect(() => {
-    if (!isLoading && shopBgLoaded) {
-      markScreenReady();
-    }
-  }, [isLoading, shopBgLoaded, markScreenReady]);
+  // shopBgLoaded kept for any other downstream logic
+  void shopBgLoaded;
 
   // --- Background Music Setup ---
   useEffect(() => {
@@ -115,6 +123,7 @@ export default function ShopScreen() {
         setGold(fallbackGold.current);
       } finally {
         setIsLoading(false);
+        completeTask('shop-items');
       }
     })();
 
