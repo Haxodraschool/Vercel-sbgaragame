@@ -150,11 +150,17 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      // EP_ISLAND_CHOICE (Đảo chủ EP): Pre-run check cho nhánh NO
+      // EP_ISLAND_CHOICE (Đảo chủ EP): Pre-run check cho nhánh NO (SKILL.md §5.2)
       if (condition === 'EP_ISLAND_CHOICE' && epIslandChoice === 'NO') {
-        if (cardTypes.includes('COOLING')) {
+        // Cấm dùng COOLING 5★ (không phải tất cả COOLING)
+        const has5StarCooling = filledCardIds.find((id: number) => {
+          const card = cardMap.get(id);
+          return card && card.type === 'COOLING' && card.rarity === 5;
+        });
+        if (has5StarCooling) {
+          const card = cardMap.get(has5StarCooling);
           return NextResponse.json(
-            { error: `🚫 Boss "${quest.bossConfig.name}" nổi giận: Đã từ chối lên đảo thì KHÔNG ĐƯỢC dùng thẻ Làm Mát (COOLING)!` },
+            { error: `🚫 Boss "${quest.bossConfig.name}" nổi giận: Đã từ chối lên đảo thì KHÔNG ĐƯỢC dùng thẻ Làm Mát 5 sao! Thẻ "${card?.name}" bị cấm.` },
             { status: 400 }
           );
         }
@@ -467,11 +473,6 @@ export async function POST(request: NextRequest) {
       // ============================================================
       if (quest.bossConfig?.specialCondition) {
         const cond = quest.bossConfig.specialCondition;
-        // MAX_HEAT_50: nhiệt không được quá 50% → penalty nếu quá
-        if (cond === 'MAX_HEAT_50' && currentHeat > 50) {
-          currentHeat += 20; // Penalty: heat tăng thêm
-        }
-
         // RUSSIA_EMPEROR during-run: heat penalty
         if (cond === 'RUSSIA_EMPEROR') {
           const maxHeatForPhase = (russiaPhase === 2 && vodkaChoice === 'YES') ? 67 : 36;
@@ -521,47 +522,43 @@ export async function POST(request: NextRequest) {
     if (!exploded && quest.bossConfig?.specialCondition) {
       const cond = quest.bossConfig.specialCondition;
 
-      // DAREDEVIL_DEATH_WISH: Heat cuối cùng phải ≥ 85% (hoặc ngưỡng nổ - 15)
+      // DAREDEVIL_DEATH_WISH: Heat cuối cùng phải ≥ 75% (hoặc ≥ 90% nếu có HOT_HANDS perk)
       if (cond === 'DAREDEVIL_DEATH_WISH') {
-        const heatThreshold = (user as any)?.activePerkCode === 'HOT_HANDS' ? GAME_CONSTANTS.HEAT_THRESHOLD + 15 : GAME_CONSTANTS.HEAT_THRESHOLD;
-        const targetHeat = heatThreshold - 15;
+        const hasHotHands = (user as any)?.activePerkCode === 'HOT_HANDS';
+        const targetHeat = hasHotHands ? 90 : 75; // SKILL.md: ≥75%, với HOT_HANDS là ≥90%
         if (currentHeat < targetHeat) {
           conditionFailed = true;
           conditionMessage = `Cô Gái Liều Lĩnh chê xe chưa đủ nóng! Yêu cầu Nhiệt độ ≥ ${targetHeat}%. Hiện tại: ${Math.round(currentHeat)}%`;
         }
       }
 
-      // DRIFT_KING_CHALLENGE: Tổng Stability ≥ 150
+      // DRIFT_KING_CHALLENGE: Tổng Stability ≥ 50 (SKILL.md §5.2)
       if (cond === 'DRIFT_KING_CHALLENGE') {
-        if (totalStability < 150) {
+        if (totalStability < 50) {
           conditionFailed = true;
-          conditionMessage = `Ông Hoàng Drift chê xe không đủ cân bằng để drift! Yêu cầu Stability ≥ 150. Hiện tại: ${totalStability}`;
+          conditionMessage = `Ông Hoàng Drift chê xe không đủ cân bằng để drift! Yêu cầu Stability ≥ 50. Hiện tại: ${totalStability}`;
         }
-      }
-
-      // MIN_STABILITY_150: Tổng Stability ≥ 150
-      if (cond === 'MIN_STABILITY_150' && totalStability < 150) {
-        conditionFailed = true;
-        conditionMessage = `Boss yêu cầu Stability ≥ 150! Hiện tại: ${totalStability}`;
       }
 
       // EP_ISLAND_CHOICE (Đảo chủ EP) Post-run checks
       if (cond === 'EP_ISLAND_CHOICE') {
-        // Cả 2 nhánh đều yều cầu Max Heat 69% và ít nhất 1 combo
-        if (currentHeat > 69) {
-          conditionFailed = true;
-          conditionMessage = `Đảo chủ EP yêu cầu Nhiệt độ không quá 69%! Hiện tại: ${Math.round(currentHeat)}%`;
-        } else if (comboCount < 1) {
-          conditionFailed = true;
-          conditionMessage = `Đảo chủ EP yêu cầu phải tạo được ít nhất 1 Combo linh kiện!`;
-        } else {
-          // Check power theo nhánh
-          if (epIslandChoice === 'YES' && totalPower < 500) {
+        if (epIslandChoice === 'YES') {
+          // Nhánh YES: Heat ≤ 69%, ≥1 Combo, Power ≥ 400 (SKILL.md §5.2)
+          if (currentHeat > 69) {
             conditionFailed = true;
-            conditionMessage = `Lên đảo phải đủ 500 Power! Hiện tại: ${totalPower}`;
-          } else if (epIslandChoice === 'NO' && totalPower < 690) {
+            conditionMessage = `Đảo chủ EP yêu cầu Nhiệt độ không quá 69%! Hiện tại: ${Math.round(currentHeat)}%`;
+          } else if (comboCount < 1) {
             conditionFailed = true;
-            conditionMessage = `Từ chối lên đảo thì phải đạt 690 Power! Hiện tại: ${totalPower}`;
+            conditionMessage = `Đảo chủ EP yêu cầu phải tạo được ít nhất 1 Combo linh kiện!`;
+          } else if (totalPower < 400) {
+            conditionFailed = true;
+            conditionMessage = `Lên đảo phải đủ 400 Power! Hiện tại: ${totalPower}`;
+          }
+        } else if (epIslandChoice === 'NO') {
+          // Nhánh NO: Power ≥ 470 (SKILL.md §5.2: cấm COOLING 5★, cần 1 thẻ 5★ + 1 thẻ 4★)
+          if (totalPower < 470) {
+            conditionFailed = true;
+            conditionMessage = `Từ chối lên đảo thì phải đạt 470 Power! Hiện tại: ${totalPower}`;
           }
         }
       }
@@ -588,14 +585,14 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      // DONALD_TRUMP (Đỗ Nam Trung) Post-run checks
+      // DONALD_TRUMP (Đỗ Nam Trung) Post-run checks: Heat > 47% VÀ Power 400≤470 (SKILL.md §5.2)
       if (cond === 'DONALD_TRUMP') {
          if (currentHeat <= 47) {
             conditionFailed = true;
             conditionMessage = `Đỗ Nam Trung yêu cầu Nhiệt độ phải trên 47%! Hiện tại: ${Math.round(currentHeat)}%`;
-         } else if (totalPower <= 470) {
+         } else if (totalPower < 400 || totalPower > 470) {
             conditionFailed = true;
-            conditionMessage = `Đỗ Nam Trung yêu cầu Power phải trên 470! Hiện tại: ${totalPower}`;
+            conditionMessage = `Đỗ Nam Trung yêu cầu Power trong khoảng 400-470! Hiện tại: ${totalPower}`;
          }
       }
       // RUSSIA_EMPEROR Post-run checks

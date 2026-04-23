@@ -1,6 +1,3 @@
-// SB-GARAGE - Prisma Schema
-// 13 tables organized into 3 groups: User Data, System Data, Game Rules
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -9,64 +6,56 @@ datasource db {
   provider = "postgresql"
 }
 
-// ============================================================
-// GROUP A: USER DATA (Dữ liệu người dùng)
-// ============================================================
-
 /// Bảng users - Hồ sơ & Tiến trình sinh tồn
 model User {
-  id              Int      @id @default(autoincrement())
-  username        String   @unique @db.VarChar(50)
-  password        String   @db.VarChar(255)
-  role            String   @default("PLAYER") @db.VarChar(20) // PLAYER | ADMIN
-  gold            BigInt   @default(500)
-  level           Int      @default(1)
-  exp             BigInt   @default(0)
-  currentDay      Int      @default(1) @map("current_day")
-  garageHealth    Int      @default(100) @map("garage_health")
-  techPoints      BigInt   @default(0) @map("tech_points")
-  crewSlots       Int      @default(1) @map("crew_slots")
-  isFinalRound    Boolean  @default(false) @map("is_final_round")
-  totalExplosions Int      @default(0) @map("total_explosions") // Track nổ máy cho Ghost Mechanic
-  smugglerPenalty Float    @default(0) @map("smuggler_penalty") // 0.15 = 15% gold reduction từ Tay Buôn Lậu
-  hasDefeatedEP   Boolean  @default(false) @map("has_defeated_ep")
-  shopTaxModifier Float    @default(1.0) @map("shop_tax_modifier")
-  shopTaxExpiresAt Int     @default(0) @map("shop_tax_expires_at")
-  isInNorthKorea  Boolean  @default(false) @map("is_in_north_korea")
-  northKoreaDayCount Int   @default(0) @map("north_korea_day_count")
-  hasKimBuff      Boolean  @default(false) @map("has_kim_buff")
-  hasUnderworldBuff Boolean @default(false) @map("has_underworld_buff")
-  lastSmugglerBuyDay Int   @default(0) @map("last_smuggler_buy_day")
-  isKimAssassinated Boolean  @default(false) @map("is_kim_assassinated")
-  hasDefeatedDonaldTrump Boolean @default(false) @map("has_defeated_donald_trump")
-  hasMoscowBuff     Boolean  @default(false) @map("has_moscow_buff")
-  moscowBuffDay     Int      @default(0) @map("moscow_buff_day")
-  activePerkCode  String?  @db.VarChar(50) @map("active_perk_code")
-  totalShopSpent  BigInt   @default(0) @map("total_shop_spent")
-  totalPacksOpened Int     @default(0) @map("total_packs_opened")
-  createdAt       DateTime @default(now()) @map("created_at")
-  updatedAt       DateTime @updatedAt @map("updated_at")
-
-  // Relations
-  inventory        UserInventory[]
-  dailyQuests      DailyQuest[]
-  activeEvents     UserActiveEvent[]
-  endings          UserEnding[]
-  achievements     UserAchievement[]
+  id                     Int               @id @default(autoincrement())
+  username               String            @unique @db.VarChar(50)
+  password               String            @db.VarChar(255)
+  role                   String            @default("PLAYER") @db.VarChar(20)
+  gold                   BigInt            @default(500)
+  level                  Int               @default(1)
+  exp                    BigInt            @default(0)
+  currentDay             Int               @default(1) @map("current_day")
+  garageHealth           Int               @default(100) @map("garage_health")
+  techPoints             BigInt            @default(0) @map("tech_points")
+  crewSlots              Int               @default(1) @map("crew_slots")
+  isFinalRound           Boolean           @default(false) @map("is_final_round")
+  totalExplosions        Int               @default(0) @map("total_explosions")
+  smugglerPenalty        Float             @default(0) @map("smuggler_penalty")
+  hasDefeatedEP          Boolean           @default(false) @map("has_defeated_ep")
+  shopTaxModifier        Float             @default(1.0) @map("shop_tax_modifier")
+  shopTaxExpiresAt       Int               @default(0) @map("shop_tax_expires_at")
+  isInNorthKorea         Boolean           @default(false) @map("is_in_north_korea")
+  northKoreaDayCount     Int               @default(0) @map("north_korea_day_count")
+  hasKimBuff             Boolean           @default(false) @map("has_kim_buff")
+  hasUnderworldBuff      Boolean           @default(false) @map("has_underworld_buff")
+  lastSmugglerBuyDay     Int               @default(0) @map("last_smuggler_buy_day")
+  isKimAssassinated      Boolean           @default(false) @map("is_kim_assassinated")
+  hasDefeatedDonaldTrump Boolean           @default(false) @map("has_defeated_donald_trump")
+  hasMoscowBuff          Boolean           @default(false) @map("has_moscow_buff")
+  moscowBuffDay          Int               @default(0) @map("moscow_buff_day")
+  activePerkCode         String?           @map("active_perk_code") @db.VarChar(50)
+  totalShopSpent         BigInt            @default(0) @map("total_shop_spent")
+  totalPacksOpened       Int               @default(0) @map("total_packs_opened")
+  createdAt              DateTime          @default(now()) @map("created_at")
+  updatedAt              DateTime          @updatedAt @map("updated_at")
+  dailyQuests            DailyQuest[]
+  achievements           UserAchievement[]
+  activeEvents           UserActiveEvent[]
+  endings                UserEnding[]
+  inventory              UserInventory[]
 
   @@map("users")
 }
 
 /// Bảng user_inventory - Kho đồ cá nhân
 model UserInventory {
-  id       Int @id @default(autoincrement())
-  userId   Int @map("user_id")
-  cardId   Int @map("card_id")
-  quantity Int @default(1)
-
-  // Relations
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-  card Card @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  id       Int  @id @default(autoincrement())
+  userId   Int  @map("user_id")
+  cardId   Int  @map("card_id")
+  quantity Int  @default(1)
+  card     Card @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  user     User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, cardId])
   @@map("user_inventory")
@@ -74,34 +63,30 @@ model UserInventory {
 
 /// Bảng daily_quests - Khách hàng & Shadow mỗi ngày
 model DailyQuest {
-  id            Int         @id @default(autoincrement())
-  userId        Int         @map("user_id")
-  dayNumber     Int         @map("day_number")
-  isBoss        Boolean     @default(false) @map("is_boss")
-  bossConfigId  Int?        @map("boss_config_id")
+  id             Int         @id @default(autoincrement())
+  userId         Int         @map("user_id")
+  dayNumber      Int         @map("day_number")
+  isBoss         Boolean     @default(false) @map("is_boss")
+  bossConfigId   Int?        @map("boss_config_id")
   requiredPower  Int         @map("required_power")
   rewardGold     Int         @map("reward_gold")
   customerBudget Int         @default(0) @map("customer_budget")
   status         QuestStatus @default(PENDING)
-
-  // Relations
-  user       User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  bossConfig BossConfig? @relation(fields: [bossConfigId], references: [id])
+  bossConfig     BossConfig? @relation(fields: [bossConfigId], references: [id])
+  user           User        @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("daily_quests")
 }
 
 /// Bảng user_active_events - Sự kiện đang áp dụng
 model UserActiveEvent {
-  id             Int     @id @default(autoincrement())
-  userId         Int     @map("user_id")
-  eventId        Int     @map("event_id")
-  isAccepted     Boolean @default(false) @map("is_accepted")
-  remainingTurns Int     @map("remaining_turns")
-
-  // Relations
-  user  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  event GameEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  id             Int       @id @default(autoincrement())
+  userId         Int       @map("user_id")
+  eventId        Int       @map("event_id")
+  isAccepted     Boolean   @default(false) @map("is_accepted")
+  remainingTurns Int       @map("remaining_turns")
+  event          GameEvent @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user           User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("user_active_events")
 }
@@ -112,41 +97,32 @@ model UserEnding {
   userId     Int      @map("user_id")
   endingId   Int      @map("ending_id")
   achievedAt DateTime @default(now()) @map("achieved_at")
-
-  // Relations
-  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  ending Ending @relation(fields: [endingId], references: [id], onDelete: Cascade)
+  ending     Ending   @relation(fields: [endingId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, endingId])
   @@map("user_endings")
 }
 
-// ============================================================
-// GROUP B: SYSTEM DATA (Dữ liệu tĩnh & Cấu hình)
-// ============================================================
-
 /// Bảng cards - Danh mục thẻ bài gốc
 model Card {
-  id            Int      @id @default(autoincrement())
-  name          String   @db.VarChar(100)
+  id            Int             @id @default(autoincrement())
+  name          String          @db.VarChar(100)
   type          CardType
-  rarity        Int      // 1-5 sao
-  statPower     Int      @default(0) @map("stat_power")
-  statHeat      Int      @default(0) @map("stat_heat")
-  statStability Int      @default(0) @map("stat_stability")
-  imageUrl      String?  @db.VarChar(255) @map("image_url")
-  description   String?  @db.Text
-  cost          Int      @default(100) // Giá mua trong shop
-  unlockType    String?  @db.VarChar(20) @map("unlock_type")
-  // unlockType: 'SHOP' = mua tại shop, 'QUEST' = nhiệm vụ, 'ACHIEVEMENT' = thành tựu ẩn, null = mặc định
-
-  // Relations
-  effects       CardEffect[]
+  rarity        Int
+  statPower     Int             @default(0) @map("stat_power")
+  statHeat      Int             @default(0) @map("stat_heat")
+  statStability Int             @default(0) @map("stat_stability")
+  imageUrl      String?         @map("image_url") @db.VarChar(255)
+  description   String?
+  cost          Int             @default(100)
+  unlockType    String?         @map("unlock_type") @db.VarChar(20)
+  achievements  Achievement[]   @relation("AchievementRewardCrew")
   combosAs1     CardCombo[]     @relation("ComboCard1")
   combosAs2     CardCombo[]     @relation("ComboCard2")
-  inventory     UserInventory[]
+  effects       CardEffect[]
   levelRewards  LevelReward[]
-  achievements  Achievement[]   @relation("AchievementRewardCrew")
+  inventory     UserInventory[]
 
   @@map("cards")
 }
@@ -157,142 +133,118 @@ model CardEffect {
   cardId           Int              @map("card_id")
   effectType       EffectType       @map("effect_type")
   triggerCondition TriggerCondition @map("trigger_condition")
-  targetStat       String           @db.VarChar(50) @map("target_stat")
+  targetStat       String           @map("target_stat") @db.VarChar(50)
   effectValue      Float            @map("effect_value")
-  description      String?          @db.Text
-
-  // Relations
-  card Card @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  description      String?
+  card             Card             @relation(fields: [cardId], references: [id], onDelete: Cascade)
 
   @@map("card_effects")
 }
 
 /// Bảng card_combos - Phản ứng dây chuyền
 model CardCombo {
-  id          Int    @id @default(autoincrement())
-  cardId1     Int    @map("card_id_1")
-  cardId2     Int    @map("card_id_2")
-  effectType  String @db.VarChar(50) @map("effect_type")
-  effectValue Float  @map("effect_value")
-  name        String @db.VarChar(100) @default("")
-  description String? @db.Text
-
-  // Relations
-  card1 Card @relation("ComboCard1", fields: [cardId1], references: [id], onDelete: Cascade)
-  card2 Card @relation("ComboCard2", fields: [cardId2], references: [id], onDelete: Cascade)
+  id          Int     @id @default(autoincrement())
+  cardId1     Int     @map("card_id_1")
+  cardId2     Int     @map("card_id_2")
+  effectType  String  @map("effect_type") @db.VarChar(50)
+  effectValue Float   @map("effect_value")
+  name        String  @default("") @db.VarChar(100)
+  description String?
+  card1       Card    @relation("ComboCard1", fields: [cardId1], references: [id], onDelete: Cascade)
+  card2       Card    @relation("ComboCard2", fields: [cardId2], references: [id], onDelete: Cascade)
 
   @@map("card_combos")
 }
 
 /// Bảng boss_configs - Cấu hình Boss 5 ngày/lần
 model BossConfig {
-  id               Int     @id @default(autoincrement())
-  name             String  @db.VarChar(100)
-  description      String? @db.Text
-  specialCondition String? @db.VarChar(50) @map("special_condition")
-  requiredPower    Int     @map("required_power")
-  rewardGold       Int     @default(1000) @map("reward_gold")
-  imageUrl         String? @db.VarChar(255) @map("image_url")
-
-  // Relations
-  dailyQuests DailyQuest[]
+  id               Int          @id @default(autoincrement())
+  name             String       @db.VarChar(100)
+  description      String?
+  specialCondition String?      @map("special_condition") @db.VarChar(50)
+  requiredPower    Int          @map("required_power")
+  rewardGold       Int          @default(1000) @map("reward_gold")
+  imageUrl         String?      @map("image_url") @db.VarChar(255)
+  dailyQuests      DailyQuest[]
 
   @@map("boss_configs")
 }
 
 /// Bảng game_events - Danh sách sự kiện ngẫu nhiên
 model GameEvent {
-  id              Int       @id @default(autoincrement())
-  name            String    @db.VarChar(100)
-  description     String?   @db.Text
+  id              Int               @id @default(autoincrement())
+  name            String            @db.VarChar(100)
+  description     String?
   type            EventType
-  targetAttribute String?   @db.VarChar(50) @map("target_attribute")
-  effectValue     Float     @default(0) @map("effect_value")
-  probability     Float     @default(0.1)
-
-  // Relations
-  activeEvents UserActiveEvent[]
+  targetAttribute String?           @map("target_attribute") @db.VarChar(50)
+  effectValue     Float             @default(0) @map("effect_value")
+  probability     Float             @default(0.1)
+  activeEvents    UserActiveEvent[]
 
   @@map("game_events")
 }
 
 /// Bảng endings - Danh mục Đa Kết Cục
 model Ending {
-  id          Int        @id @default(autoincrement())
-  name        String     @db.VarChar(100)
+  id          Int          @id @default(autoincrement())
+  name        String       @db.VarChar(100)
   type        EndingType
-  description String?    @db.Text
-
-  // Relations
+  description String?
   userEndings UserEnding[]
 
   @@map("endings")
 }
 
-// ============================================================
-// GROUP C: GAME RULES (Logic Game)
-// ============================================================
-
 /// Bảng quest_configs - Công thức sinh khách random
 model QuestConfig {
-  id             Int @id @default(autoincrement())
-  minLevel       Int @map("min_level")
-  maxLevel       Int @map("max_level")
-  minPowerReq    Int @map("min_power_req")
-  maxPowerReq    Int @map("max_power_req")
-  minGoldReward  Int @map("min_gold_reward")
-  maxGoldReward  Int @map("max_gold_reward")
-  minCustomers   Int @default(1) @map("min_customers")
-  maxCustomers   Int @default(3) @map("max_customers")
+  id            Int @id @default(autoincrement())
+  minLevel      Int @map("min_level")
+  maxLevel      Int @map("max_level")
+  minPowerReq   Int @map("min_power_req")
+  maxPowerReq   Int @map("max_power_req")
+  minGoldReward Int @map("min_gold_reward")
+  maxGoldReward Int @map("max_gold_reward")
+  minCustomers  Int @default(1) @map("min_customers")
+  maxCustomers  Int @default(3) @map("max_customers")
 
   @@map("quest_configs")
 }
 
 /// Bảng level_rewards - Quà thăng cấp cố định
 model LevelReward {
-  id       Int @id @default(autoincrement())
+  id       Int  @id @default(autoincrement())
   level    Int
-  cardId   Int @map("card_id")
-  quantity Int @default(1)
-
-  // Relations
-  card Card @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  cardId   Int  @map("card_id")
+  quantity Int  @default(1)
+  card     Card @relation(fields: [cardId], references: [id], onDelete: Cascade)
 
   @@map("level_rewards")
 }
 
-// ============================================================
-// ACHIEVEMENTS (Hệ thống Thành Tựu)
-// ============================================================
-
 /// Bảng achievements - Danh mục thành tựu
 model Achievement {
-  id              Int      @id @default(autoincrement())
-  code            String   @unique @db.VarChar(50)
-  name            String   @db.VarChar(100)
-  description     String?  @db.Text
-  conditionType   String   @db.VarChar(50) @map("condition_type")
-  conditionValue  Int      @default(0) @map("condition_value")
-  rewardCrewId    Int?     @map("reward_crew_id")
-  isHidden        Boolean  @default(false) @map("is_hidden")
-
-  // Relations
+  id               Int               @id @default(autoincrement())
+  code             String            @unique @db.VarChar(50)
+  name             String            @db.VarChar(100)
+  description      String?
+  conditionType    String            @map("condition_type") @db.VarChar(50)
+  conditionValue   Int               @default(0) @map("condition_value")
+  rewardCrewId     Int?              @map("reward_crew_id")
+  isHidden         Boolean           @default(false) @map("is_hidden")
+  rewardCrew       Card?             @relation("AchievementRewardCrew", fields: [rewardCrewId], references: [id])
   userAchievements UserAchievement[]
-  rewardCrew       Card?   @relation("AchievementRewardCrew", fields: [rewardCrewId], references: [id])
 
   @@map("achievements")
 }
 
 /// Bảng user_achievements - Thành tựu đã đạt
 model UserAchievement {
-  id            Int       @id @default(autoincrement())
-  userId        Int       @map("user_id")
-  achievementId Int       @map("achievement_id")
-  achievedAt    DateTime  @default(now()) @map("achieved_at")
-
-  // Relations
-  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  achievement Achievement @relation(fields: [achievementId], references: [id])
+  id            Int         @id @default(autoincrement())
+  userId        Int         @map("user_id")
+  achievementId Int         @map("achievement_id")
+  achievedAt    DateTime    @default(now()) @map("achieved_at")
+  achievement   Achievement @relation(fields: [achievementId], references: [id])
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, achievementId])
   @@map("user_achievements")
@@ -303,18 +255,14 @@ model StarterPerk {
   id              Int     @id @default(autoincrement())
   code            String  @unique @db.VarChar(50)
   name            String  @db.VarChar(100)
-  description     String? @db.Text
-  effectType      String  @db.VarChar(50) @map("effect_type")
+  description     String?
+  effectType      String  @map("effect_type") @db.VarChar(50)
   effectValue     Float   @map("effect_value")
-  unlockCondition String? @db.VarChar(100) @map("unlock_condition")
+  unlockCondition String? @map("unlock_condition") @db.VarChar(100)
   isDefault       Boolean @default(false) @map("is_default")
 
   @@map("starter_perks")
 }
-
-// ============================================================
-// ENUMS
-// ============================================================
 
 enum CardType {
   ENGINE

@@ -50,19 +50,31 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // Tặng lại starter cards
-    const starterCards = await prisma.card.findMany({
-      where: { rarity: 1 },
-      take: 10,
-    });
+    // Tặng lại starter cards: 80 thẻ = 10 nhóm loại thẻ × 8 thẻ ngẫu nhiên 1-3★ (độc nhất) mỗi nhóm
+    const cardTypes = ['ENGINE', 'TURBO', 'EXHAUST', 'COOLING', 'FILTER', 'FUEL', 'SUSPENSION', 'TIRE', 'NITROUS', 'TOOL'];
+    const quantityByCardId = new Map<number, number>();
 
-    if (starterCards.length > 0) {
+    for (const type of cardTypes) {
+      const availableCards = await prisma.card.findMany({
+        where: { type: type as any, rarity: { in: [1, 2, 3] } },
+        select: { id: true },
+      });
+      if (availableCards.length === 0) continue;
+
+      // Pick 8 unique random cards
+      const shuffled = availableCards.sort(() => 0.5 - Math.random());
+      const selected = shuffled.slice(0, 8);
+      for (const card of selected) {
+        quantityByCardId.set(card.id, (quantityByCardId.get(card.id) || 0) + 1);
+      }
+    }
+
+    if (quantityByCardId.size > 0) {
       await prisma.userInventory.createMany({
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        data: starterCards.map((card: any) => ({
+        data: Array.from(quantityByCardId.entries()).map(([cardId, quantity]) => ({
           userId: auth.userId,
-          cardId: card.id,
-          quantity: 2,
+          cardId,
+          quantity,
         })),
       });
     }

@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import styles from './ShadowCustomer.module.css';
+import spriteAtlas from '../../data/shadow-sit-atlas.json';
 
 export interface QuestData {
   id: number;
@@ -24,10 +25,13 @@ interface Props {
   isInteractive: boolean;
   isLeaving: boolean;
   onShadowClick: (quest: QuestData) => void;
+  zIndex?: number;
 }
 
-// shadowsitleft.png / shadowsitright.png: 6 frames each (1 row)
-const SIT_FRAMES = 6;
+// Sprite atlas types
+type Frame = { x: number; y: number; w: number; h: number };
+type AtlasEntry = { frames: Frame[]; width: number; height: number; src: string };
+type SpriteAtlas = { frames: { shadowsitleft: AtlasEntry; shadowsitright: AtlasEntry } };
 
 export default function ShadowCustomer({
   quest,
@@ -35,18 +39,20 @@ export default function ShadowCustomer({
   isInteractive,
   isLeaving,
   onShadowClick,
+  zIndex,
 }: Props) {
-  // Random sitting pose: pick 1 of 4 frames from sitleft/sitright
-  const [sitPose] = useState(() => Math.floor(Math.random() * SIT_FRAMES));
-
-
+  const atlas = (spriteAtlas as unknown as SpriteAtlas).frames;
+  const spriteKey = seatPosition.sofa === 'right' ? 'shadowsitright' : 'shadowsitleft';
+  const spriteData = atlas[spriteKey];
+  
+  // Random sitting pose: pick 1 of 6 frames
+  const [sitPose] = useState(() => Math.floor(Math.random() * spriteData.frames.length));
+  const frame = spriteData.frames[sitPose];
 
   const handleClick = () => {
     if (!isInteractive || quest.status !== 'PENDING') return;
     onShadowClick(quest);
   };
-
-  const isRightSofa = seatPosition.sofa === 'right';
 
   const containerClass = [
     styles.shadowContainer,
@@ -56,23 +62,26 @@ export default function ShadowCustomer({
     isLeaving ? styles.leaving : '',
   ].filter(Boolean).join(' ');
 
-  // 6 frames, background-size: 600% → mỗi frame cách nhau 20%
-  const sitBgPosX = `${sitPose * 20}%`;
-
   return (
     <div
       className={containerClass}
       style={{
         left: seatPosition.left,
         top: seatPosition.top,
+        zIndex: zIndex !== undefined ? zIndex : undefined,
       }}
       onClick={handleClick}
     >
-      {/* Sitting pose — same sprite for both boss and normal shadows */}
+      {/* Sitting pose — using JSON atlas with exact pixel coordinates */}
       <div
-        className={`${styles.sitSprite} ${isRightSofa ? styles.sitSpriteRight : styles.sitSpriteLeft}`}
+        className={styles.sitSprite}
         style={{
-          backgroundPosition: `${sitBgPosX} 0%`,
+          // Exact pixel coordinates from JSON atlas
+          aspectRatio: `${frame.w} / ${frame.h}`,
+          backgroundImage: `url(${spriteData.src})`,
+          backgroundSize: `${spriteData.width}px ${spriteData.height}px`,
+          backgroundPosition: `-${frame.x}px -${frame.y}px`,
+          backgroundRepeat: 'no-repeat',
         }}
       />
     </div>

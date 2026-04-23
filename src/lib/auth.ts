@@ -74,6 +74,7 @@ export const GAME_CONSTANTS = {
   PACK_CARDS_COUNT: 5,
   PACK_CHANCE_IN_SHOP: 0.1, // 10% chance pack xuất hiện
   SHOP_ITEMS_COUNT: 6,
+  PITY_INTERVAL: 10, // Pack thứ 10 đảm bảo 4-5★
 
   // Drop rates
   DROP_RATES: {

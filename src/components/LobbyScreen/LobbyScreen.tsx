@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { useGameStore } from '@/stores/useGameStore';
+import { BuyTpModal, TopupGoldModal } from '@/components/CurrencyModal/CurrencyModals';
 import { useInterval } from 'react-use';
 import { format } from 'date-fns';
 import { useTheme } from 'next-themes';
@@ -151,9 +152,33 @@ export default function LobbyScreen() {
   const registerTask = useGameStore((s) => s.registerTask);
   const completeTask = useGameStore((s) => s.completeTask);
 
+  const setUser = useGameStore((s) => s.setUser);
+  const setTopupGoldModalOpen = useGameStore((s) => s.setTopupGoldModalOpen);
+  const setBuyTpModalOpen = useGameStore((s) => s.setBuyTpModalOpen);
+
   // --- Loading readiness tracking (tell global LoadingScreen when we're done) ---
   const [questsLoaded, setQuestsLoaded] = useState(false);
   const [bgImgLoaded, setBgImgLoaded] = useState(false);
+
+  // Sync user profile upon entering Lobby
+  useEffect(() => {
+    if (!mounted || !token) return;
+    const fetchUser = async () => {
+      try {
+        const res = await fetch('/api/user/profile', {
+          headers: { 'Authorization': `Bearer ${token}` },
+          cache: 'no-store'
+        });
+        const data = await res.json();
+        if (res.ok && data.user) {
+          setUser(data.user);
+        }
+      } catch (err) {
+        console.error('Lỗi sync user profile:', err);
+      }
+    };
+    fetchUser();
+  }, [mounted, token, setUser]);
 
   // Đăng ký task ngay khi mount để progress bar hiển thị
   useEffect(() => {
@@ -162,7 +187,48 @@ export default function LobbyScreen() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // --- Background Music ref (swapped by currentDay: 1-25 vs 26-50) ---
+  const handleEndDay = async () => {
+    if (!token) return;
+    try {
+      const res = await fetch('/api/game/end-day', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (res.ok) {
+        // Nếu có ending, chuyển sang màn hình ending
+        if (data.ending) {
+          transitionScreen('ending');
+          return;
+        }
+        
+        // Mở shop nếu có shopPhase (ngày 2+)
+        if (data.shopPhase) {
+          transitionScreen('shop');
+        } else {
+          // Ngày 1 -> qua ngày 2 trực tiếp
+          window.location.reload();
+        }
+      } else {
+        alert(data.error || 'Lỗi khi kết thúc ngày!');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Lỗi kết nối khi kết thúc ngày!');
+    }
+  };
+
+  const handleEndDayClick = () => {
+    const pendingCount = quests.filter((q) => q.status === 'PENDING').length;
+    if (pendingCount > 0) {
+      if (!confirm(`CẢNH BÁO: Bạn còn ${pendingCount} khách chưa phục vụ. Nếu kết thúc ngày, họ sẽ tức giận bỏ đi và bạn sẽ bị TRỪ UY TÍN nặng nề! Bạn có chắc chắn muốn kết thúc ngày không?`)) {
+        return;
+      }
+    }
+    handleEndDay();
+  };
+
+  // Render logic continues...
   const bgmRef = useRef<HTMLAudioElement | null>(null);
   const bgmTrackRef = useRef<string | null>(null);
 
@@ -191,6 +257,7 @@ export default function LobbyScreen() {
     bgmTrackRef.current = trackSrc;
 
     const playMusic = () => {
+      if ((bgm as any).intentionalPause) return;
       bgm.play().catch((e) => console.error('Lobby BGM play blocked:', e));
     };
     playMusic();
@@ -216,8 +283,9 @@ export default function LobbyScreen() {
 
     const fetchQuests = async () => {
       try {
-        const res = await fetch('/api/quest/daily', {
-          headers: { 'Authorization': `Bearer ${token}` }
+        const res = await fetch(`/api/quest/daily?t=${Date.now()}`, {
+          headers: { 'Authorization': `Bearer ${token}` },
+          cache: 'no-store'
         });
         const data = await res.json();
 
@@ -286,11 +354,18 @@ export default function LobbyScreen() {
   }, [time, mounted, setTheme]);
 
   // Derived values
-  const currentLevel = user?.level || 5;
-  const currentDay = user?.currentDay || 15;
-  const gold = user?.gold || 1250;
-  const prestigePoints = user?.garageHealth || 75;
+  const currentLevel = user?.level || 1;
+  const currentDay = user?.currentDay || 1;
+  const gold = user?.gold || 500;
+  const prestigePoints = user?.garageHealth || 100;
   const maxPrestige = 100;
+  const techPoints = (user as any)?.techPoints || 0;
+  
+  // EXP system: 1000 base + 100 per level (scaling)
+  const currentExp = Number((user as any)?.exp || 0);
+  const getExpForLevel = (lvl: number) => 1000 + (lvl - 1) * 100; // Lv1: 1000, Lv2: 1100, Lv3: 1200...
+  const expForCurrentLevel = getExpForLevel(currentLevel);
+  const expProgress = Math.min(100, (currentExp / expForCurrentLevel) * 100);
 
   const [isBurning, setIsBurning] = useState(false);
   const prevPrestigeRef = useRef(prestigePoints);
@@ -323,16 +398,18 @@ export default function LobbyScreen() {
 
       {/* Game container — locked to 16:9 aspect ratio, always shows full image */}
       <div
-        className="relative z-10 w-full h-full max-w-[177.78vh] max-h-[56.25vw] bg-center bg-no-repeat bg-cover shadow-[0_0_40px_rgba(0,0,0,1)] flex flex-col justify-between overflow-hidden"
+        className="relative z-10 w-full h-full max-w-[177.78vh] max-h-[56.25vw] bg-center bg-no-repeat bg-cover shadow-[0_0_40px_rgba(0,0,0,1)] flex flex-col justify-between overflow-visible"
         style={{
           backgroundImage: 'url("/bg-lobby.jpg")',
           imageRendering: 'pixelated',
+          paddingBottom: '50px',
         }}
       >
         {/* Shadow Customer System — ShadowManager handles the full animation flow */}
         {mounted && quests.length > 0 && (
           <ShadowManager
             quests={quests}
+            lobbyBgmRef={bgmRef}
             onQuestAccepted={(quest) => {
               setActiveQuest(quest);
               transitionScreen('workshop');
@@ -346,7 +423,7 @@ export default function LobbyScreen() {
           Chiều cao sẽ tự động tính toán theo tỷ lệ gốc để không bị bóp méo!
         */}
         <div
-          className="absolute pointer-events-none z-[20]"
+          className="absolute pointer-events-none z-[30]"
           style={{
             backgroundImage: 'url("/table.png")',
             backgroundSize: '100% 100%',
@@ -493,8 +570,9 @@ export default function LobbyScreen() {
 
               {/* Gold */}
               <motion.div 
-                className="relative flex items-center justify-between gap-3 bg-[#080810]/80 backdrop-blur-md rounded-md p-[10px] w-full overflow-hidden border border-[#fca100]/30 shadow-[0_0_15px_rgba(252,161,0,0.05),inset_0_0_10px_rgba(252,161,0,0.05)] cursor-default group" 
+                className="relative flex items-center justify-between gap-3 bg-[#080810]/80 backdrop-blur-md rounded-md p-[10px] w-full overflow-hidden border border-[#fca100]/30 shadow-[0_0_15px_rgba(252,161,0,0.05),inset_0_0_10px_rgba(252,161,0,0.05)] cursor-pointer group" 
                 whileHover={{ scale: 1.02, boxShadow: "0 0 20px rgba(252,161,0,0.3), inset 0 0 15px rgba(252,161,0,0.2)" }}
+                onClick={() => setTopupGoldModalOpen(true)}
               >
                 {/* Tech Background Pattern */}
                 <div className="absolute inset-0 opacity-[0.06] pointer-events-none" style={{ background: 'linear-gradient(45deg, transparent 25%, #fca100 25%, #fca100 50%, transparent 50%, transparent 75%, #fca100 75%, #fca100 100%)', backgroundSize: '8px 8px' }} />
@@ -515,6 +593,35 @@ export default function LobbyScreen() {
                   <div className="flex flex-col items-start leading-none flex-grow justify-center h-full">
                      <span className="text-[#fca100] text-xl sm:text-[24px] drop-shadow-[0_0_8px_rgba(252,161,0,0.6)] tracking-wider" style={{ imageRendering: 'pixelated' }}>
                        {gold.toLocaleString()} G
+                     </span>
+                  </div>
+                </div>
+              </motion.div>
+
+              {/* TechPoints */}
+              <motion.div 
+                className="relative flex items-center justify-between gap-3 bg-[#080810]/80 backdrop-blur-md rounded-md p-[8px] w-full overflow-hidden border border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.05),inset_0_0_10px_rgba(16,185,129,0.05)] cursor-pointer group" 
+                whileHover={{ scale: 1.02, boxShadow: "0 0 20px rgba(16,185,129,0.3), inset 0 0 15px rgba(16,185,129,0.2)" }}
+                onClick={() => setBuyTpModalOpen(true)}
+              >
+                {/* Tech Background Pattern */}
+                <div className="absolute inset-0 opacity-[0.06] pointer-events-none" style={{ background: 'linear-gradient(45deg, transparent 25%, #10b981 25%, #10b981 50%, transparent 50%, transparent 75%, #10b981 75%, #10b981 100%)', backgroundSize: '8px 8px' }} />
+
+                {/* Animated Edge Line */}
+                <motion.div className="absolute bottom-0 left-0 h-[1px] bg-gradient-to-r from-transparent via-emerald-400 to-transparent w-full pointer-events-none" animate={{ x: ['100%', '-100%'] }} transition={{ duration: 2.5, repeat: Infinity, ease: 'linear' }} />
+
+                {/* Tech UI Corners */}
+                <div className="absolute top-0 right-0 w-2 h-2 border-t-[2px] border-r-[2px] border-emerald-500 bg-transparent opacity-70 pointer-events-none" />
+                <div className="absolute bottom-0 left-0 w-2 h-2 border-b-[2px] border-l-[2px] border-emerald-500 bg-transparent opacity-70 pointer-events-none" />
+
+                <div className="flex items-center gap-3 z-10 w-full">
+                  <div className="relative bg-[#12141c] border border-emerald-500/50 shadow-[0_0_8px_rgba(16,185,129,0.3)] p-[5px] rounded-sm flex items-center justify-center group-hover:bg-emerald-500/10 transition-colors">
+                    <span className="text-emerald-400 text-lg">🔧</span>
+                  </div>
+
+                  <div className="flex flex-col items-start leading-none flex-grow justify-center h-full">
+                     <span className="text-emerald-400 text-lg drop-shadow-[0_0_8px_rgba(16,185,129,0.6)] tracking-wider" style={{ imageRendering: 'pixelated' }}>
+                       {techPoints.toLocaleString()} TP
                      </span>
                   </div>
                 </div>
@@ -542,6 +649,21 @@ export default function LobbyScreen() {
                 {/* Tech UI Corners */}
                 <div className={`absolute top-0 left-0 w-2 h-2 border-t-[2px] border-l-[2px] bg-transparent opacity-70 pointer-events-none ${isBurning ? 'border-[#ef4444]' : 'border-[#a855f7]'}`} />
                 <div className={`absolute bottom-0 right-0 w-2 h-2 border-b-[2px] border-r-[2px] bg-transparent opacity-70 pointer-events-none ${isBurning ? 'border-[#ef4444]' : 'border-[#a855f7]'}`} />
+
+                {/* EXP Bar - Small bar above Reputation */}
+                <div className="flex justify-between items-center w-full z-10 mb-1">
+                  <span className="text-[10px] text-cyan-400 tracking-widest drop-shadow-[1px_1px_0_rgba(0,0,0,1)]" style={{ imageRendering: 'pixelated' }}>EXP</span>
+                  <span className="text-[10px] text-cyan-300 tracking-wider drop-shadow-[1px_1px_0_rgba(0,0,0,1)]">{currentExp} / {expForCurrentLevel}</span>
+                </div>
+                <Progress.Root className="relative w-full h-2 bg-[#0f111a] border border-cyan-500/30 rounded-sm overflow-hidden shadow-[inset_0_2px_3px_rgba(0,0,0,0.6)] z-10 mb-2" value={expProgress}>
+                  <Progress.Indicator
+                    className="h-full transition-all duration-500 ease-in-out"
+                    style={{ 
+                      width: `${expProgress}%`,
+                      background: 'linear-gradient(90deg, #06b6d4 0%, #22d3ee 100%)',
+                    }}
+                  />
+                </Progress.Root>
 
                 <div className="flex justify-between items-end w-full z-10 mb-1">
                   <div className="flex flex-col leading-none gap-1 justify-end h-full">
@@ -619,21 +741,18 @@ export default function LobbyScreen() {
 
             {/* Bottom-Right: End Day */}
             <motion.button
-              className={`bg-[#1e1e21] rounded-[12px] shadow-[0_5px_0_rgba(0,0,0,0.8)] pointer-events-auto transition-all group min-w-[200px] sm:min-w-[240px] ${true ? "active:translate-y-1 active:shadow-none cursor-pointer" : "cursor-not-allowed opacity-80"}`}
-              whileHover={true ? { y: -2 } : {}}
-              whileTap={true ? { scale: 0.95 } : {}}
-              // TODO: Change 'true' to condition determining if all tasks are done (e.g. quests.length === 0)
+              onClick={handleEndDayClick}
+              className={`bg-[#1e1e21] rounded-[12px] shadow-[0_5px_0_rgba(0,0,0,0.8)] pointer-events-auto transition-all group min-w-[200px] sm:min-w-[240px] active:translate-y-1 active:shadow-none cursor-pointer`}
+              whileHover={{ y: -2 }}
+              whileTap={{ scale: 0.95 }}
             >
               <div className="rounded-md w-full h-full transition-colors relative flex items-center justify-center">
-                  {/* Using true for placeholder. Replace true with actual boolean state for canEndDay */}
                   <img 
-                    src={true ? "/enddaybutton.jpg" : "/endaybuttongrayout.jpg"} 
+                    src={quests.filter((q) => q.status === 'PENDING').length > 0 ? "/endaybuttongrayout.jpg" : "/enddaybutton.jpg"} 
                     alt="End Day Button" 
                     className="w-[200px] sm:w-[240px] object-contain drop-shadow-[0_4px_4px_rgba(0,0,0,0.5)] group-hover:brightness-110 transition-all duration-300 rounded-[12px]"
                     style={{ imageRendering: 'pixelated' }}
                   />
-                  {/* Glow effect when active and hovered */}
-                  <div className={`absolute -inset-2 bg-yellow-500/0 ${true ? "group-hover:bg-yellow-500/10 blur-xl" : ""} rounded-full transition-all duration-300 pointer-events-none`} />
               </div>
             </motion.button>
 
@@ -645,6 +764,9 @@ export default function LobbyScreen() {
 
       {/* Deck Overlay */}
       <DeckOverlay isOpen={isDeckOpen} onClose={() => setIsDeckOpen(false)} />
+
+      <BuyTpModal />
+      <TopupGoldModal />
     </motion.div>
   );
 }

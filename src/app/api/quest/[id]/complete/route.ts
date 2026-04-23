@@ -89,9 +89,15 @@ export async function POST(
           goldReward -= smugglerPenaltyApplied;
         }
         actualGoldReward = goldReward;
-
-        updates.gold = { increment: goldReward };
         updates.exp = { increment: quest.isBoss ? GAME_CONSTANTS.BOSS_SUCCESS_EXP : GAME_CONSTANTS.SUCCESS_EXP };
+      }
+      
+      // Lưu base gold reward cho tất cả quest thắng (ngoại trừ đã xử lý riêng ở trên)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      if (!updates.gold) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const existingInc = (updates.gold as any)?.increment || 0;
+        updates.gold = { increment: existingInc + goldReward };
       }
 
       // +Uy tín khi thắng: +1 quest thường, +5 boss
@@ -124,9 +130,9 @@ export async function POST(
       const profit = quest.customerBudget - totalCardCost;
       if (profit > 0) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const currentGoldInc = (updates.gold as any)?.increment || 0;
+        const currentGoldInc = (updates.gold as any)?.increment || quest.rewardGold || 0;
         updates.gold = { increment: currentGoldInc + profit };
-        actualGoldReward = (actualGoldReward || 0) + profit;
+        actualGoldReward = (actualGoldReward || quest.rewardGold || 0) + profit;
       }
     }
 
@@ -299,10 +305,88 @@ export async function POST(
       }
     }
 
-    const updatedUser = await prisma.user.update({
+    // ============================================================
+    // UPDATE INVENTORY: TRỪ THẺ ĐÃ SỬ DỤNG (ngoại trừ CREW)
+    // ============================================================
+    let updatedInventory: any[] = [];
+    if (Array.isArray(usedCardIds) && usedCardIds.length > 0) {
+      // Lấy thông tin các thẻ đã sử dụng để xác định loại (CREW không bị trừ)
+      const usedCardsInfo = await prisma.card.findMany({
+        where: { id: { in: usedCardIds as number[] } },
+        select: { id: true, type: true }
+      });
+      
+      // Tạo map cardId -> type để dễ tra cứu
+      const cardTypeMap = new Map(usedCardsInfo.map((c: any) => [c.id, c.type]));
+      
+      // Group cards to handle duplicates in the used list (chỉ tính các thẻ không phải CREW)
+      const cardsToDeduct: Record<number, number> = {};
+      for (const cardId of usedCardIds) {
+        if (typeof cardId === 'number') {
+          const cardType = cardTypeMap.get(cardId);
+          // Crew cards không bị trừ khi sử dụng
+          if (cardType !== 'CREW') {
+            cardsToDeduct[cardId] = (cardsToDeduct[cardId] || 0) + 1;
+          }
+        }
+      }
+      
+      // Chỉ trừ thẻ nếu có thẻ cần trừ (không phải CREW)
+      if (Object.keys(cardsToDeduct).length > 0) {
+        for (const [cardId, count] of Object.entries(cardsToDeduct)) {
+          await prisma.userInventory.updateMany({
+            where: {
+              userId: auth.userId,
+              cardId: parseInt(cardId),
+              quantity: { gte: count }
+            },
+            data: {
+              quantity: { decrement: count }
+            }
+          });
+        }
+
+        // Xóa các bản ghi có quantity = 0
+        await prisma.userInventory.deleteMany({
+          where: {
+            userId: auth.userId,
+            quantity: { lte: 0 }
+          }
+        });
+      }
+
+      // Lấy inventory mới để trả về frontend
+      updatedInventory = await prisma.userInventory.findMany({
+        where: { userId: auth.userId, quantity: { gt: 0 } },
+        include: { card: true }
+      });
+    }
+
+    let updatedUser = await prisma.user.update({
       where: { id: auth.userId },
       data: updates,
     });
+
+    // ============================================================
+    // LEVEL UP CHECK - 1000 base + 100 per level scaling
+    // ============================================================
+    const getExpForLevel = (lvl: number) => 1000 + (lvl - 1) * 100;
+    let currentExp = Number(updatedUser.exp);
+    let currentLevel = updatedUser.level;
+    let leveledUp = false;
+    
+    while (currentExp >= getExpForLevel(currentLevel)) {
+      currentExp -= getExpForLevel(currentLevel);
+      currentLevel += 1;
+      leveledUp = true;
+    }
+    
+    if (leveledUp) {
+      updatedUser = await prisma.user.update({
+        where: { id: auth.userId },
+        data: { level: currentLevel, exp: currentExp },
+      });
+    }
 
     // ============================================================
     // EP_ISLAND_CHOICE - SPECIAL REWARDS (3 Packs + 1 4*)
@@ -408,7 +492,7 @@ export async function POST(
       message: status === 'SUCCESS'
         ? (smugglerPenaltyApplied > 0
           ? `Hoàn thành xuất sắc! +${actualGoldReward} vàng (🕶️ Tay Buôn Lậu lấy ${smugglerPenaltyApplied} vàng). ${reputationMessage}${extraRewardsMessage}`
-          : `Hoàn thành xuất sắc! +${quest.rewardGold} vàng. ${reputationMessage}${extraRewardsMessage}`)
+          : `Hoàn thành xuất sắc! +${actualGoldReward} vàng. ${reputationMessage}${extraRewardsMessage}`)
         : `Xe nổ máy! Uy tín bị ảnh hưởng. ${reputationMessage}`,
       questStatus: status,
       rewards: status === 'SUCCESS' ? {
@@ -427,6 +511,11 @@ export async function POST(
         garageHealth: updatedUser.garageHealth,
         exp: Number(updatedUser.exp),
       },
+      updatedInventory: updatedInventory.map(item => ({
+        cardId: item.cardId,
+        quantity: item.quantity,
+        card: item.card,
+      })),
       gameOver,
       ending,
       isFinalRound: user.isFinalRound,

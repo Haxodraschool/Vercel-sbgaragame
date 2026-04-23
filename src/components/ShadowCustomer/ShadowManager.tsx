@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import styles from './ShadowCustomer.module.css';
 import ShadowCustomer from './ShadowCustomer';
 import QuestDialog from './QuestDialog';
@@ -8,21 +8,51 @@ import { useGameStore } from '@/stores/useGameStore';
 import type { BossChoiceData } from '@/stores/useGameStore';
 import type { QuestData } from './ShadowCustomer';
 
+// ─── Boss Music Map — mỗi boss → file mp3 tương ứng ─────────────────────────
+const BOSS_MUSIC_MAP: Record<string, string> = {
+  'DRIFT_KING_CHALLENGE': '/gamemusic/driftking.mp3',
+  'NO_COOLING':           '/gamemusic/f1boss.mp3',
+  'MIN_RARITY_3':         '/gamemusic/colletorboss.mp3',
+  'DAREDEVIL_DEATH_WISH': '/gamemusic/DAREDEVILgirlboss.mp3',
+  // Kẻ Bí Ẩn không có specialCondition cụ thể, dùng tên boss để fallback
+  'MYSTERIOUS':           '/gamemusic/mysteriousboss.mp3',
+  'EP_ISLAND_CHOICE':     '/gamemusic/islandboss.mp3',
+  'BABY_OIL_CHOICE':      '/gamemusic/babyoilboss.mp3',
+  'KIM_JONG_UN':          '/gamemusic/kimboss.mp3',
+  'DONALD_TRUMP':         '/gamemusic/trumpboss.mp3',
+  'RUSSIA_EMPEROR_P1':    '/gamemusic/russianbossp1.mp3',
+  'RUSSIA_EMPEROR_P2':    '/gamemusic/russianbossp2.mp3',
+};
+
+/** Lấy đường dẫn nhạc boss dựa theo quest */
+function getBossMusic(quest: QuestData): string | null {
+  if (!quest.isBoss) return null;
+  const condition = quest.bossConfig?.specialCondition;
+  if (!condition) {
+    // Kẻ Bí Ẩn (không có specialCondition)
+    const name = quest.bossConfig?.name || '';
+    if (name.includes('Bí Ẩn')) return BOSS_MUSIC_MAP['MYSTERIOUS'];
+    return null;
+  }
+  if (condition === 'RUSSIA_EMPEROR') return BOSS_MUSIC_MAP['RUSSIA_EMPEROR_P1'];
+  return BOSS_MUSIC_MAP[condition] || null;
+}
+
 /**
  * Sofa seat positions (% of the game container).
  * 8 seats: 4 on left sofa + 4 on right sofa.
  */
 const SOFA_SEATS = [
   // Left sofa — facing left (from left to right)
-  { left: '22.5%', top: '45%', sofa: 'left' },
-  { left: '29%', top: '45.5%', sofa: 'left' },
-  { left: '35%', top: '45.5%', sofa: 'left' },
-  { left: '42%', top: '44.5%', sofa: 'left' },
+  { left: '21%', top: '40%', sofa: 'left' },
+  { left: '28%', top: '39%', sofa: 'left' },
+  { left: '35%', top: '38%', sofa: 'left' },
+  { left: '41%', top: '37%', sofa: 'left' },
   // Right sofa — facing right (from left to right)
-  { left: '61%', top: '44.5%', sofa: 'right' }, 
-  { left: '67%', top: '45.5%', sofa: 'right' },
-  { left: '75%', top: '45.5%', sofa: 'right' },
-  { left: '82%', top: '45%', sofa: 'right' },
+  { left: '56%', top: '37%', sofa: 'right' }, 
+  { left: '63%', top: '39%', sofa: 'right' },
+  { left: '73%', top: '41%', sofa: 'right' },
+  { left: '82%', top: '41%', sofa: 'right' },
 ];
 
 // Red X position where big shadow walks to before splitting
@@ -54,9 +84,10 @@ type ManagerPhase =
 interface Props {
   quests: QuestData[];
   onQuestAccepted: (quest: QuestData) => void;
+  lobbyBgmRef?: React.RefObject<HTMLAudioElement | null>; // ← nhận từ LobbyScreen
 }
 
-export default function ShadowManager({ quests, onQuestAccepted }: Props) {
+export default function ShadowManager({ quests, onQuestAccepted, lobbyBgmRef }: Props) {
   const [phase, setPhase] = useState<ManagerPhase>('idle');
   const [bigAtSeat, setBigAtSeat] = useState(false);
   const [showIndividuals, setShowIndividuals] = useState(false);
@@ -67,6 +98,9 @@ export default function ShadowManager({ quests, onQuestAccepted }: Props) {
   const [angryInfo, setAngryInfo] = useState<{ questId: number; text: string } | null>(null);
   const [lastPenalty, setLastPenalty] = useState(10); // Actual penalty from backend
 
+  // Boss music management
+  const bossMusicRef = useRef<HTMLAudioElement | null>(null);
+
   const token = useGameStore((s) => s.token);
   const updateGarageHealth = useGameStore((s) => s.updateGarageHealth);
   const user = useGameStore((s) => s.user);
@@ -74,6 +108,54 @@ export default function ShadowManager({ quests, onQuestAccepted }: Props) {
   const setScreen = useGameStore((s) => s.setScreen);
   const skipShadowIntro = useGameStore((s) => s.skipShadowIntro);
   const setSkipShadowIntro = useGameStore((s) => s.setSkipShadowIntro);
+  const setActiveBossMusic = useGameStore((s) => s.setActiveBossMusic);
+
+  // ─── Boss Music helpers ──────────────────────────────────────────────────
+  const playBossMusic = useCallback((musicSrc: string) => {
+    // Dừng TẤT CẢ audio đang phát trong document (để chắc chắn tắt nhạc lobby)
+    document.querySelectorAll('audio').forEach((audio) => {
+      audio.pause();
+      (audio as any).intentionalPause = true;
+    });
+    // Dừng & tắt lobby bgm ref nếu có
+    if (lobbyBgmRef?.current) {
+      (lobbyBgmRef.current as any).intentionalPause = true;
+      lobbyBgmRef.current.pause();
+    }
+    // Dừng boss music cũ nếu có
+    if (bossMusicRef.current) {
+      bossMusicRef.current.pause();
+      bossMusicRef.current.currentTime = 0;
+    }
+    const audio = new Audio(musicSrc);
+    audio.loop = true;
+    audio.volume = 0.45;
+    audio.play().catch(() => {});
+    bossMusicRef.current = audio;
+  }, [lobbyBgmRef]);
+
+  const stopBossMusic = useCallback((resumeLobby = true) => {
+    if (bossMusicRef.current) {
+      bossMusicRef.current.pause();
+      bossMusicRef.current.currentTime = 0;
+      bossMusicRef.current = null;
+    }
+    // Phát lại lobby bgm
+    if (resumeLobby && lobbyBgmRef?.current) {
+      (lobbyBgmRef.current as any).intentionalPause = false;
+      lobbyBgmRef.current.play().catch(() => {});
+    }
+  }, [lobbyBgmRef]);
+
+  // Cleanup khi unmount (workshop về lobby sẽ destroy ref)
+  useEffect(() => {
+    return () => {
+      if (bossMusicRef.current) {
+        bossMusicRef.current.pause();
+        bossMusicRef.current = null;
+      }
+    };
+  }, []);
 
   // Show quests that are PENDING or currently in 'leaving' animation
   const visibleQuests = quests.filter(
@@ -163,7 +245,13 @@ export default function ShadowManager({ quests, onQuestAccepted }: Props) {
     if (phase !== 'spawningInteractive') return;
     if (quest.status !== 'PENDING' || removedQuestIds.has(quest.id)) return;
     setSelectedQuest(quest);
-  }, [phase, removedQuestIds]);
+
+    // Phát nhạc boss khi click vào shadow boss
+    if (quest.isBoss) {
+      const musicSrc = getBossMusic(quest);
+      if (musicSrc) playBossMusic(musicSrc);
+    }
+  }, [phase, removedQuestIds, playBossMusic]);
 
   // ═══ Accept quest → switch to workshop ═══
   // For boss with choices (EP, Baby Oil, Kim, Russia), YES = accept with bossChoice
@@ -171,6 +259,15 @@ export default function ShadowManager({ quests, onQuestAccepted }: Props) {
     if (!selectedQuest) return;
     const quest = selectedQuest;
     setSelectedQuest(null);
+
+    // Ghi nhớ nhạc boss vào store để Workshop tiếp tục phát
+    if (quest.isBoss && bossMusicRef.current) {
+      const musicSrc = getBossMusic(quest);
+      setActiveBossMusic(musicSrc);
+      // Không dừng nhạc — để Workshop tiếp nhận và dừng ở cuối
+    } else {
+      setActiveBossMusic(null);
+    }
 
     // Store boss choice for workshop to use
     const condition = quest.bossConfig?.specialCondition;
@@ -189,13 +286,15 @@ export default function ShadowManager({ quests, onQuestAccepted }: Props) {
     }
 
     onQuestAccepted(quest);
-  }, [selectedQuest, onQuestAccepted, setBossChoice]);
+  }, [selectedQuest, onQuestAccepted, setBossChoice, setActiveBossMusic]);
 
   // ═══ Final Close (called by QuestDialog after angry phase) ═══
   const handleCloseDialog = useCallback(() => {
     setSelectedQuest(null);
     setAngryInfo(null);
-  }, []);
+    // Đóng dialog boss (không accept) → tắt boss music + phát lại lobby
+    stopBossMusic(true);
+  }, [stopBossMusic]);
 
   // ═══════════════════════════════════════════════════════════════
   // REJECT HANDLER — Boss-specific flows per Game Bible
@@ -211,6 +310,9 @@ export default function ShadowManager({ quests, onQuestAccepted }: Props) {
       // EP NO doesn't reject — it accepts with different conditions
       setSelectedQuest(null);
       setBossChoice({ epIslandChoice: 'NO' });
+      // Lưu nhạc boss vào store để Workshop tiếp tục phát
+      const musicSrc = getBossMusic(quest);
+      setActiveBossMusic(musicSrc);
       onQuestAccepted(quest); // Goes to workshop with EP NO conditions
       return;
     }
@@ -237,6 +339,7 @@ export default function ShadowManager({ quests, onQuestAccepted }: Props) {
             setLastPenalty(0); // Kim NO doesn't show normal penalty
             // Game Over → redirect to ending screen after delay
             if (data.gameOver) {
+              stopBossMusic(false); // Tắt nhạc boss, không phục hồi lobby
               setTimeout(() => {
                 setScreen('ending');
               }, 3500);
@@ -252,6 +355,7 @@ export default function ShadowManager({ quests, onQuestAccepted }: Props) {
 
     // ─── BABY OIL: NO = -45% Uy Tín + all customers auto-fail ───
     if (condition === 'BABY_OIL_CHOICE') {
+      stopBossMusic(true); // Tắt boss music, phục hồi lobby music
       setLeavingQuestIds((prev) => new Set(prev).add(quest.id));
       const line = '💀 Chúa Tể Dầu Em Bé nổi cơn thịnh nộ! Đổ dầu lên khắp garage!';
       setAngryInfo({ questId: quest.id, text: line });
@@ -302,6 +406,7 @@ export default function ShadowManager({ quests, onQuestAccepted }: Props) {
     // Russia (RUSSIA_EMPEROR): standard -20
     // Boss thường (Drift, F1, Collector, Daredevil, Bí Ẩn): -20
     // NPC thường: -10
+    stopBossMusic(true); // Tắt nhạc boss nếu có, phục hồi lobby
     setLeavingQuestIds((prev) => new Set(prev).add(quest.id));
 
     const line = ANGRY_LINES[Math.floor(Math.random() * ANGRY_LINES.length)];
@@ -354,7 +459,8 @@ export default function ShadowManager({ quests, onQuestAccepted }: Props) {
         return next;
       });
     }, 2500);
-  }, [selectedQuest, token, user, updateGarageHealth, setBossChoice, onQuestAccepted, setScreen, quests]);
+  }, [selectedQuest, token, user, updateGarageHealth, setBossChoice, setActiveBossMusic, onQuestAccepted, setScreen, quests, stopBossMusic]);
+
 
   if (pendingQuests.length === 0 && phase === 'idle') return null;
 
@@ -379,6 +485,14 @@ export default function ShadowManager({ quests, onQuestAccepted }: Props) {
         visibleQuests.map((quest, i) => {
           if (i >= spawnedCount) return null; // Wait for sequential spawn
           const seatIndex = i % SOFA_SEATS.length;
+          // Calculate z-index for left sofa sprites relative to the 2nd sprite (index 1)
+          // Left sofa indices: 0, 1, 2, 3. Base z-index is 15 from CSS.
+          // Index 0 (1st): +1, Index 1 (2nd): base, Index 2 (3rd): -1, Index 3 (4th): -2
+          let zIndexOverride: number | undefined;
+          if (seatIndex === 0) zIndexOverride = 16; // 15 + 1
+          else if (seatIndex === 2) zIndexOverride = 14; // 15 - 1
+          else if (seatIndex === 3) zIndexOverride = 13; // 15 - 2
+          // seatIndex === 1 uses default z-index: 15
           return (
             <React.Fragment key={quest.id}>
               <ShadowCustomer
@@ -387,6 +501,7 @@ export default function ShadowManager({ quests, onQuestAccepted }: Props) {
                 isInteractive={phase === 'spawningInteractive' && !leavingQuestIds.has(quest.id)}
                 isLeaving={leavingQuestIds.has(quest.id)}
                 onShadowClick={handleShadowClick}
+                zIndex={zIndexOverride}
               />
               {/* Angry text overlay for this specific shadow */}
               {angryInfo && angryInfo.questId === quest.id && (

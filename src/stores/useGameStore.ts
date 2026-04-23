@@ -44,6 +44,13 @@ interface GameState {
   bossChoice: BossChoiceData | null; // Stores boss-specific choices for workshop
   skipShadowIntro: boolean; // Skip shadow-walking animation khi quay lại lobby từ workshop
 
+  // Music State — nhạc boss được chọn ở Lobby, tiếp tục phát sang Workshop
+  activeBossMusic: string | null; // e.g. '/gamemusic/babyoilboss.mp3'
+
+  // Modals
+  isTopupGoldModalOpen: boolean;
+  isBuyTpModalOpen: boolean;
+
   // Loading progress tracking (cho LoadingScreen)
   loadingPending: string[]; // list of pending task IDs
   loadingTotal: number;      // total tasks registered in current transition
@@ -54,6 +61,8 @@ interface GameState {
   setToken: (token: string | null) => void;
   setUser: (user: UserProfile | null) => void;
   setScreen: (screen: GameState['currentScreen']) => void;
+  setTopupGoldModalOpen: (open: boolean) => void;
+  setBuyTpModalOpen: (open: boolean) => void;
   /** Transition to a destination screen WITH a loading overlay; call markScreenReady() from destination when its resources are fully loaded. */
   transitionScreen: (screen: GameState['currentScreen']) => void;
   markScreenReady: () => void;
@@ -65,8 +74,10 @@ interface GameState {
   setActiveQuest: (quest: any | null) => void;
   setBossChoice: (choice: BossChoiceData | null) => void;
   setSkipShadowIntro: (skip: boolean) => void;
+  setActiveBossMusic: (track: string | null) => void;
   updateGold: (gold: number) => void;
   updateGarageHealth: (health: number) => void;
+  updateTechPoints: (tp: number) => void;
   logout: () => void;
 }
 
@@ -83,6 +94,9 @@ export const useGameStore = create<GameState>((set) => ({
   activeQuest: null,
   bossChoice: null,
   skipShadowIntro: false,
+  activeBossMusic: null,
+  isTopupGoldModalOpen: false,
+  isBuyTpModalOpen: false,
   loadingPending: [],
   loadingTotal: 0,
   loadingLabel: '',
@@ -148,6 +162,7 @@ export const useGameStore = create<GameState>((set) => ({
   setActiveQuest: (quest) => set({ activeQuestId: quest?.id || null, activeQuest: quest }),
   setBossChoice: (choice) => set({ bossChoice: choice }),
   setSkipShadowIntro: (skip) => set({ skipShadowIntro: skip }),
+  setActiveBossMusic: (track) => set({ activeBossMusic: track }),
 
   updateGold: (gold) => set((state) => ({
     user: state.user ? { ...state.user, gold } : null,
@@ -157,6 +172,13 @@ export const useGameStore = create<GameState>((set) => ({
     user: state.user ? { ...state.user, garageHealth: health } : null,
   })),
 
+  updateTechPoints: (tp) => set((state) => ({
+    user: state.user ? { ...state.user, techPoints: tp } : null,
+  })),
+
+  setTopupGoldModalOpen: (open) => set({ isTopupGoldModalOpen: open }),
+  setBuyTpModalOpen: (open) => set({ isBuyTpModalOpen: open }),
+
   logout: () => {
     localStorage.removeItem('sb-token');
     set({
@@ -165,6 +187,7 @@ export const useGameStore = create<GameState>((set) => ({
       user: null,
       currentScreen: 'login',
       activeQuestId: null,
+      activeBossMusic: null,
     });
   },
 }));

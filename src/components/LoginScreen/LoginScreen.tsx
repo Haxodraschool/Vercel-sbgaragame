@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence, useAnimation } from 'framer-motion';
 import { useGameStore } from '@/stores/useGameStore';
 import { api } from '@/lib/api';
-import { toast } from 'sonner';
 
 // ─── Pixel Rain Drop Component ───
 function RainDrop({ delay, left, duration }: { delay: number; left: number; duration: number }) {
@@ -135,6 +134,7 @@ export default function LoginScreen() {
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [hasError, setHasError] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
   const [isOpening, setIsOpening] = useState(false);
   const [garageFlicker, setGarageFlicker] = useState(true);
   const [mounted, setMounted] = useState(false);
@@ -209,8 +209,9 @@ export default function LoginScreen() {
       setToken(data.token);
       setUser(data.user as any);
       setIsOpening(true);
+      setErrorMessage('');
 
-      toast.success(isLoginMode ? 'Đăng nhập thành công!' : 'Đăng ký thành công!');
+      // Login/register success - no toast
 
       // Door open + slit lighting run in parallel
       // (isOpening=true already triggers slit lighting via AnimatePresence)
@@ -228,7 +229,9 @@ export default function LoginScreen() {
       setTimeout(() => transitionScreen('lobby'), 200);
     } catch (err: any) {
       setHasError(true);
-      toast.error(err.message || 'Lỗi xác thực!');
+      const msg = err?.message || (isLoginMode ? 'Sai tài khoản hoặc mật khẩu!' : 'Tạo tài khoản thất bại!');
+      setErrorMessage(msg);
+      console.error('Auth error:', msg);
       setTimeout(() => setHasError(false), 600);
     } finally {
       setIsLoading(false);
@@ -613,6 +616,22 @@ export default function LoginScreen() {
               >
                 {isLoginMode ? '⛽ ĐĂNG NHẬP' : '🔧 TẠO TÀI KHOẢN'}
               </motion.h2>
+
+              {/* Error Message */}
+              <AnimatePresence>
+                {errorMessage && (
+                  <motion.div
+                    className="mb-4 text-center text-red-500 text-sm tracking-wide"
+                    initial={{ opacity: 0, y: -5 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    style={{ textShadow: '0 0 8px rgba(239,68,68,0.4)' }}
+                  >
+                    ⚠ {errorMessage}
+                  </motion.div>
+                )}
+              </AnimatePresence>
 
               {/* Divider */}
               <div className="w-full h-[2px] bg-gradient-to-r from-transparent via-cyan-500/30 to-transparent mb-6" />

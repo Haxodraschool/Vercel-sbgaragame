@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { toast } from 'sonner';
 import { useGameStore } from '@/stores/useGameStore';
 import { api } from '@/lib/api';
 import ShelfGrid from './ShelfGrid';
@@ -47,6 +46,13 @@ export default function ShopScreen() {
   const [rerollCount, setRerollCount] = useState(0);
   const [isRerolling, setIsRerolling] = useState(false);
   const [lootBoxOpen, setLootBoxOpen] = useState(false);
+  
+  // Toast notification state
+  const [toast, setToast] = useState<{ message: string; type: 'error' | 'success' } | null>(null);
+  const showToast = (message: string, type: 'error' | 'success' = 'error') => {
+    setToast({ message, type });
+    setTimeout(() => setToast(null), 2500);
+  };
 
   // Derived: separate shelf items vs pack items
   const shelfItems = allItems.filter(
@@ -109,7 +115,7 @@ export default function ShopScreen() {
         setIsLoading(true);
         const data = await api.shop.items() as any;
         if (data.error) {
-          toast.error(data.error);
+          console.error('Shop error:', data.error);
           setGold(fallbackGold.current);
           return;
         }
@@ -119,7 +125,7 @@ export default function ShopScreen() {
         setPityCounter(data.pityCounter || 0);
         setNextPityAt(data.nextPityAt || 10);
       } catch (err: any) {
-        toast.error(err.message || 'Không thể tải Shop');
+        console.error('Shop load error:', err.message || 'Không thể tải Shop');
         setGold(fallbackGold.current);
       } finally {
         setIsLoading(false);
@@ -142,7 +148,7 @@ export default function ShopScreen() {
     if (isRerolling) return;
     const cost = REROLL_BASE_COST * Math.pow(2, rerollCount);
     if (gold < cost) {
-      toast.error(`Không đủ vàng! Cần ${cost}g`);
+      showToast(`Không đủ vàng! Cần ${cost}g`, 'error');
       return;
     }
 
@@ -161,9 +167,8 @@ export default function ShopScreen() {
       setNextPityAt(data.nextPityAt || 10);
       setRerollCount((c) => c + 1);
       updateGold(data.gold);
-      toast.success(`Reroll thành công! -${cost}g`);
     } catch (err: any) {
-      toast.error(err.message || 'Reroll thất bại');
+      console.error('Reroll error:', err.message || 'Reroll thất bại');
     } finally {
       setIsRerolling(false);
     }
@@ -172,6 +177,11 @@ export default function ShopScreen() {
   // Buy card/bundle/crew handler
   const handleBuyCard = async (item: ShopItemData) => {
     if (isBuying) return;
+    // Check if can afford before attempting to buy
+    if (gold < item.cost) {
+      showToast(`Không đủ vàng! Cần ${item.cost}g`, 'error');
+      return;
+    }
     try {
       setIsBuying(true);
       const payload: any = {
@@ -195,9 +205,11 @@ export default function ShopScreen() {
       }
 
       setSelectedItem(null);
-      toast.success(data.message || 'Mua thành công!');
+      showToast('Mua thành công!', 'success');
     } catch (err: any) {
-      toast.error(err.message || 'Mua thất bại!');
+      const errorMsg = err?.message || 'Mua thất bại!';
+      showToast(errorMsg, 'error');
+      console.error('Buy error:', errorMsg);
     } finally {
       setIsBuying(false);
     }
@@ -237,7 +249,7 @@ export default function ShopScreen() {
         wasPity: data.wasPity || false,
       };
     } catch (err: any) {
-      toast.error(err.message || 'Mở Pack thất bại!');
+      console.error('Pack error:', err.message || 'Mở Pack thất bại!');
       return null;
     }
   };
@@ -283,6 +295,44 @@ export default function ShopScreen() {
             background: 'rgba(0, 0, 0, 0.15)',
           }}
         />
+
+        {/* Toast Notification */}
+        <AnimatePresence>
+          {toast && (
+            <motion.div
+              initial={{ opacity: 0, y: -30, x: '-50%' }}
+              animate={{ opacity: 1, y: 0, x: '-50%' }}
+              exit={{ opacity: 0, y: -20, x: '-50%' }}
+              transition={{ duration: 0.3, ease: 'easeOut' }}
+              style={{
+                position: 'fixed',
+                top: '80px',
+                left: '50%',
+                zIndex: 100,
+                padding: '10px 24px',
+                borderRadius: '6px',
+                fontFamily: 'var(--font-pixel)',
+                fontSize: '0.9rem',
+                fontWeight: 600,
+                letterSpacing: '0.05em',
+                background: toast.type === 'error' 
+                  ? 'linear-gradient(135deg, rgba(180, 40, 40, 0.95), rgba(140, 30, 30, 0.95))'
+                  : 'linear-gradient(135deg, rgba(40, 180, 80, 0.95), rgba(30, 140, 60, 0.95))',
+                color: '#fff',
+                boxShadow: toast.type === 'error'
+                  ? '0 4px 20px rgba(180, 40, 40, 0.4), 0 0 0 1px rgba(255, 100, 100, 0.3)'
+                  : '0 4px 20px rgba(40, 180, 80, 0.4), 0 0 0 1px rgba(100, 255, 150, 0.3)',
+                border: toast.type === 'error'
+                  ? '1px solid rgba(255, 100, 100, 0.4)'
+                  : '1px solid rgba(100, 255, 150, 0.4)',
+                textShadow: '0 1px 2px rgba(0,0,0,0.3)',
+                pointerEvents: 'none',
+              }}
+            >
+              {toast.message}
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Loading */}
         {isLoading && (

@@ -186,10 +186,14 @@ Mỗi slot:
 
 | Level | Power Required | Gold Reward | Customers |
 | ----- | -------------- | ----------- | --------- |
-| 1–3   | 100–250        | 100–250     | 1–3       |
-| 4–7   | 200–400        | 200–500     | 2–4       |
-| 8–12  | 350–600        | 400–900     | 3–5       |
-| 13+   | 500–800        | 600–1500    | 3–6       |
+| 1–3   | 75-125        | 200-300     | 1–3       |
+| 4–7   | 125-180        | 400-600     | 2–4       |
+| 8–12  | 180–300        | 800-1200    | 3–5       |
+| 13-20  | 250–350        | 1300-1800    | 3–6       |
+| 20-30 | 300-380        | 1500-2500   | 3–6       |
+| 30-40 | 300-400        | 1500-3500   | 3–7       |
+| 40-50 | 350-400        | 2000-5000   | 3–8       |
+
 
 ### 4.2 Boss Day
 
@@ -224,14 +228,14 @@ Mỗi slot:
 
 | Boss                  | Điều kiện đặc biệt                                     | Power yêu cầu | Thưởng Gold |
 | --------------------- | ------------------------------------------------------ | ------------- | ----------- |
-| **Ông Hoàng Drift**   | `DRIFT_KING_CHALLENGE` — Trượt ly tâm, Stability ≥ 150 | 400           | 1200        |
-| **Huyền Thoại F1**    | `NO_COOLING` — Cấm dùng thẻ COOLING                    | 550           | 2200        |
-| **Nhà Sưu Tập**       | `MIN_RARITY_3` — Chỉ thẻ ≥ 3★                          | 450           | 1500        |
-| **Cô Gái Liều Lĩnh**  | `DAREDEVIL_DEATH_WISH` — Bơm Heat tử thần, Đáy 85%     | 400           | 1800        |
-| **Kẻ Bí Ẩn**          | Không có — Pure power check 800. **Chỉ xuất hiện sau ngày 10** | 800           | 5000        |
-| **Đảo Chủ EP**        | `EP_ISLAND_CHOICE` — Nhánh lựa chọn                    | 500           | 2000        |
-| **Chúa Tể Dầu Em Bé** | `BABY_OIL_CHOICE` — Nhánh lựa chọn                     | 420           | 2500        |
-| **Chủ Tịch Kim**      | `KIM_JONG_UN` — Storyline Triều Tiên                   | 500           | 3000        |
+| **Ông Hoàng Drift**   | `DRIFT_KING_CHALLENGE` — Trượt ly tâm, Stability ≥ 150 | 350           | 1500        |
+| **Huyền Thoại F1**    | `NO_COOLING` — Cấm dùng thẻ COOLING                    | 450           | 2500        |
+| **Nhà Sưu Tập**       | `MIN_RARITY_3` — Chỉ thẻ ≥ 3★                          | 400           | 1800        |
+| **Cô Gái Liều Lĩnh**  | `DAREDEVIL_DEATH_WISH` — Bơm Heat tử thần, Đáy 85%     | 325           | 2100        |
+| **Kẻ Bí Ẩn**          | Không có — Pure power check 800. **Chỉ xuất hiện sau ngày 10** | 666           | 5500        |
+| **Đảo Chủ EP**        | `EP_ISLAND_CHOICE` — Nhánh lựa chọn                    | 467           | 2500        |
+| **Chúa Tể Dầu Em Bé** | `BABY_OIL_CHOICE` — Nhánh lựa chọn                     | 369           | 3000        |
+| **Chủ Tịch Kim**      | `KIM_JONG_UN` — Storyline Triều Tiên                   | 365           | 3000        |
 | **Đỗ Nam Trung**      | `DONALD_TRUMP` — Tax + khóa 5★                         | 470           | 4700        |
 | **Nga Đại Đế**        | `RUSSIA_EMPEROR` — 2 Phase + Gấu                       | dynamic       | dynamic     |
 
@@ -242,20 +246,20 @@ Mỗi slot:
 - **Pre-run**: Cấm dùng thẻ loại Hệ thống treo (`SUSPENSION`) có độ hiếm ≥ 3★ (Bắt buộc dùng phuộc "mềm" 1-2★ để văng xe).
 - **Active-run (Trượt ly tâm)**: Tại các Slot Chẵn (Slot 2, 4, 6, 8, 10):
   - Nhận thêm quán tính: **+15% Power**.
-  - Mất gió trực diện: Khả năng làm mát của thẻ bị **giảm 50%**.
-- **Post-run**: Tổng `Stability` cuối cùng của xe phải **≥ 150** (Xác nhận xe không lật).
+  - Mất gió trực diện: Khả năng làm mát của thẻ bị **giảm 30%**.
+- **Post-run**: Tổng `Stability` cuối cùng của xe phải **≥ 50** (Xác nhận xe không lật).
 
 #### Cô Gái Liều Lĩnh (`DAREDEVIL_DEATH_WISH`)
 
 - **Active-run (Thốc Ga Tử Thần)**: Tại đúng **Slot 7**, Nhiệt độ (Heat) xe bị sốc bất ngờ **tăng đột biến +15 Heat**.
-- **Post-run**: Tổng Nhiệt độ (Heat) cuối cùng của xe bắt buộc phải đạt độ nỏng sát viền vực nổ máy: **≥ 85%**. (Và dĩ nhiên không được vượt quá 100% gây nổ).
-- _Lưu ý_: Với perk Bàn Tay Nóng (ngưỡng 115%), mức tối thiểu yêu cầu sẽ chạy theo là ≥ 100%.
+- **Post-run**: Tổng Nhiệt độ (Heat) cuối cùng của xe bắt buộc phải đạt độ nỏng sát viền vực nổ máy: **≥ 75%**. (Và dĩ nhiên không được vượt quá 100% gây nổ).
+- _Lưu ý_: Với perk Bàn Tay Nóng (ngưỡng 115%), mức tối thiểu yêu cầu sẽ chạy theo là ≥ 90%.
 
 #### Đảo Chủ EP (`EP_ISLAND_CHOICE`)
 
 - **Hỏi**: "Có đồng ý lên đảo không?"
-- **Nhánh YES**: -50 Uy tín, power ≥ 500, Heat ≤ 69%, ≥1 Combo
-- **Nhánh NO**: +15 Uy tín, cấm COOLING, cần 1 thẻ 5★ + 1 thẻ 4★, power ≥ 690
+- **Nhánh YES**: -50 Uy tín, power ≥ 400, Heat ≤ 69%, ≥1 Combo
+- **Nhánh NO**: +15 Uy tín, cấm dùng COOLING 5★, cần 1 thẻ 5★ + 1 thẻ 4★, power ≥ 470
 - **Thưởng thắng**: 3 Pack + 1 thẻ 4★ + Unlock Donald Trump appearance (`hasDefeatedEP = true`)
 
 #### Chúa Tể Dầu Em Bé (`BABY_OIL_CHOICE`)
@@ -266,7 +270,7 @@ Mỗi slot:
 #### Đỗ Nam Trung (`DONALD_TRUMP`)
 
 - **Pre-run**: Khóa tất cả thẻ 5★
-- **Post-run**: Heat > 47% VÀ Power > 470
+- **Post-run**: Heat > 47% VÀ Power  400≤470
 - **Thắng**: +4700 Gold, +47 Uy tín, giảm 4.7% thuế Shop ngày mai (`shopTaxModifier = 0.953`)
 - **Thua**: Tăng 47% thuế Shop ngày mai (`shopTaxModifier = 1.47`), KHÔNG trừ Uy tín
 - **Chỉ xuất hiện sau khi thắng Đảo Chủ EP** (`hasDefeatedEP = true`)

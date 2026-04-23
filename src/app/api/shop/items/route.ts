@@ -10,7 +10,7 @@ import { authenticateRequest, GAME_CONSTANTS, rollRarity } from '@/lib/auth';
 const BUNDLE_DISCOUNT = 0.9; // Giảm 10% tổng giá cụm
 const BUNDLE_CHANCE_RATIO = 1 / 3; // Tỉ lệ cụm = 1/3 drop rate gốc
 const X2_PACK_CHANCE = 0.005; // 0.5% chance x2 Pack
-const PITY_INTERVAL = 10; // Pack thứ 8 đảm bảo 4-5★
+const PITY_INTERVAL = GAME_CONSTANTS.PITY_INTERVAL; // Pack thứ 10 đảm bảo 4-5★
 
 const CARD_TYPES_FOR_PRIORITY = [
   'ENGINE', 'TURBO', 'EXHAUST', 'COOLING', 'FILTER',

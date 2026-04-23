@@ -2,7 +2,10 @@
 
 import React, { useEffect, useState, useMemo, useRef, useCallback } from 'react';
 import { useGameStore } from '@/stores/useGameStore';
+import { BuyTpModal, TopupGoldModal } from '@/components/CurrencyModal/CurrencyModals';
 import { DndContext, DragOverlay, useDraggable, useDroppable, DragStartEvent, DragEndEvent, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
+import { motion, AnimatePresence } from 'framer-motion';
+
 import styles from './WorkshopScreen.module.css';
 
 // ═══════════════════════════════════════════════════════════
@@ -23,8 +26,8 @@ const CATEGORIES = [
   { type: 'CREW',       label: 'CREW',    icon: '👥' },
 ];
 
-// Nhóm thẻ linh kiện (không tính CREW, TOOL)
-const CORE_PART_TYPES = ['ENGINE','TURBO','EXHAUST','COOLING','FILTER','FUEL','SUSPENSION','TIRE','NITROUS'];
+// Nhóm thẻ linh kiện (không tính CREW)
+const CORE_PART_TYPES = ['ENGINE','TURBO','EXHAUST','COOLING','FILTER','FUEL','SUSPENSION','TIRE','NITROUS','TOOL'];
 
 // Max crew slots a user can have
 const MAX_CREW_SLOTS = 5;
@@ -220,6 +223,31 @@ function WorkshopSlot({ index, card, isScanning, isTested, vfxText, disabledDnd,
                 'border-cyan-600/40 hover:border-cyan-400 hover:bg-slate-700/80'
             } ${isCombo ? styles.comboGlowSlot : ''}`}
         >
+            {/* Combo Chain Border (Framer Motion) */}
+            {isCombo && (
+                <motion.svg
+                    className="absolute inset-0 w-full h-full pointer-events-none rounded-md z-[25]"
+                    style={{ overflow: 'visible' }}
+                >
+                    <motion.rect
+                        x="0"
+                        y="0"
+                        width="100%"
+                        height="100%"
+                        rx="6"
+                        ry="6"
+                        fill="none"
+                        stroke="#fbbf24"
+                        strokeWidth="3"
+                        strokeDasharray="10 5"
+                        strokeLinecap="round"
+                        initial={{ strokeDashoffset: 0 }}
+                        animate={{ strokeDashoffset: 60 }}
+                        transition={{ repeat: Infinity, duration: 1.5, ease: 'linear' }}
+                    />
+                </motion.svg>
+            )}
+
             {/* Combo badge (shown on the LEFT slot of the pair) */}
             {isCombo && comboName && (
                 <div className={styles.comboSlotBadge}>
@@ -263,11 +291,12 @@ function WorkshopSlot({ index, card, isScanning, isTested, vfxText, disabledDnd,
 // CREW SLOT
 // ═══════════════════════════════════════════════════════════
 
-function CrewSlot({ index, card, isUnlocked, disabledDnd }: {
+function CrewSlot({ index, card, isUnlocked, disabledDnd, onLockedClick }: {
     index: number;
     card: any | null;
     isUnlocked: boolean;
     disabledDnd?: boolean;
+    onLockedClick?: () => void;
 }) {
     const { isOver, setNodeRef: setDropRef } = useDroppable({
         id: `crew-${index}`,
@@ -282,9 +311,12 @@ function CrewSlot({ index, card, isUnlocked, disabledDnd }: {
 
     if (!isUnlocked) {
         return (
-            <div className="w-14 h-20 border-2 border-slate-800/60 rounded-md bg-slate-950/80 flex flex-col items-center justify-center relative shadow-inner opacity-50">
+            <div 
+                onClick={onLockedClick}
+                className="w-14 h-20 border-2 border-slate-800/60 rounded-md bg-slate-950/80 flex flex-col items-center justify-center relative shadow-inner opacity-50 hover:opacity-80 hover:border-emerald-500/50 cursor-pointer transition-all"
+            >
                 <span className="text-2xl">🔒</span>
-                <span className="text-[8px] text-slate-600 tracking-widest mt-1">LOCKED</span>
+                <span className="text-[8px] text-slate-600 tracking-widest mt-1">CLICK</span>
             </div>
         );
     }
@@ -445,15 +477,21 @@ export default function WorkshopScreen() {
     const registerTask = useGameStore((state) => state.registerTask);
     const completeTask = useGameStore((state) => state.completeTask);
     const updateGarageHealth = useGameStore((state) => state.updateGarageHealth);
+    const updateGold = useGameStore((state) => state.updateGold);
+    const updateTechPoints = useGameStore((state) => state.updateTechPoints);
+    const setUser = useGameStore((state) => state.setUser);
     const user = useGameStore((state) => state.user);
     const token = useGameStore((state) => state.token);
     const activeQuest = useGameStore((state) => state.activeQuest);
     const setSkipShadowIntro = useGameStore((state) => state.setSkipShadowIntro);
+    const activeBossMusic = useGameStore((state) => state.activeBossMusic);
+    const setActiveBossMusic = useGameStore((state) => state.setActiveBossMusic);
 
     // --- Loading readiness (global LoadingScreen) ---
     const [inventoryLoaded, setInventoryLoaded] = useState(false);
     const [combosLoaded, setCombosLoaded] = useState(false);
     const [wsBgLoaded, setWsBgLoaded] = useState(false);
+    const bgmRef = useRef<HTMLAudioElement | null>(null);
 
     // Đăng ký task ngay khi mount
     useEffect(() => {
@@ -461,6 +499,34 @@ export default function WorkshopScreen() {
         registerTask('ws-combos', 'Đang nạp danh sách combo...');
         registerTask('ws-bg', 'Đang bậy nắp capo...');
         // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
+    // --- Background Music Setup ---
+    // Nếu có boss music được truyền từ lobby → phát boss music
+    // Nếu không → phát nhạc workshop mặc định
+    useEffect(() => {
+        const trackSrc = activeBossMusic || '/gamemusic/workshop.mp3';
+        const bgm = new Audio(trackSrc);
+        bgm.loop = true;
+        bgm.volume = activeBossMusic ? 0.45 : 0.3;
+
+        let played = false;
+        const playMusic = () => {
+            if (played) return;
+            played = true;
+            bgm.play().catch((e) => console.error('Workshop BGM play blocked:', e));
+        };
+
+        playMusic();
+        document.addEventListener('click', playMusic, { once: true });
+        bgmRef.current = bgm;
+
+        return () => {
+            document.removeEventListener('click', playMusic);
+            bgm.pause();
+            bgm.currentTime = 0;
+        };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
     const [inventory, setInventory] = useState<any[]>([]);
@@ -503,6 +569,11 @@ export default function WorkshopScreen() {
 
     // Overheat penalty — no "làm lại" after fail
     const [penaltyApplied, setPenaltyApplied] = useState(false);
+
+    // Unlock crew slot modal
+    const [showUnlockModal, setShowUnlockModal] = useState(false);
+    const [unlockInfo, setUnlockInfo] = useState<{ nextCost: number; techPoints: number; currentSlots: number } | null>(null);
+    const [isUnlocking, setIsUnlocking] = useState(false);
 
     // ─── Install VFX (chớp / tóe lửa / rung) khi lắp thẻ vào slot ───
     // flashKey: increment mỗi lần để re-trigger animation overlay
@@ -644,6 +715,52 @@ export default function WorkshopScreen() {
         const usedInSlots = slots.filter(c => c && c.id === cardId).length;
         const usedInCrew = crewSlots.filter(c => c && c.id === cardId).length;
         return totalOwned - usedInSlots - usedInCrew;
+    };
+
+    // ─── Unlock Crew Slot Handler ───
+    const handleLockedCrewClick = async () => {
+        if (!token) return;
+        try {
+            const res = await fetch('/api/user/unlock-crew-slot', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const data = await res.json();
+            if (res.ok) {
+                setUnlockInfo({ nextCost: data.nextCost, techPoints: data.techPoints, currentSlots: data.currentSlots });
+                setShowUnlockModal(true);
+            }
+        } catch (e) {
+            console.error('Error fetching unlock info:', e);
+        }
+    };
+
+    const handleUnlockCrewSlot = async () => {
+        if (!token || isUnlocking) return;
+        setIsUnlocking(true);
+        try {
+            const res = await fetch('/api/user/unlock-crew-slot', {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+            });
+            const data = await res.json();
+            if (res.ok) {
+                setShowUnlockModal(false);
+                if (user) {
+                    setUser({
+                        ...user,
+                        crewSlots: data.crewSlots,
+                        techPoints: data.techPoints
+                    });
+                    updateTechPoints(data.techPoints);
+                }
+            } else {
+                alert(data.error || 'Không thể mở khóa slot');
+            }
+        } catch (e) {
+            console.error('Error unlocking crew slot:', e);
+        } finally {
+            setIsUnlocking(false);
+        }
     };
 
     // ─── Validation: can this card go into chassis slot? ───
@@ -913,20 +1030,35 @@ export default function WorkshopScreen() {
         // Gọi API complete quest để backend persist kết quả + penalty
         if (activeQuest?.id && token && testResult !== 'none') {
             try {
-                const status = testResult === 'success' ? 'COMPLETED' : 'FAILED';
+                // The backend requires 'SUCCESS' or 'FAILED'
+                const status = testResult === 'success' ? 'SUCCESS' : 'FAILED';
+                
+                // Collect used card IDs from slots and crew slots
+                const usedCardIds: number[] = [];
+                for (const slot of slots) {
+                    if (slot?.id) usedCardIds.push(slot.id);
+                }
+                for (const crew of crewSlots) {
+                    if (crew?.id) usedCardIds.push(crew.id);
+                }
+                
                 const res = await fetch(`/api/quest/${activeQuest.id}/complete`, {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ status }),
+                    body: JSON.stringify({ status, usedCardIds }),
                 });
                 if (res.ok) {
                     const data = await res.json();
                     // Cập nhật uy tín từ backend (đã trừ penalty hoặc cộng thưởng)
                     if (data.userState?.garageHealth !== undefined) {
                         updateGarageHealth(data.userState.garageHealth);
+                    }
+                    // Cập nhật vàng (bao gồm cả thưởng ngân sách nếu có)
+                    if (data.userState?.gold !== undefined) {
+                        updateGold(data.userState.gold);
                     }
                     // Game over check
                     if (data.gameOver) {
@@ -945,8 +1077,9 @@ export default function WorkshopScreen() {
             }
         }
         setSkipShadowIntro(true);
+        setActiveBossMusic(null); // Reset boss music khi về lobby
         transitionScreen('lobby');
-    }, [activeQuest, token, testResult, user, updateGarageHealth, setSkipShadowIntro, setScreen, transitionScreen]);
+    }, [activeQuest, token, testResult, user, slots, crewSlots, updateGarageHealth, updateGold, setSkipShadowIntro, setActiveBossMusic, setScreen, transitionScreen]);
 
     // ─── NPC image của quest hiện tại ───
     const isInNK = !!(user as any)?.isInNorthKorea;
@@ -986,6 +1119,21 @@ export default function WorkshopScreen() {
     const questImageUrl = activeQuest?.bossConfig?.imageUrl || null;
     const isBossQuest = activeQuest?.isBoss || false;
 
+    // Customer Budget (chỉ áp dụng cho quest thường)
+    const customerBudget: number = (!isBossQuest && activeQuest?.customerBudget > 0) ? activeQuest.customerBudget : 0;
+
+    // Ước lượng chi phí thẻ hiện tại (5* chỉ tính 50%)
+    const estimatedCardCost = useMemo(() => {
+        const allCards = [...slots.filter(Boolean), ...crewSlots.filter(Boolean)];
+        return allCards.reduce((sum, card: any) => {
+            const effectiveCost = card.rarity === 5 ? Math.floor((card.cost || 0) * 0.5) : (card.cost || 0);
+            return sum + effectiveCost;
+        }, 0);
+    }, [slots, crewSlots]);
+
+    // Budget profit dự kiến: budget - chi phí thẻ
+    const estimatedBudgetProfit = customerBudget > 0 ? Math.max(0, customerBudget - estimatedCardCost) : 0;
+
     const unlockedCrewSlots = user?.crewSlots || 1;
 
     return (
@@ -997,6 +1145,11 @@ export default function WorkshopScreen() {
         <div
             className={`relative min-h-screen bg-[url('/workshop-bg.png')] bg-cover bg-center overflow-hidden font-mono text-cyan-50 ${shakeActive ? styles.installShakeRoot : ''}`}
         >
+            {/* Note: Gold/TP display removed from Workshop - only shown in Lobby */}
+            {/* Modals kept for unlock crew slot functionality */}
+            <BuyTpModal />
+            <TopupGoldModal />
+
             {/* Install flash overlay (chớp trắng-vàng khi lắp thẻ) */}
             {flashKey !== 0 && (
                 <div key={`flash-${flashKey}`} className={styles.installFlashOverlay} />
@@ -1208,6 +1361,7 @@ export default function WorkshopScreen() {
                                     card={crewSlots[i]}
                                     isUnlocked={i < unlockedCrewSlots}
                                     disabledDnd={isTesting}
+                                    onLockedClick={handleLockedCrewClick}
                                 />
                             ))}
                         </div>
@@ -1418,6 +1572,32 @@ export default function WorkshopScreen() {
                                     <span className="font-bold text-amber-400 text-[10px]">{questGold.toLocaleString()} G</span>
                                 </div>
                             )}
+                            {/* Customer Budget — chỉ hiện cho quest thường */}
+                            {customerBudget > 0 && (
+                                <>
+                                    <div className="flex justify-between items-center border-t border-emerald-900/50 pt-1">
+                                        <span className="text-[8px] font-bold text-emerald-600 tracking-wider">NGÂN SÁCH KH</span>
+                                        <span className="font-bold text-emerald-400 text-[10px]">{customerBudget.toLocaleString()} G</span>
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-[8px] font-bold text-slate-500 tracking-wider">↳ CHI PHÍ THẺ</span>
+                                        <span className={`font-bold text-[10px] ${
+                                            estimatedCardCost === 0 ? 'text-slate-500' :
+                                            estimatedCardCost <= customerBudget ? 'text-cyan-400' : 'text-red-400'
+                                        }`}>{estimatedCardCost > 0 ? `${estimatedCardCost.toLocaleString()} G` : '---'}</span>
+                                    </div>
+                                    {estimatedCardCost > 0 && (
+                                        <div className="flex justify-between items-center">
+                                            <span className="text-[8px] font-bold text-slate-500 tracking-wider">↳ LỢI NHUẬN DỰ ĐỰ</span>
+                                            <span className={`font-bold text-[10px] ${
+                                                estimatedBudgetProfit > 0 ? 'text-emerald-300 drop-shadow-[0_0_4px_rgba(52,211,153,0.6)]' : 'text-red-400'
+                                            }`}>
+                                                {estimatedBudgetProfit > 0 ? `+${estimatedBudgetProfit.toLocaleString()} G` : 'âm lợi'}
+                                            </span>
+                                        </div>
+                                    )}
+                                </>
+                            )}
                             {questBanned && (
                                 <div className="flex justify-between items-center border-t border-slate-800/50 pt-1">
                                     <span className="text-[8px] font-bold text-slate-500 tracking-wider">ĐIỀU KIỆN</span>
@@ -1533,6 +1713,12 @@ export default function WorkshopScreen() {
                         {questGold > 0 && (
                             <span className="text-2xl text-amber-400 font-black tracking-widest drop-shadow-[0_0_15px_rgba(251,191,36,0.8)]">+{questGold.toLocaleString()} 💰</span>
                         )}
+                        {/* Budget profit bonus */}
+                        {estimatedBudgetProfit > 0 && (
+                            <span className="text-xl text-emerald-300 font-black tracking-widest drop-shadow-[0_0_12px_rgba(52,211,153,0.8)]">
+                                +{estimatedBudgetProfit.toLocaleString()} 💵 lời ngân sách!
+                            </span>
+                        )}
                         <button
                             onClick={goToLobby}
                             className="mt-3 px-8 py-3 bg-emerald-900/80 border-2 border-emerald-400 text-emerald-200 text-base font-bold tracking-[0.2em] rounded-lg uppercase cursor-pointer hover:bg-emerald-800 hover:text-white hover:shadow-[0_0_30px_rgba(16,185,129,0.6)] transition-all"
@@ -1569,6 +1755,56 @@ export default function WorkshopScreen() {
                     </div>
                 ) : null}
             </DragOverlay>
+
+            {/* Unlock Crew Slot Modal */}
+            {showUnlockModal && unlockInfo && (
+                <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/70 backdrop-blur-sm">
+                    <motion.div 
+                        initial={{ scale: 0.9, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        className="bg-slate-900 border-2 border-emerald-500/50 rounded-lg p-6 max-w-sm w-full mx-4 shadow-[0_0_30px_rgba(16,185,129,0.3)]"
+                    >
+                        <h3 className="text-xl font-bold text-emerald-400 mb-4 text-center">🔓 Mở Khóa Slot Crew</h3>
+                        
+                        <div className="space-y-3 mb-6">
+                            <div className="flex justify-between text-sm">
+                                <span className="text-slate-400">Slot hiện tại:</span>
+                                <span className="text-white font-bold">{unlockInfo.currentSlots} / 5</span>
+                            </div>
+                            <div className="flex justify-between text-sm">
+                                <span className="text-slate-400">Chi phí mở khóa:</span>
+                                <span className="text-emerald-400 font-bold">{unlockInfo.nextCost} TP</span>
+                            </div>
+                            <div className="flex justify-between text-sm">
+                                <span className="text-slate-400">TechPoints của bạn:</span>
+                                <span className={`font-bold ${unlockInfo.techPoints >= unlockInfo.nextCost ? 'text-emerald-400' : 'text-red-400'}`}>
+                                    {unlockInfo.techPoints} TP
+                                </span>
+                            </div>
+                        </div>
+
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => setShowUnlockModal(false)}
+                                className="flex-1 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded transition-colors"
+                            >
+                                Hủy
+                            </button>
+                            <button
+                                onClick={handleUnlockCrewSlot}
+                                disabled={isUnlocking || unlockInfo.techPoints < unlockInfo.nextCost}
+                                className={`flex-1 py-2 rounded font-bold transition-colors ${
+                                    unlockInfo.techPoints >= unlockInfo.nextCost
+                                        ? 'bg-emerald-600 hover:bg-emerald-500 text-white'
+                                        : 'bg-slate-600 text-slate-400 cursor-not-allowed'
+                                }`}
+                            >
+                                {isUnlocking ? 'Đang mở...' : 'Mở Khóa'}
+                            </button>
+                        </div>
+                    </motion.div>
+                </div>
+            )}
         </div>
         </DndContext>
     );

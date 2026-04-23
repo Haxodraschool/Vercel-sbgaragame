@@ -16,7 +16,7 @@ const CARD_TYPES_FOR_PRIORITY = [
   'FUEL', 'SUSPENSION', 'TIRE', 'NITROUS', 'TOOL',
 ];
 
-const PITY_INTERVAL = 10;
+const PITY_INTERVAL = GAME_CONSTANTS.PITY_INTERVAL;
 
 // =============================================
 // Helper: Tính loại thẻ ưu tiên

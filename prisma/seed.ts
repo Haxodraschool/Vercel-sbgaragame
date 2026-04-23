@@ -434,74 +434,72 @@ async function main() {
     }),
 
     // === 10. CREW EFFECTS (11 Crew Members) ===
-    // Normal Crew Effects
-    // index 140: The Cooler - Giảm 10% Heat cho Turbo
+    // Normal Crew Effects - CREW cards have IDs 186-201
+    // 186: The Cooler - Giảm 10% Heat cho Turbo
     prisma.cardEffect.create({
-      data: { cardId: 141, effectType: 'BUFF', triggerCondition: 'PASSIVE', targetStat: 'HEAT', effectValue: -10, description: 'Giải nhiệt cấp tốc: Giảm 10% Heat cho mọi Turbo.' },
+      data: { cardId: 186, effectType: 'BUFF', triggerCondition: 'PASSIVE', targetStat: 'HEAT', effectValue: -10, description: 'Giải nhiệt cấp tốc: Giảm 10% Heat cho mọi Turbo.' },
     }),
-    // index 141: The Flow - Ống xả +15 Power
+    // 187: The Flow - Ống xả +15 Power
     prisma.cardEffect.create({
-      data: { cardId: 142, effectType: 'BUFF', triggerCondition: 'PASSIVE', targetStat: 'POWER', effectValue: 15, description: 'Luồng khí mượt mà: Ống xả +15 Power, 0 Heat thêm.' },
+      data: { cardId: 187, effectType: 'BUFF', triggerCondition: 'PASSIVE', targetStat: 'POWER', effectValue: 15, description: 'Luồng khí mượt mà: Ống xả +15 Power, 0 Heat thêm.' },
     }),
-    // index 142: The Stuntman - Chậm nổ 2s (handled by frontend flag)
+    // 188: The Accountant - Hoàn 10% gold
     prisma.cardEffect.create({
-      data: { cardId: 143, effectType: 'UTILITY', triggerCondition: 'PASSIVE', targetStat: 'HEAT', effectValue: 5, description: 'Kiểm soát giới hạn: Ngưỡng nổ +5% khi Heat > 95%.' },
+      data: { cardId: 188, effectType: 'UTILITY', triggerCondition: 'PASSIVE', targetStat: 'GOLD', effectValue: 10, description: 'Tối ưu ngân sách: Hoàn trả 10% tiền mua linh kiện.' },
     }),
-    // index 143: The Accountant - Hoàn 10% gold
+    // 189: The Stuntman - Ngưỡng nổ +5
     prisma.cardEffect.create({
-      data: { cardId: 144, effectType: 'UTILITY', triggerCondition: 'PASSIVE', targetStat: 'GOLD', effectValue: 10, description: 'Tối ưu ngân sách: Hoàn trả 10% tiền mua linh kiện.' },
+      data: { cardId: 189, effectType: 'UTILITY', triggerCondition: 'PASSIVE', targetStat: 'HEAT', effectValue: 5, description: 'Kiểm soát giới hạn: Ngưỡng nổ +5 (từ 100 lên 105).' },
     }),
-    // index 144: The Artist - +15% gold tip
+    // 190: The Artist - +15% gold tip
     prisma.cardEffect.create({
-      data: { cardId: 145, effectType: 'UTILITY', triggerCondition: 'PASSIVE', targetStat: 'GOLD', effectValue: 15, description: 'Vẻ ngoài hào nhoáng: +15% tiền tip ngẫu nhiên.' },
+      data: { cardId: 190, effectType: 'UTILITY', triggerCondition: 'PASSIVE', targetStat: 'GOLD', effectValue: 15, description: 'Vẻ ngoài hào nhoáng: +15% tiền tip ngẫu nhiên.' },
     }),
-    // index 145: The Grip - +20 Stability nếu Power > 400
+    // 191: The Grip - +20 Stability nếu Power > 400
     prisma.cardEffect.create({
-      data: { cardId: 146, effectType: 'BUFF', triggerCondition: 'PASSIVE', targetStat: 'STABILITY', effectValue: 20, description: 'Bám đường tuyệt đối: +20 Stability cho xe > 400 HP.' },
+      data: { cardId: 191, effectType: 'BUFF', triggerCondition: 'PASSIVE', targetStat: 'STABILITY', effectValue: 20, description: 'Bám đường tuyệt đối: +20 Stability cho xe > 400 HP.' },
     }),
-
-    // === 5 NEW Normal Crew Effects (Redesigned) ===
-    // index 146: The Fuel Doctor - Slot FUEL x2 Power, x1.5 Heat
+    // 192: The Fuel Doctor - Slot FUEL x2 Power, x1.5 Heat
     prisma.cardEffect.create({
-      data: { cardId: 147, effectType: 'BUFF', triggerCondition: 'PASSIVE', targetStat: 'POWER', effectValue: 2.0, description: 'Pha Chế Hoàn Hảo: Slot FUEL x2 Power, nhưng Heat x1.5.' },
+      data: { cardId: 192, effectType: 'BUFF', triggerCondition: 'PASSIVE', targetStat: 'POWER', effectValue: 2.0, description: 'Pha Chế Hoàn Hảo: Slot FUEL x2 Power, nhưng Heat x1.5.' },
     }),
-    // index 147: The Welder - Slot EXHAUST +10 Stability
+    // 193: The Welder - Slot EXHAUST +10 Stability
     prisma.cardEffect.create({
-      data: { cardId: 148, effectType: 'BUFF', triggerCondition: 'PASSIVE', targetStat: 'STABILITY', effectValue: 10, description: 'Mối Hàn Hoàn Hảo: Slot EXHAUST +10 Stability.' },
+      data: { cardId: 193, effectType: 'BUFF', triggerCondition: 'PASSIVE', targetStat: 'STABILITY', effectValue: 10, description: 'Mối Hàn Hoàn Hảo: Slot EXHAUST +10 Stability.' },
     }),
-    // index 148: The Wireman - Slot NITROUS xoá trừ Stability
+    // 194: The Wireman - Slot NITROUS xoá trừ Stability
     prisma.cardEffect.create({
-      data: { cardId: 149, effectType: 'BUFF', triggerCondition: 'PASSIVE', targetStat: 'STABILITY', effectValue: 0, description: 'Đấu Nối Thần Tốc: Slot NITROUS không trừ Stability.' },
+      data: { cardId: 194, effectType: 'BUFF', triggerCondition: 'PASSIVE', targetStat: 'STABILITY', effectValue: 0, description: 'Đấu Nối Thần Tốc: Slot NITROUS không trừ Stability.' },
     }),
-    // index 149: The Feng Shui - FILTER+ENGINE+COOLING cùng rarity → +25 Stability
+    // 195: The Night Rider - Ngày 25+: TIRE & TURBO +15 Power
     prisma.cardEffect.create({
-      data: { cardId: 150, effectType: 'BUFF', triggerCondition: 'PASSIVE', targetStat: 'STABILITY', effectValue: 25, description: 'Ngũ Hành Cân Bằng: FILTER+ENGINE+COOLING cùng sao → +25 Stability.' },
+      data: { cardId: 195, effectType: 'BUFF', triggerCondition: 'PASSIVE', targetStat: 'POWER', effectValue: 15, description: 'Bóng Đêm Tốc Độ: Từ Ngày 25, TIRE & TURBO +15 Power mỗi slot.' },
     }),
-    // index 150: The Night Rider - Ngày 25+: TIRE & TURBO +15 Power
+    // 196: The Feng Shui - FILTER+ENGINE+COOLING cùng rarity → +25 Stability
     prisma.cardEffect.create({
-      data: { cardId: 151, effectType: 'BUFF', triggerCondition: 'PASSIVE', targetStat: 'POWER', effectValue: 15, description: 'Bóng Đêm Tốc Độ: Từ Ngày 25, TIRE & TURBO +15 Power mỗi slot.' },
+      data: { cardId: 196, effectType: 'BUFF', triggerCondition: 'PASSIVE', targetStat: 'STABILITY', effectValue: 25, description: 'Ngũ Hành Cân Bằng: FILTER+ENGINE+COOLING cùng sao → +25 Stability.' },
     }),
 
-    // Hidden Crew Effects (indices shifted +5)
-    // index 151: The Fugitive - Bypass Boss conditions
+    // Hidden Crew Effects (Achievement unlocks)
+    // 197: The Fugitive - Bypass Boss conditions
     prisma.cardEffect.create({
-      data: { cardId: 152, effectType: 'UTILITY', triggerCondition: 'PASSIVE', targetStat: 'POWER', effectValue: 0, description: 'Chạy trốn: Bypass mọi điều kiện Boss.' },
+      data: { cardId: 197, effectType: 'UTILITY', triggerCondition: 'PASSIVE', targetStat: 'POWER', effectValue: 0, description: 'Chạy trốn: Bypass mọi điều kiện Boss.' },
     }),
-    // index 152: Ghost Mechanic - 1x cứu nổ
+    // 198: Ghost Mechanic - 1x cứu nổ
     prisma.cardEffect.create({
-      data: { cardId: 153, effectType: 'UTILITY', triggerCondition: 'PASSIVE', targetStat: 'HEAT', effectValue: 50, description: 'Hồi sinh: Khi Heat >= 100 (nổ máy), reset Heat về 50 và tiếp tục duyệt slot kế tiếp. Chỉ 1 lần/lượt chạy thử.' },
+      data: { cardId: 198, effectType: 'UTILITY', triggerCondition: 'PASSIVE', targetStat: 'HEAT', effectValue: 50, description: 'Hồi sinh: Khi Heat >= 100 (nổ máy), reset Heat về 50 và tiếp tục duyệt slot kế tiếp. Chỉ 1 lần/lượt chạy thử.' },
     }),
-    // index 153: The CEO - Mượn 1 Legendary
+    // 199: The CEO - Mượn 1 Legendary
     prisma.cardEffect.create({
-      data: { cardId: 154, effectType: 'UTILITY', triggerCondition: 'PASSIVE', targetStat: 'POWER', effectValue: 0, description: 'Đầu tư mạo hiểm: Mượn 1 Legendary miễn phí.' },
+      data: { cardId: 199, effectType: 'UTILITY', triggerCondition: 'PASSIVE', targetStat: 'POWER', effectValue: 0, description: 'Đầu tư mạo hiểm: Mượn 1 Legendary miễn phí.' },
     }),
-    // index 154: Black-Hat - Đảo ngược Heat ↔ Stability
+    // 200: Black-Hat - Đảo ngược Heat ↔ Stability
     prisma.cardEffect.create({
-      data: { cardId: 155, effectType: 'UTILITY', triggerCondition: 'PASSIVE', targetStat: 'HEAT_STABILITY_SWAP', effectValue: 1, description: 'Chỉnh sửa mã nguồn: Đảo ngược chỉ số Heat ↔ Stability của mọi thẻ trên xe.' },
+      data: { cardId: 200, effectType: 'UTILITY', triggerCondition: 'PASSIVE', targetStat: 'HEAT_STABILITY_SWAP', effectValue: 1, description: 'Chỉnh sửa mã nguồn: Đảo ngược chỉ số Heat ↔ Stability của mọi thẻ trên xe.' },
     }),
-    // index 155: The Legend - Common/Uncommon → Rare stats
+    // 201: The Legend - Common/Uncommon → Rare stats
     prisma.cardEffect.create({
-      data: { cardId: 156, effectType: 'BUFF', triggerCondition: 'PASSIVE', targetStat: 'POWER', effectValue: 0, description: 'Bàn tay vàng: Common/Uncommon nâng chỉ số thành Rare.' },
+      data: { cardId: 201, effectType: 'BUFF', triggerCondition: 'PASSIVE', targetStat: 'POWER', effectValue: 0, description: 'Bàn tay vàng: Common/Uncommon nâng chỉ số thành Rare.' },
     }),
   ]);
 
@@ -629,32 +627,32 @@ async function main() {
 
   await Promise.all([
     prisma.bossConfig.create({
-      data: { name: 'Ông Hoàng Drift', description: '"Nghệ thuật Drift! Cấm dùng phuộc xịn (SUSPENSION ≥ 3★). Tổng Stability cuối cùng ≥ 150!"', specialCondition: 'DRIFT_KING_CHALLENGE', requiredPower: 400, rewardGold: 1200 },
+      data: { name: 'Ông Hoàng Drift', description: '"Nghệ thuật Drift! Cấm dùng phuộc xịn (SUSPENSION ≥ 3★). Tổng Stability cuối cùng ≥ 50!"', specialCondition: 'DRIFT_KING_CHALLENGE', requiredPower: 350, rewardGold: 1500 },
     }),
     prisma.bossConfig.create({
-      data: { name: 'Đảo chủ EP', description: '"Có đồng ý lên đảo của ta tham gia cuộc thi không?"', specialCondition: 'EP_ISLAND_CHOICE', requiredPower: 500, rewardGold: 2000 },
+      data: { name: 'Đảo Chủ EP', description: '"Có đồng ý lên đảo của ta tham gia cuộc thi không?"', specialCondition: 'EP_ISLAND_CHOICE', requiredPower: 467, rewardGold: 2500 },
     }),
     prisma.bossConfig.create({
-      data: { name: 'Nhà Sưu Tập', description: '"Chỉ dùng thẻ 3 sao trở lên thôi nhé!"', specialCondition: 'MIN_RARITY_3', requiredPower: 450, rewardGold: 1500 },
+      data: { name: 'Nhà Sưu Tập', description: '"Chỉ dùng thẻ 3 sao trở lên thôi nhé!"', specialCondition: 'MIN_RARITY_3', requiredPower: 400, rewardGold: 1800 },
     }),
     prisma.bossConfig.create({
-      data: { name: 'Chủ Tịch Kim', description: '"Gia nhập triều tiên ko?"', specialCondition: 'KIM_JONG_UN', requiredPower: 500, rewardGold: 3000 },
+      data: { name: 'Chủ Tịch Kim', description: '"Gia nhập triều tiên ko?"', specialCondition: 'KIM_JONG_UN', requiredPower: 365, rewardGold: 3000 },
     }),
     prisma.bossConfig.create({
-      data: { name: 'Cô Gái Liều Lĩnh', description: '"Đạp lút ga! Heat cuối cùng phải sát ngưỡng nổ (≥ 85%)!"', specialCondition: 'DAREDEVIL_DEATH_WISH', requiredPower: 400, rewardGold: 1800 },
+      data: { name: 'Cô Gái Liều Lĩnh', description: '"Đạp lút ga! Heat cuối cùng phải sát ngưỡng nổ (≥ 75%)!"', specialCondition: 'DAREDEVIL_DEATH_WISH', requiredPower: 325, rewardGold: 2100 },
     }),
     prisma.bossConfig.create({
       data: { name: 'Đỗ Nam Trung', description: '"Make Garage Great Again! Mọi thẻ 5* đều bị khóa!"', specialCondition: 'DONALD_TRUMP', requiredPower: 470, rewardGold: 4700 },
     }),
 
     prisma.bossConfig.create({
-      data: { name: 'Huyền Thoại F1', description: '"Chỉ có thể dùng Engine và Turbo. No Cooling!"', specialCondition: 'NO_COOLING', requiredPower: 550, rewardGold: 2200 },
+      data: { name: 'Huyền Thoại F1', description: '"Chỉ có thể dùng Engine và Turbo. No Cooling!"', specialCondition: 'NO_COOLING', requiredPower: 450, rewardGold: 2500 },
     }),
     prisma.bossConfig.create({
-      data: { name: 'Kẻ Bí Ẩn', description: '"..."', specialCondition: null, requiredPower: 800, rewardGold: 5000 },
+      data: { name: 'Kẻ Bí Ẩn', description: '"..."', specialCondition: null, requiredPower: 666, rewardGold: 5500 },
     }),
     prisma.bossConfig.create({
-      data: { name: 'Chúa tể dầu em bé', description: '"DO YOU LOVE ME??!??"', specialCondition: 'BABY_OIL_CHOICE', requiredPower: 420, rewardGold: 2500 },
+      data: { name: 'Chúa Tể Dầu Em Bé', description: '"DO YOU LOVE ME??!??"', specialCondition: 'BABY_OIL_CHOICE', requiredPower: 369, rewardGold: 3000 },
     }),
     prisma.bossConfig.create({
       data: { name: 'Nga Đại Đế', description: '"Vodka? Nyet? Da? Hãy chứng minh sức mạnh cho Đế Chế!"', specialCondition: 'RUSSIA_EMPEROR', requiredPower: 1, rewardGold: 0 },
@@ -749,16 +747,25 @@ async function main() {
 
   await Promise.all([
     prisma.questConfig.create({
-      data: { minLevel: 1, maxLevel: 3, minPowerReq: 100, maxPowerReq: 250, minGoldReward: 100, maxGoldReward: 250, minCustomers: 1, maxCustomers: 3 },
+      data: { minLevel: 1, maxLevel: 3, minPowerReq: 75, maxPowerReq: 125, minGoldReward: 200, maxGoldReward: 300, minCustomers: 1, maxCustomers: 3 },
     }),
     prisma.questConfig.create({
-      data: { minLevel: 4, maxLevel: 7, minPowerReq: 200, maxPowerReq: 400, minGoldReward: 200, maxGoldReward: 500, minCustomers: 2, maxCustomers: 4 },
+      data: { minLevel: 4, maxLevel: 7, minPowerReq: 125, maxPowerReq: 180, minGoldReward: 400, maxGoldReward: 600, minCustomers: 2, maxCustomers: 4 },
     }),
     prisma.questConfig.create({
-      data: { minLevel: 8, maxLevel: 12, minPowerReq: 350, maxPowerReq: 600, minGoldReward: 400, maxGoldReward: 900, minCustomers: 3, maxCustomers: 5 },
+      data: { minLevel: 8, maxLevel: 12, minPowerReq: 180, maxPowerReq: 300, minGoldReward: 800, maxGoldReward: 1200, minCustomers: 3, maxCustomers: 5 },
     }),
     prisma.questConfig.create({
-      data: { minLevel: 13, maxLevel: 99, minPowerReq: 500, maxPowerReq: 800, minGoldReward: 600, maxGoldReward: 1500, minCustomers: 3, maxCustomers: 6 },
+      data: { minLevel: 13, maxLevel: 20, minPowerReq: 250, maxPowerReq: 350, minGoldReward: 1300, maxGoldReward: 1800, minCustomers: 3, maxCustomers: 6 },
+    }),
+    prisma.questConfig.create({
+      data: { minLevel: 21, maxLevel: 30, minPowerReq: 300, maxPowerReq: 380, minGoldReward: 1500, maxGoldReward: 2500, minCustomers: 3, maxCustomers: 6 },
+    }),
+    prisma.questConfig.create({
+      data: { minLevel: 31, maxLevel: 40, minPowerReq: 300, maxPowerReq: 400, minGoldReward: 1500, maxGoldReward: 3500, minCustomers: 3, maxCustomers: 7 },
+    }),
+    prisma.questConfig.create({
+      data: { minLevel: 41, maxLevel: 99, minPowerReq: 350, maxPowerReq: 400, minGoldReward: 2000, maxGoldReward: 5000, minCustomers: 3, maxCustomers: 8 },
     }),
   ]);
 

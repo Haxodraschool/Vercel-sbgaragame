@@ -85,8 +85,8 @@ export async function POST(request: NextRequest) {
     const isBossDay = user.currentDay % GAME_CONSTANTS.BOSS_INTERVAL === 0;
 
     if (user.currentDay <= GAME_CONSTANTS.FIXED_QUEST_DAYS) {
-      // Ngày 1-5: số lượng khách cố định
-      customerCount = Math.min(user.currentDay, 4);
+      // Ngày 1-5: số lượng khách tăng dần
+      customerCount = Math.min(user.currentDay + 2, 8);
     } else {
       // Ngày 6+: Random
       const config = await prisma.questConfig.findFirst({
@@ -96,17 +96,24 @@ export async function POST(request: NextRequest) {
         },
       });
       customerCount = config
-        ? randomInt(config.minCustomers, config.maxCustomers)
-        : randomInt(2, 5);
+        ? randomInt(config.minCustomers, Math.max(config.maxCustomers, 8))
+        : randomInt(4, 8);
     }
 
     // Get quest config for power/gold range
-    const questConfig = await prisma.questConfig.findFirst({
+    let questConfig = await prisma.questConfig.findFirst({
       where: {
         minLevel: { lte: user.level },
         maxLevel: { gte: user.level },
       },
     });
+
+    // Fallback if no exact match found (e.g. user level > 99 or DB not seeded)
+    if (!questConfig) {
+      questConfig = await prisma.questConfig.findFirst({
+        orderBy: { maxLevel: 'desc' }
+      });
+    }
 
     const questsData = [];
 

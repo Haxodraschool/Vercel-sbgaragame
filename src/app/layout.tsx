@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { VT323 } from "next/font/google";
-import { Toaster } from "sonner";
 import "./globals.css";
 
 const vt323 = VT323({
@@ -24,17 +23,6 @@ export default function RootLayout({
     <html lang="vi" suppressHydrationWarning>
       <body className={vt323.variable} suppressHydrationWarning>
         {children}
-        <Toaster
-          position="top-right"
-          richColors
-          expand
-          closeButton
-          toastOptions={{
-            style: {
-              fontFamily: "var(--font-primary)",
-            },
-          }}
-        />
       </body>
     </html>
   );
