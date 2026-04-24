@@ -24,7 +24,7 @@ function createPrismaClient(): PrismaClient {
   
   const pool = new pg.Pool({ 
     connectionString: databaseUrl,
-    ssl: databaseUrl.includes('neon.tech') ? { rejectUnauthorized: false } : false
+    ssl: databaseUrl.includes('neon.tech') ? { rejectUnauthorized: false } : undefined
   });
   const adapter = new PrismaPg(pool);
   return new PrismaClient({ adapter });
