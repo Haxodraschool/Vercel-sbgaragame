@@ -3,6 +3,12 @@
 import "dotenv/config";
 import { defineConfig } from "prisma/config";
 
+// Try multiple environment variable names that Neon/Vercel might use
+const databaseUrl = process.env.DATABASE_URL || 
+                    process.env.POSTGRES_URL || 
+                    process.env.DATABASE_POSTGRES_URL ||
+                    process.env.DATABASE_POSTGRES_PRISMA_URL;
+
 export default defineConfig({
   schema: "prisma/schema.prisma",
   migrations: {
@@ -10,6 +16,6 @@ export default defineConfig({
     seed: "npx ts-node prisma/seed.ts",
   },
   datasource: {
-    url: process.env["DATABASE_URL"],
+    url: databaseUrl,
   },
 });
