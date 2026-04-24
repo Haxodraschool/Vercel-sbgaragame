@@ -106,8 +106,13 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('Register error:', error);
+    console.error('Error details:', JSON.stringify(error, null, 2));
+    console.error('DATABASE_URL exists:', !!process.env.DATABASE_URL);
+    console.error('DATABASE_URL prefix:', process.env.DATABASE_URL?.substring(0, 20));
+    
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
-      { error: 'Lỗi server khi đăng ký' },
+      { error: 'Lỗi server khi đăng ký', details: errorMessage },
       { status: 500 }
     );
   }

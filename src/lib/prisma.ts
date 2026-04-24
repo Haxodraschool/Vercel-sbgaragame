@@ -10,7 +10,22 @@ const globalForPrisma = globalThis as unknown as {
 };
 
 function createPrismaClient(): PrismaClient {
-  const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
+  // Try multiple environment variable names that Neon/Vercel might use
+  const databaseUrl = process.env.DATABASE_URL || 
+                      process.env.POSTGRES_URL || 
+                      process.env.DATABASE_POSTGRES_URL ||
+                      process.env.DATABASE_POSTGRES_PRISMA_URL;
+  
+  if (!databaseUrl) {
+    throw new Error('DATABASE_URL environment variable is not set');
+  }
+  
+  console.log('Database URL prefix:', databaseUrl.substring(0, 30));
+  
+  const pool = new pg.Pool({ 
+    connectionString: databaseUrl,
+    ssl: databaseUrl.includes('neon.tech') ? { rejectUnauthorized: false } : false
+  });
   const adapter = new PrismaPg(pool);
   return new PrismaClient({ adapter });
 }
