@@ -44,15 +44,15 @@ function getBossMusic(quest: QuestData): string | null {
  */
 const SOFA_SEATS = [
   // Left sofa — facing left (from left to right)
-  { left: '21%', top: '40%', sofa: 'left' },
-  { left: '28%', top: '39%', sofa: 'left' },
-  { left: '35%', top: '38%', sofa: 'left' },
-  { left: '41%', top: '37%', sofa: 'left' },
+  { left: '21%', top: '38.5%', sofa: 'left' },
+  { left: '28%', top: '37%', sofa: 'left' },
+  { left: '35%', top: '36%', sofa: 'left' },
+  { left: '41%', top: '35%', sofa: 'left' },
   // Right sofa — facing right (from left to right)
-  { left: '56%', top: '37%', sofa: 'right' }, 
-  { left: '63%', top: '39%', sofa: 'right' },
-  { left: '73%', top: '41%', sofa: 'right' },
-  { left: '82%', top: '41%', sofa: 'right' },
+  { left: '54%', top: '36%', sofa: 'right' }, 
+  { left: '63%', top: '37.5%', sofa: 'right' },
+  { left: '73%', top: '39%', sofa: 'right' },
+  { left: '82%', top: '40%', sofa: 'right' },
 ];
 
 // Red X position where big shadow walks to before splitting
@@ -485,14 +485,15 @@ export default function ShadowManager({ quests, onQuestAccepted, lobbyBgmRef }: 
         visibleQuests.map((quest, i) => {
           if (i >= spawnedCount) return null; // Wait for sequential spawn
           const seatIndex = i % SOFA_SEATS.length;
-          // Calculate z-index for left sofa sprites relative to the 2nd sprite (index 1)
+          // Calculate z-index for left sofa sprites: frame càng trái càng cao z-index
           // Left sofa indices: 0, 1, 2, 3. Base z-index is 15 from CSS.
-          // Index 0 (1st): +1, Index 1 (2nd): base, Index 2 (3rd): -1, Index 3 (4th): -2
+          // Index 0 (trái nhất): cao nhất, Index 3: thấp nhất
           let zIndexOverride: number | undefined;
-          if (seatIndex === 0) zIndexOverride = 16; // 15 + 1
-          else if (seatIndex === 2) zIndexOverride = 14; // 15 - 1
-          else if (seatIndex === 3) zIndexOverride = 13; // 15 - 2
-          // seatIndex === 1 uses default z-index: 15
+          if (seatIndex === 0) zIndexOverride = 18; // cao nhất
+          else if (seatIndex === 1) zIndexOverride = 17;
+          else if (seatIndex === 2) zIndexOverride = 16;
+          else if (seatIndex === 3) zIndexOverride = 15; // thấp nhất
+          // Right sofa uses default z-index: 15
           return (
             <React.Fragment key={quest.id}>
               <ShadowCustomer

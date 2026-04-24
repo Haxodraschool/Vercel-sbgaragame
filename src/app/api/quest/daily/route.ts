@@ -86,7 +86,7 @@ export async function POST(request: NextRequest) {
 
     if (user.currentDay <= GAME_CONSTANTS.FIXED_QUEST_DAYS) {
       // Ngày 1-5: số lượng khách tăng dần
-      customerCount = Math.min(user.currentDay + 2, 8);
+      customerCount = Math.min(user.currentDay, 4);
     } else {
       // Ngày 6+: Random
       const config = await prisma.questConfig.findFirst({
@@ -183,15 +183,19 @@ export async function POST(request: NextRequest) {
         }
         
         const randomBoss = bossPool[Math.floor(Math.random() * bossPool.length)];
-        questsData.push({
+        const bossQuest = {
           userId: auth.userId,
           dayNumber: user.currentDay,
           isBoss: true,
           bossConfigId: randomBoss.id,
           requiredPower: randomBoss.requiredPower,
           rewardGold: randomBoss.rewardGold,
+          customerBudget: 0, // Boss không có ngân sách khách
           status: 'PENDING' as const,
-        });
+        };
+        // Random vị trí boss trong array để trà trộn với khách thường
+        const randomIndex = Math.floor(Math.random() * (questsData.length + 1));
+        questsData.splice(randomIndex, 0, bossQuest);
       }
     }
 

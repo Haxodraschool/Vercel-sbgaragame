@@ -3,6 +3,13 @@ import 'dotenv/config';
 import { PrismaClient } from '@prisma/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 import pg from 'pg';
+import bcrypt from 'bcryptjs';
+
+const SALT_ROUNDS = 10;
+
+async function hashPassword(password: string): Promise<string> {
+  return bcrypt.hash(password, SALT_ROUNDS);
+}
 
 const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
 const adapter = new PrismaPg(pool);
@@ -881,7 +888,47 @@ async function main() {
   console.log('✅ Đã tạo 6 starter perks\n');
 
   console.log('🎉 SEED HOÀN TẤT! SB-GARAGE sẵn sàng hoạt động!');
-  console.log(`📊 Tổng kết:`);
+  console.log('📊 Tổng kết:');
+
+  // ============================================================
+  // TẠO ADMIN ACCOUNT MẶC ĐỊNH
+  // ============================================================
+  console.log('🔐 Tạo admin account mặc định...');
+  const adminUsername = 'bigadmin';
+  const adminPassword = '123456';
+
+  const existingAdmin = await prisma.user.findUnique({
+    where: { username: adminUsername },
+  });
+
+  if (existingAdmin) {
+    await prisma.user.update({
+      where: { username: adminUsername },
+      data: { role: 'ADMIN' },
+    });
+    console.log('✅ Đã cập nhật role ADMIN cho user hiện có');
+  } else {
+    const hashedPassword = await hashPassword(adminPassword);
+    await prisma.user.create({
+      data: {
+        username: adminUsername,
+        password: hashedPassword,
+        role: 'ADMIN',
+        gold: 0,
+        level: 1,
+        exp: 0,
+        currentDay: 1,
+        garageHealth: 100,
+        techPoints: 0,
+        crewSlots: 1,
+        isFinalRound: false,
+      },
+    });
+    console.log('✅ Đã tạo admin account mặc định');
+    console.log(`   Username: ${adminUsername}`);
+    console.log(`   Password: ${adminPassword}`);
+  }
+
   console.log(`   - ${cards.length} thẻ bài (185 linh kiện + 6 crew thường + 5 crew ẩn)`);
   console.log(`   - 34 hiệu ứng đặc biệt (23 linh kiện + 11 crew)`);
   console.log(`   - 25 combos`);
