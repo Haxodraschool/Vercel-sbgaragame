@@ -84,6 +84,7 @@ type ManagerPhase =
 interface Props {
   quests: QuestData[];
   onQuestAccepted: (quest: QuestData) => void;
+  onQuestRejected?: (quest: QuestData) => void;
   lobbyBgmRef?: React.RefObject<HTMLAudioElement | null>; // ← nhận từ LobbyScreen
 }
 
