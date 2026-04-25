@@ -86,37 +86,45 @@ export default function LoadingScreen({ isLoading }: LoadingScreenProps) {
       <div className={styles.scanlines} />
 
       <div className={styles.box}>
-        {/* Cờ lê + Ốc vít */}
+        {/* Ốc vít với hiệu ứng tóe lửa */}
         <div className={styles.gearBox}>
-          <svg className={styles.wrench} viewBox="0 0 64 64" width={120} height={120}>
-            <defs>
-              <linearGradient id="wg" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0%" stopColor="#b7c3d0" />
-                <stop offset="45%" stopColor="#e3e9ef" />
-                <stop offset="100%" stopColor="#6d7986" />
-              </linearGradient>
-            </defs>
-            <path
-              d="M42 8 a10 10 0 0 0 -8 17 L10 49 a4 4 0 0 0 0 5 l0 0 a4 4 0 0 0 5 0 L39 30 a10 10 0 0 0 15 -12 l-7 7 -6 -6 7 -7 A10 10 0 0 0 42 8 z"
-              fill="url(#wg)"
-              stroke="#222a33"
-              strokeWidth="1.5"
-              strokeLinejoin="round"
-            />
-            <path d="M12 52 l22 -22" stroke="#ffffff55" strokeWidth="1.2" strokeLinecap="round" fill="none" />
-          </svg>
-
-          <svg className={`${styles.bolt} ${exitPhase ? styles.drop : ''}`} viewBox="0 0 32 32" width={40} height={40}>
+          <svg className={`${styles.bolt} ${exitPhase ? styles.drop : ''}`} viewBox="0 0 32 32" width={80} height={80}>
             <defs>
               <radialGradient id="bg" cx="50%" cy="40%" r="60%">
                 <stop offset="0%" stopColor="#d8dee5" />
                 <stop offset="70%" stopColor="#7a838f" />
                 <stop offset="100%" stopColor="#363c44" />
               </radialGradient>
+              <filter id="spark">
+                <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3" result="noise" />
+                <feDisplacementMap in="SourceGraphic" in2="noise" scale="2" />
+              </filter>
             </defs>
             <polygon points="16,3 28,10 28,22 16,29 4,22 4,10" fill="url(#bg)" stroke="#10151b" strokeWidth="1.4" strokeLinejoin="round" />
             <polygon points="16,9 23,13 23,19 16,23 9,19 9,13" fill="#1a1f26" stroke="#0a0d11" strokeWidth="0.8" />
             <path d="M12 16 h8 M16 12 v8" stroke="#4a525c" strokeWidth="1.4" strokeLinecap="round" />
+            
+            {/* Welding sparks */}
+            {!exitPhase && (
+              <g className={styles.sparks}>
+                <circle cx="16" cy="16" r="3" fill="#ff6b00" opacity="0.8">
+                  <animate attributeName="r" values="2;5;2" dur="0.3s" repeatCount="indefinite" />
+                  <animate attributeName="opacity" values="0.8;0.3;0.8" dur="0.3s" repeatCount="indefinite" />
+                </circle>
+                <circle cx="20" cy="12" r="1.5" fill="#ffcc00" opacity="0.6">
+                  <animate attributeName="cx" values="20;18;20" dur="0.2s" repeatCount="indefinite" />
+                  <animate attributeName="cy" values="12;14;12" dur="0.2s" repeatCount="indefinite" />
+                </circle>
+                <circle cx="12" cy="20" r="1" fill="#ff9900" opacity="0.5">
+                  <animate attributeName="cx" values="12;14;12" dur="0.25s" repeatCount="indefinite" />
+                  <animate attributeName="cy" values="20;18;20" dur="0.25s" repeatCount="indefinite" />
+                </circle>
+                <circle cx="22" cy="18" r="0.8" fill="#ffff00" opacity="0.4">
+                  <animate attributeName="cx" values="22;24;22" dur="0.15s" repeatCount="indefinite" />
+                  <animate attributeName="cy" values="18;16;18" dur="0.15s" repeatCount="indefinite" />
+                </circle>
+              </g>
+            )}
           </svg>
         </div>
 

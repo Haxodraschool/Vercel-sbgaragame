@@ -859,6 +859,17 @@ export default function WorkshopScreen() {
 
             } else if (source === 'slot') {
                 const sourceIndex = active.data.current?.index as number;
+                const sourceCard = slots[sourceIndex];
+                
+                // Validate the swap to prevent duplicate types
+                if (sourceCard) {
+                    const validation = canDropToSlot(sourceCard);
+                    if (!validation.ok) {
+                        triggerReject(targetIndex);
+                        return;
+                    }
+                }
+                
                 // Swap between slots
                 const temp = newSlots[targetIndex];
                 newSlots[targetIndex] = newSlots[sourceIndex];

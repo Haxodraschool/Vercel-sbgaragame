@@ -88,9 +88,27 @@ export async function POST(request: NextRequest) {
     console.log(`[Quest Generation] User ${user.username}: Day=${user.currentDay}, Level=${user.level}, FIXED_QUEST_DAYS=${GAME_CONSTANTS.FIXED_QUEST_DAYS}, BOSS_INTERVAL=${GAME_CONSTANTS.BOSS_INTERVAL}`);
 
     if (user.currentDay <= GAME_CONSTANTS.FIXED_QUEST_DAYS) {
-      // Ngày 1-5: số lượng khách tăng dần (capped at 4)
-      customerCount = Math.min(user.currentDay, 4);
-      console.log(`[Quest Generation] Day ${user.currentDay}: Fixed customer count = ${customerCount} (Math.min(${user.currentDay}, 4))`);
+      // Ngày 1-5: số lượng khách tăng dần theo level (không chỉ theo ngày)
+      // Day 1: 1 khách bất kể level
+      // Day 2-5: Random theo level, nhưng giới hạn theo ngày
+      if (user.currentDay === 1) {
+        customerCount = 1;
+      } else {
+        // Lấy config theo level
+        const config = await prisma.questConfig.findFirst({
+          where: {
+            minLevel: { lte: user.level },
+            maxLevel: { gte: user.level },
+          },
+        });
+        const maxByLevel = config ? config.maxCustomers : 3;
+        // Giới hạn tối đa theo ngày: Day 2 max 2, Day 3 max 3, Day 4-5 max 4
+        const maxByDay = Math.min(user.currentDay, 4);
+        const effectiveMax = Math.min(maxByLevel, maxByDay);
+        const minByLevel = config ? config.minCustomers : 1;
+        customerCount = randomInt(minByLevel, effectiveMax);
+      }
+      console.log(`[Quest Generation] Day ${user.currentDay}: Customer count = ${customerCount} (Level ${user.level}, capped by day)`);
     } else {
       // Ngày 6+: Random based on level
       const config = await prisma.questConfig.findFirst({
@@ -100,8 +118,8 @@ export async function POST(request: NextRequest) {
         },
       });
       customerCount = config
-        ? randomInt(config.minCustomers, Math.max(config.maxCustomers, 8))
-        : randomInt(4, 8);
+        ? randomInt(config.minCustomers, config.maxCustomers)
+        : randomInt(3, 4);
       console.log(`[Quest Generation] Day ${user.currentDay}: Random customer count = ${customerCount} (Level ${user.level})`);
     }
 
@@ -136,9 +154,12 @@ export async function POST(request: NextRequest) {
           ? randomInt(questConfig.minGoldReward, questConfig.maxGoldReward)
           : randomInt(50, 200));
 
-      // Ngân sách khách = 2x – 4x tiền thưởng
+      // Tăng gold thưởng lên 1.5x cho tất cả ngày và level
+      const boostedGold = Math.floor(baseGold * 1.5);
+
+      // Ngân sách khách = 2x – 4x tiền thưởng (dựa trên gold đã tăng)
       const budgetMultiplier = 2.0 + Math.random() * 2.0; // 2.0 – 4.0
-      const customerBudget = Math.floor(baseGold * budgetMultiplier);
+      const customerBudget = Math.floor(boostedGold * budgetMultiplier);
 
       questsData.push({
         userId: auth.userId,
@@ -149,7 +170,7 @@ export async function POST(request: NextRequest) {
           : (questConfig
             ? randomInt(questConfig.minPowerReq, questConfig.maxPowerReq)
             : randomInt(100, 300)),
-        rewardGold: baseGold,
+        rewardGold: boostedGold,
         customerBudget,
         status: 'PENDING' as const,
       });

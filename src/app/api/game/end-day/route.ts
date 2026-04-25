@@ -110,6 +110,7 @@ export async function POST(request: NextRequest) {
 
     const expNeeded = updatedUser.level * 500; // Simple formula
     let leveledUp = false;
+    let levelRewardsGiven: any[] = [];
     if (Number(updatedUser.exp) >= expNeeded) {
       await prisma.user.update({
         where: { id: auth.userId },
@@ -139,6 +140,11 @@ export async function POST(request: NextRequest) {
           where: { userId_cardId: { userId: auth.userId, cardId: reward.cardId } },
           create: { userId: auth.userId, cardId: reward.cardId, quantity: reward.quantity },
           update: { quantity: { increment: reward.quantity } },
+        });
+        levelRewardsGiven.push({
+          cardName: reward.card.name,
+          quantity: reward.quantity,
+          cardId: reward.cardId
         });
       }
     }
@@ -203,6 +209,7 @@ export async function POST(request: NextRequest) {
       leveledUp,
       newLevel: leveledUp ? (updatedUser.level + 1) : updatedUser.level,
       levelUpGoldReward: leveledUp ? (updatedUser.level + 1) * (updatedUser.level + 1) * 100 : 0,
+      levelRewards: leveledUp ? (levelRewardsGiven || []) : [],
       techPointsEarned: GAME_CONSTANTS.TECH_POINTS_PER_DAY,
       garageHealth: finalUser?.garageHealth,
       gold: finalUser ? Number(finalUser.gold) : 0,

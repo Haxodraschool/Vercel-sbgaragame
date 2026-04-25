@@ -69,7 +69,7 @@ export async function POST(
         goldReward = dynamicGold;
         actualGoldReward = dynamicGold;
         updates.gold = { increment: dynamicGold };
-        updates.exp = { increment: GAME_CONSTANTS.BOSS_SUCCESS_EXP };
+        updates.exp = { increment: quest.requiredPower * 2 };
       } else {
         // KIM_JONG_UN Custom Logic & Buff Multipliers
         // Apply Underworld Buff (+50% profit equivalent to 1.5 multiplier)
@@ -89,7 +89,7 @@ export async function POST(
           goldReward -= smugglerPenaltyApplied;
         }
         actualGoldReward = goldReward;
-        updates.exp = { increment: quest.isBoss ? GAME_CONSTANTS.BOSS_SUCCESS_EXP : GAME_CONSTANTS.SUCCESS_EXP };
+        updates.exp = { increment: quest.requiredPower * 2 };
       }
       
       // Lưu base gold reward cho tất cả quest thắng (ngoại trừ đã xử lý riêng ở trên)
@@ -123,6 +123,97 @@ export async function POST(
       const currentGoldInc = (updates.gold as any)?.increment || quest.rewardGold || 0;
       updates.gold = { increment: currentGoldInc + quest.customerBudget };
       actualGoldReward = (actualGoldReward || quest.rewardGold || 0) + quest.customerBudget;
+    }
+
+    // ============================================================
+    // CREW & TOOL GOLD EFFECTS - Áp dụng hiệu ứng crew/tool liên quan đến gold
+    // ============================================================
+    let crewGoldMessage = '';
+    let toolGoldMessage = '';
+    if (status === 'SUCCESS' && Array.isArray(usedCardIds) && usedCardIds.length > 0) {
+      // Lấy thông tin các thẻ đã sử dụng (bao gồm cost cho tính toán)
+      const usedCardsInfo = await prisma.card.findMany({
+        where: { id: { in: usedCardIds as number[] } },
+        include: { effects: true }
+      });
+
+      // Tính tổng chi phí thẻ (cho Kế Toán Trưởng và Hộp Đồ Dát Vàng)
+      let totalCardCost = 0;
+      const nonCrewCards = usedCardsInfo.filter((c: any) => c.type !== 'CREW');
+      for (const card of nonCrewCards) {
+        totalCardCost += (card as any).cost || 0;
+      }
+
+      // Xử lý CREW cards
+      const crewCards = usedCardsInfo.filter((c: any) => c.type === 'CREW');
+      for (const crew of crewCards) {
+        for (const effect of (crew as any).effects) {
+          if (effect.triggerCondition === 'PASSIVE' && effect.targetStat === 'GOLD') {
+            // Thợ Sơn (The Artist) - cardId 190: +15% tiền tip ngẫu nhiên
+            if (crew.id === 190 && effect.effectValue === 15) {
+              const tipChance = Math.random();
+              if (tipChance < 0.5) { // 50% cơ hội nhận tip
+                const tipAmount = Math.floor((actualGoldReward || 0) * 0.15);
+                if (tipAmount > 0) {
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  const currentInc = (updates.gold as any)?.increment || 0;
+                  updates.gold = { increment: currentInc + tipAmount };
+                  actualGoldReward += tipAmount;
+                  crewGoldMessage = `(Thợ Sơn nhận được tip: +${tipAmount} Gold!) `;
+                }
+              }
+            }
+            // Kế Toán Trưởng (The Accountant) - cardId 188: Hoàn 10% chi phí thẻ
+            if (crew.id === 188 && effect.effectValue === 10) {
+              const refundAmount = Math.floor(totalCardCost * 0.1);
+              if (refundAmount > 0) {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const currentInc = (updates.gold as any)?.increment || 0;
+                updates.gold = { increment: currentInc + refundAmount };
+                actualGoldReward += refundAmount;
+                crewGoldMessage += `(Kế Toán Trưởng hoàn 10%: +${refundAmount} Gold) `;
+              }
+            }
+          }
+        }
+      }
+
+      // Xử lý TOOL cards
+      const toolCards = usedCardsInfo.filter((c: any) => c.type === 'TOOL');
+      for (const tool of toolCards) {
+        for (const effect of (tool as any).effects) {
+          if (effect.triggerCondition === 'PASSIVE' && effect.targetStat === 'GOLD') {
+            // Hệ Thống Đo Lường Từ Xa (cardId 182): +15% Gold thưởng
+            if (tool.id === 182 && effect.effectValue === 15) {
+              const bonusAmount = Math.floor((actualGoldReward || 0) * 0.15);
+              if (bonusAmount > 0) {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const currentInc = (updates.gold as any)?.increment || 0;
+                updates.gold = { increment: currentInc + bonusAmount };
+                actualGoldReward += bonusAmount;
+                toolGoldMessage = `(Đo Lường Từ Xa: +${bonusAmount} Gold) `;
+              }
+            }
+            // Hộp Đồ Nghề Dát Vàng (cardId 183): Hoàn trả 100% chi phí thẻ
+            if (tool.id === 183 && effect.effectValue === 100) {
+              // Tính tổng chi phí tất cả thẻ (trừ chính nó)
+              let totalCostExcludingThis = 0;
+              for (const card of usedCardsInfo) {
+                if (card.id !== 183) {
+                  totalCostExcludingThis += (card as any).cost || 0;
+                }
+              }
+              if (totalCostExcludingThis > 0) {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const currentInc = (updates.gold as any)?.increment || 0;
+                updates.gold = { increment: currentInc + totalCostExcludingThis };
+                actualGoldReward += totalCostExcludingThis;
+                toolGoldMessage += `(Hộp Đồ Dát Vàng: Hoàn ${totalCostExcludingThis} Gold) `;
+              }
+            }
+          }
+        }
+      }
     }
 
     // ============================================================
@@ -480,8 +571,8 @@ export async function POST(
     return NextResponse.json({
       message: status === 'SUCCESS'
         ? (smugglerPenaltyApplied > 0
-          ? `Hoàn thành xuất sắc! +${actualGoldReward} vàng (🕶️ Tay Buôn Lậu lấy ${smugglerPenaltyApplied} vàng). ${reputationMessage}${extraRewardsMessage}`
-          : `Hoàn thành xuất sắc! +${actualGoldReward} vàng. ${reputationMessage}${extraRewardsMessage}`)
+          ? `Hoàn thành xuất sắc! +${actualGoldReward} vàng (🕶️ Tay Buôn Lậu lấy ${smugglerPenaltyApplied} vàng). ${reputationMessage}${crewGoldMessage}${toolGoldMessage}${extraRewardsMessage}`
+          : `Hoàn thành xuất sắc! +${actualGoldReward} vàng. ${reputationMessage}${crewGoldMessage}${toolGoldMessage}${extraRewardsMessage}`)
         : `Xe nổ máy! Uy tín bị ảnh hưởng. ${reputationMessage}`,
       questStatus: status,
       rewards: status === 'SUCCESS' ? {
@@ -490,7 +581,7 @@ export async function POST(
         customerBudget: quest.customerBudget || 0,
         budgetProfit: budgetProfit,
         smugglerPenalty: smugglerPenaltyApplied,
-        exp: quest.isBoss ? GAME_CONSTANTS.BOSS_SUCCESS_EXP : GAME_CONSTANTS.SUCCESS_EXP,
+        exp: quest.requiredPower * 2,
       } : null,
       penalty: status === 'FAILED' ? {
         healthLost: quest.isBoss

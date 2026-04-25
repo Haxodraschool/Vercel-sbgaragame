@@ -228,14 +228,14 @@ Mỗi slot:
 
 | Boss                  | Điều kiện đặc biệt                                     | Power yêu cầu | Thưởng Gold |
 | --------------------- | ------------------------------------------------------ | ------------- | ----------- |
-| **Ông Hoàng Drift**   | `DRIFT_KING_CHALLENGE` — Trượt ly tâm, Stability ≥ 150 | 350           | 1500        |
-| **Huyền Thoại F1**    | `NO_COOLING` — Cấm dùng thẻ COOLING                    | 450           | 2500        |
-| **Nhà Sưu Tập**       | `MIN_RARITY_3` — Chỉ thẻ ≥ 3★                          | 400           | 1800        |
-| **Cô Gái Liều Lĩnh**  | `DAREDEVIL_DEATH_WISH` — Bơm Heat tử thần, Đáy 85%     | 325           | 2100        |
+| **Ông Hoàng Drift**   | `DRIFT_KING_CHALLENGE` — Trượt ly tâm, Stability ≥ 150 | 350           | 2200        |
+| **Huyền Thoại F1**    | `NO_COOLING` — Cấm dùng thẻ COOLING                    | 400           | 2800        |
+| **Nhà Sưu Tập**       | `MIN_RARITY_3` — Chỉ thẻ ≥ 3★                          | 400           | 2900        |
+| **Cô Gái Liều Lĩnh**  | `DAREDEVIL_DEATH_WISH` — Bơm Heat tử thần, Đáy 85%     | 325           | 2700        |
 | **Kẻ Bí Ẩn**          | Không có — Pure power check 800. **Chỉ xuất hiện sau ngày 10** | 666           | 5500        |
-| **Đảo Chủ EP**        | `EP_ISLAND_CHOICE` — Nhánh lựa chọn                    | 467           | 2500        |
-| **Chúa Tể Dầu Em Bé** | `BABY_OIL_CHOICE` — Nhánh lựa chọn                     | 369           | 3000        |
-| **Chủ Tịch Kim**      | `KIM_JONG_UN` — Storyline Triều Tiên                   | 365           | 3000        |
+| **Đảo Chủ EP**        | `EP_ISLAND_CHOICE` — Nhánh lựa chọn                    | 467           | 3333        |
+| **Chúa Tể Dầu Em Bé** | `BABY_OIL_CHOICE` — Nhánh lựa chọn                     | 369           | 3700        |
+| **Chủ Tịch Kim**      | `KIM_JONG_UN` — Storyline Triều Tiên                   | 365           | 3500        |
 | **Đỗ Nam Trung**      | `DONALD_TRUMP` — Tax + khóa 5★                         | 470           | 4700        |
 | **Nga Đại Đế**        | `RUSSIA_EMPEROR` — 2 Phase + Gấu                       | dynamic       | dynamic     |
 

@@ -18,8 +18,15 @@ const prisma = new PrismaClient({ adapter });
 async function main() {
   console.log('🚗 Bắt đầu seed dữ liệu SB-GARAGE...\n');
 
-  console.log('🗑️ Xóa dữ liệu cũ...');
+  console.log('🗑️ Xóa dữ liệu cũ (giữ lại User)...');
   // Xóa theo thứ tự phụ thuộc (bảng con trước, bảng cha sau)
+  // User-related data (nhưng giữ User table)
+  await prisma.userInventory.deleteMany();
+  await prisma.userAchievement.deleteMany();
+  await prisma.userEnding.deleteMany();
+  await prisma.userActiveEvent.deleteMany();
+  await prisma.dailyQuest.deleteMany();
+  // Game data
   await prisma.starterPerk.deleteMany();
   await prisma.cardCombo.deleteMany();
   await prisma.cardEffect.deleteMany();
@@ -30,7 +37,7 @@ async function main() {
   await prisma.ending.deleteMany();
   await prisma.questConfig.deleteMany();
   await prisma.card.deleteMany();
-  console.log('✅ Xóa dữ liệu cũ hoàn tất\n');
+  console.log('✅ Xóa dữ liệu cũ hoàn tất (User được giữ lại)\n');
 
   // ============================================================
   // 1. CARDS - Thẻ bài (30 thẻ)
@@ -634,32 +641,32 @@ async function main() {
 
   await Promise.all([
     prisma.bossConfig.create({
-      data: { name: 'Ông Hoàng Drift', description: '"Nghệ thuật Drift! Cấm dùng phuộc xịn (SUSPENSION ≥ 3★). Tổng Stability cuối cùng ≥ 50!"', specialCondition: 'DRIFT_KING_CHALLENGE', requiredPower: 350, rewardGold: 1500 },
+      data: { name: 'Ông Hoàng Drift', description: '"Nghệ thuật Drift! Cấm dùng phuộc xịn (SUSPENSION ≥ 3★). Tổng Stability cuối cùng ≥ 50!"', specialCondition: 'DRIFT_KING_CHALLENGE', requiredPower: 350, rewardGold: 2200 },
     }),
     prisma.bossConfig.create({
-      data: { name: 'Đảo Chủ EP', description: '"Có đồng ý lên đảo của ta tham gia cuộc thi không?"', specialCondition: 'EP_ISLAND_CHOICE', requiredPower: 467, rewardGold: 2500 },
+      data: { name: 'Đảo Chủ EP', description: '"Có đồng ý lên đảo của ta tham gia cuộc thi không?"', specialCondition: 'EP_ISLAND_CHOICE', requiredPower: 467, rewardGold: 3333 },
     }),
     prisma.bossConfig.create({
-      data: { name: 'Nhà Sưu Tập', description: '"Chỉ dùng thẻ 3 sao trở lên thôi nhé!"', specialCondition: 'MIN_RARITY_3', requiredPower: 400, rewardGold: 1800 },
+      data: { name: 'Nhà Sưu Tập', description: '"Chỉ dùng thẻ 3 sao trở lên thôi nhé!"', specialCondition: 'MIN_RARITY_3', requiredPower: 400, rewardGold: 2900 },
     }),
     prisma.bossConfig.create({
-      data: { name: 'Chủ Tịch Kim', description: '"Gia nhập triều tiên ko?"', specialCondition: 'KIM_JONG_UN', requiredPower: 365, rewardGold: 3000 },
+      data: { name: 'Chủ Tịch Kim', description: '"Gia nhập triều tiên ko?"', specialCondition: 'KIM_JONG_UN', requiredPower: 365, rewardGold: 3500 },
     }),
     prisma.bossConfig.create({
-      data: { name: 'Cô Gái Liều Lĩnh', description: '"Đạp lút ga! Heat cuối cùng phải sát ngưỡng nổ (≥ 75%)!"', specialCondition: 'DAREDEVIL_DEATH_WISH', requiredPower: 325, rewardGold: 2100 },
+      data: { name: 'Cô Gái Liều Lĩnh', description: '"Đạp lút ga! Heat cuối cùng phải sát ngưỡng nổ (≥ 75%)!"', specialCondition: 'DAREDEVIL_DEATH_WISH', requiredPower: 325, rewardGold: 2700 },
     }),
     prisma.bossConfig.create({
       data: { name: 'Đỗ Nam Trung', description: '"Make Garage Great Again! Mọi thẻ 5* đều bị khóa!"', specialCondition: 'DONALD_TRUMP', requiredPower: 470, rewardGold: 4700 },
     }),
 
     prisma.bossConfig.create({
-      data: { name: 'Huyền Thoại F1', description: '"Chỉ có thể dùng Engine và Turbo. No Cooling!"', specialCondition: 'NO_COOLING', requiredPower: 450, rewardGold: 2500 },
+      data: { name: 'Huyền Thoại F1', description: '"Chỉ có thể dùng Engine và Turbo. No Cooling!"', specialCondition: 'NO_COOLING', requiredPower: 400, rewardGold: 2800 },
     }),
     prisma.bossConfig.create({
       data: { name: 'Kẻ Bí Ẩn', description: '"..."', specialCondition: null, requiredPower: 666, rewardGold: 5500 },
     }),
     prisma.bossConfig.create({
-      data: { name: 'Chúa Tể Dầu Em Bé', description: '"DO YOU LOVE ME??!??"', specialCondition: 'BABY_OIL_CHOICE', requiredPower: 369, rewardGold: 3000 },
+      data: { name: 'Chúa Tể Dầu Em Bé', description: '"DO YOU LOVE ME??!?"', specialCondition: 'BABY_OIL_CHOICE', requiredPower: 369, rewardGold: 3700 },
     }),
     prisma.bossConfig.create({
       data: { name: 'Nga Đại Đế', description: '"Vodka? Nyet? Da? Hãy chứng minh sức mạnh cho Đế Chế!"', specialCondition: 'RUSSIA_EMPEROR', requiredPower: 1, rewardGold: 0 },
