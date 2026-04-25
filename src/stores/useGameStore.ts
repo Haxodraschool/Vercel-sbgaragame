@@ -50,6 +50,7 @@ interface GameState {
   // Modals
   isTopupGoldModalOpen: boolean;
   isBuyTpModalOpen: boolean;
+  isAccountInfoModalOpen: boolean;
 
   // Loading progress tracking (cho LoadingScreen)
   loadingPending: string[]; // list of pending task IDs
@@ -62,6 +63,7 @@ interface GameState {
   setUser: (user: UserProfile | null) => void;
   setScreen: (screen: GameState['currentScreen']) => void;
   setTopupGoldModalOpen: (open: boolean) => void;
+  setAccountInfoModalOpen: (open: boolean) => void;
   setBuyTpModalOpen: (open: boolean) => void;
   /** Transition to a destination screen WITH a loading overlay; call markScreenReady() from destination when its resources are fully loaded. */
   transitionScreen: (screen: GameState['currentScreen']) => void;
@@ -97,6 +99,7 @@ export const useGameStore = create<GameState>((set) => ({
   activeBossMusic: null,
   isTopupGoldModalOpen: false,
   isBuyTpModalOpen: false,
+  isAccountInfoModalOpen: false,
   loadingPending: [],
   loadingTotal: 0,
   loadingLabel: '',
@@ -178,6 +181,7 @@ export const useGameStore = create<GameState>((set) => ({
 
   setTopupGoldModalOpen: (open) => set({ isTopupGoldModalOpen: open }),
   setBuyTpModalOpen: (open) => set({ isBuyTpModalOpen: open }),
+  setAccountInfoModalOpen: (open) => set({ isAccountInfoModalOpen: open }),
 
   logout: () => {
     localStorage.removeItem('sb-token');
@@ -188,6 +192,7 @@ export const useGameStore = create<GameState>((set) => ({
       currentScreen: 'login',
       activeQuestId: null,
       activeBossMusic: null,
+      isAccountInfoModalOpen: false,
     });
   },
 }));

@@ -268,6 +268,11 @@ export default function QuestDialog({ quest, onAccept, onReject, onClose, penalt
                         <span className={`${styles.questStatBadge} ${styles.gold}`}>
                         💰 Thưởng: {quest.rewardGold.toLocaleString()}G
                         </span>
+                        {!quest.isBoss && (quest.customerBudget || 0) > 0 && (
+                            <span className={`${styles.questStatBadge} ${styles.gold}`}>
+                            💵 Ngân sách: {(quest.customerBudget || 0).toLocaleString()}G
+                            </span>
+                        )}
                     </div>
                )}
             </div>

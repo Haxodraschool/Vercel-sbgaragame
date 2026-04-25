@@ -87,7 +87,7 @@ interface Props {
   lobbyBgmRef?: React.RefObject<HTMLAudioElement | null>; // ← nhận từ LobbyScreen
 }
 
-export default function ShadowManager({ quests, onQuestAccepted, lobbyBgmRef }: Props) {
+export default function ShadowManager({ quests, onQuestAccepted, onQuestRejected, lobbyBgmRef }: Props) {
   const [phase, setPhase] = useState<ManagerPhase>('idle');
   const [bigAtSeat, setBigAtSeat] = useState(false);
   const [showIndividuals, setShowIndividuals] = useState(false);
@@ -429,6 +429,11 @@ export default function ShadowManager({ quests, onQuestAccepted, lobbyBgmRef }: 
           const newHealth = data.userState?.garageHealth ?? oldHealth;
           const actualPenalty = oldHealth - newHealth;
           setLastPenalty(actualPenalty > 0 ? actualPenalty : (quest.isBoss ? 20 : 10));
+
+          // Notify parent component that quest was rejected (to refresh quests)
+          if (onQuestRejected) {
+            onQuestRejected(quest);
+          }
 
           // Check for game over (uy tín = 0)
           if (data.gameOver) {

@@ -10,6 +10,7 @@ import { format } from 'date-fns';
 import { useTheme } from 'next-themes';
 import * as Progress from '@radix-ui/react-progress';
 import { ShadowManager, DeckOverlay } from '@/components';
+import AccountInfoModal from '@/components/AccountInfoModal/AccountInfoModal';
 import type { QuestData } from '@/components/ShadowCustomer/ShadowCustomer';
 
 /* ─── Inline SVG Icons ─── */
@@ -155,6 +156,8 @@ export default function LobbyScreen() {
   const setUser = useGameStore((s) => s.setUser);
   const setTopupGoldModalOpen = useGameStore((s) => s.setTopupGoldModalOpen);
   const setBuyTpModalOpen = useGameStore((s) => s.setBuyTpModalOpen);
+  const isAccountInfoModalOpen = useGameStore((s) => s.isAccountInfoModalOpen);
+  const setAccountInfoModalOpen = useGameStore((s) => s.setAccountInfoModalOpen);
 
   // --- Loading readiness tracking (tell global LoadingScreen when we're done) ---
   const [questsLoaded, setQuestsLoaded] = useState(false);
@@ -221,9 +224,8 @@ export default function LobbyScreen() {
   const handleEndDayClick = () => {
     const pendingCount = quests.filter((q) => q.status === 'PENDING').length;
     if (pendingCount > 0) {
-      if (!confirm(`CẢNH BÁO: Bạn còn ${pendingCount} khách chưa phục vụ. Nếu kết thúc ngày, họ sẽ tức giận bỏ đi và bạn sẽ bị TRỪ UY TÍN nặng nề! Bạn có chắc chắn muốn kết thúc ngày không?`)) {
-        return;
-      }
+      alert('CẢNH BÁO: Bạn vẫn còn khách hàng chưa phục vụ! Hãy hoàn thành hoặc từ chối hết khách trước khi kết thúc ngày.');
+      return;
     }
     handleEndDay();
   };
@@ -410,6 +412,20 @@ export default function LobbyScreen() {
           <ShadowManager
             quests={quests}
             lobbyBgmRef={bgmRef}
+            onQuestRejected={async () => {
+              // Refresh quests after rejection to update status
+              try {
+                const res = await fetch('/api/quest/daily', {
+                  headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) {
+                  const data = await res.json();
+                  if (data.quests) setQuests(data.quests);
+                }
+              } catch (err) {
+                console.error('Error refreshing quests after rejection:', err);
+              }
+            }}
             onQuestAccepted={(quest) => {
               setActiveQuest(quest);
               transitionScreen('workshop');
@@ -447,8 +463,8 @@ export default function LobbyScreen() {
 
             {/* Top-Left: Branding + Day */}
             <div className="flex flex-col gap-3 pointer-events-auto">
-              <motion.div 
-                className="relative bg-[#080810]/80 backdrop-blur-md rounded-md flex items-center justify-center px-6 py-3 min-w-[240px] overflow-hidden"
+              <motion.div
+                className="relative bg-[#080810]/80 backdrop-blur-md rounded-md flex items-center justify-center px-6 py-3 min-w-[240px] overflow-hidden cursor-pointer"
                 animate={{
                   boxShadow: [
                     "0 0 10px rgba(0,229,255,0.1), inset 0 0 10px rgba(0,229,255,0.1)",
@@ -462,6 +478,8 @@ export default function LobbyScreen() {
                   ]
                 }}
                 transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+                onClick={() => setAccountInfoModalOpen(true)}
+                whileHover={{ scale: 1.02 }}
               >
                 {/* ─── Tech UI Details ─── */}
                 {/* Cyberpunk scanlines */}
@@ -569,29 +587,30 @@ export default function LobbyScreen() {
               </motion.div>
 
               {/* Gold */}
-              <motion.div 
-                className="relative flex items-center justify-between gap-3 bg-[#080810]/80 backdrop-blur-md rounded-md p-[10px] w-full overflow-hidden border border-[#fca100]/30 shadow-[0_0_15px_rgba(252,161,0,0.05),inset_0_0_10px_rgba(252,161,0,0.05)] cursor-pointer group" 
-                whileHover={{ scale: 1.02, boxShadow: "0 0 20px rgba(252,161,0,0.3), inset 0 0 15px rgba(252,161,0,0.2)" }}
+              <motion.div
+                className="relative flex items-center justify-between gap-3 bg-gradient-to-br from-[#2a2a2a] to-[#1a1a1a] backdrop-blur-md rounded-md p-[10px] w-full overflow-hidden border border-gray-600/50 cursor-pointer group"
+                whileHover={{ scale: 1.02, boxShadow: "0 0 20px rgba(0,229,255,0.5), inset 0 0 15px rgba(0,229,255,0.1)" }}
                 onClick={() => setTopupGoldModalOpen(true)}
               >
-                {/* Tech Background Pattern */}
-                <div className="absolute inset-0 opacity-[0.06] pointer-events-none" style={{ background: 'linear-gradient(45deg, transparent 25%, #fca100 25%, #fca100 50%, transparent 50%, transparent 75%, #fca100 75%, #fca100 100%)', backgroundSize: '8px 8px' }} />
+                {/* Metallic Background Pattern */}
+                <div className="absolute inset-0 opacity-[0.1] pointer-events-none" style={{ background: 'linear-gradient(135deg, transparent 25%, #4a4a4a 25%, #4a4a4a 50%, transparent 50%, transparent 75%, #4a4a4a 75%, #4a4a4a 100%)', backgroundSize: '4px 4px' }} />
 
-                {/* Animated Edge Line */}
-                <motion.div className="absolute bottom-0 left-0 h-[1px] bg-gradient-to-r from-transparent via-[#fca100] to-transparent w-full pointer-events-none" animate={{ x: ['100%', '-100%'] }} transition={{ duration: 2.5, repeat: Infinity, ease: 'linear' }} />
-
-                {/* Tech UI Corners */}
-                <div className="absolute top-0 right-0 w-2 h-2 border-t-[2px] border-r-[2px] border-[#fca100] bg-transparent opacity-70 pointer-events-none" />
-                <div className="absolute bottom-0 left-0 w-2 h-2 border-b-[2px] border-l-[2px] border-[#fca100] bg-transparent opacity-70 pointer-events-none" />
+                {/* Neon Border Animation */}
+                <motion.div className="absolute inset-0 rounded-md pointer-events-none" style={{ boxShadow: 'inset 0 0 10px rgba(0,229,255,0.3)' }}>
+                  <motion.div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-cyan-400 to-transparent animate-pulse" />
+                  <motion.div className="absolute bottom-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-cyan-400 to-transparent animate-pulse" style={{ animationDelay: '0.5s' }} />
+                  <motion.div className="absolute top-0 left-0 h-full w-[2px] bg-gradient-to-b from-transparent via-cyan-400 to-transparent animate-pulse" style={{ animationDelay: '1s' }} />
+                  <motion.div className="absolute top-0 right-0 h-full w-[2px] bg-gradient-to-b from-transparent via-cyan-400 to-transparent animate-pulse" style={{ animationDelay: '1.5s' }} />
+                </motion.div>
 
                 <div className="flex items-center gap-3 z-10 w-full mt-1">
-                  <div className="relative bg-[#12141c] border border-[#fca100]/50 shadow-[0_0_8px_rgba(252,161,0,0.3)] p-[6px] rounded-sm flex items-center justify-center group-hover:bg-[#fca100]/10 transition-colors">
-                    <CoinIcon className="w-6 h-6 sm:w-7 sm:h-7" />
-                    <motion.div className="absolute inset-0 bg-yellow-400/20" animate={{ opacity: [0, 1, 0] }} transition={{ duration: 1.5, repeat: Infinity }} />
+                  <div className="relative bg-[#3a3a3a] border border-cyan-500/50 shadow-[0_0_8px_rgba(0,229,255,0.3)] p-[6px] rounded-sm flex items-center justify-center group-hover:bg-cyan-500/20 transition-colors">
+                    <CoinIcon className="w-6 h-6 sm:w-7 sm:h-7 text-cyan-400" />
+                    <motion.div className="absolute inset-0 bg-cyan-400/20" animate={{ opacity: [0, 1, 0] }} transition={{ duration: 1.5, repeat: Infinity }} />
                   </div>
 
                   <div className="flex flex-col items-start leading-none flex-grow justify-center h-full">
-                     <span className="text-[#fca100] text-xl sm:text-[24px] drop-shadow-[0_0_8px_rgba(252,161,0,0.6)] tracking-wider" style={{ imageRendering: 'pixelated' }}>
+                     <span className="text-cyan-300 text-lg sm:text-xl font-bold drop-shadow-[0_0_8px_rgba(0,229,255,0.6)] tracking-wider" style={{ imageRendering: 'pixelated' }}>
                        {gold.toLocaleString()} G
                      </span>
                   </div>
@@ -599,28 +618,29 @@ export default function LobbyScreen() {
               </motion.div>
 
               {/* TechPoints */}
-              <motion.div 
-                className="relative flex items-center justify-between gap-3 bg-[#080810]/80 backdrop-blur-md rounded-md p-[8px] w-full overflow-hidden border border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.05),inset_0_0_10px_rgba(16,185,129,0.05)] cursor-pointer group" 
-                whileHover={{ scale: 1.02, boxShadow: "0 0 20px rgba(16,185,129,0.3), inset 0 0 15px rgba(16,185,129,0.2)" }}
+              <motion.div
+                className="relative flex items-center justify-between gap-3 bg-gradient-to-br from-[#2a2a2a] to-[#1a1a1a] backdrop-blur-md rounded-md p-[8px] w-full overflow-hidden border border-gray-600/50 cursor-pointer group"
+                whileHover={{ scale: 1.02, boxShadow: "0 0 20px rgba(0,229,255,0.5), inset 0 0 15px rgba(0,229,255,0.1)" }}
                 onClick={() => setBuyTpModalOpen(true)}
               >
-                {/* Tech Background Pattern */}
-                <div className="absolute inset-0 opacity-[0.06] pointer-events-none" style={{ background: 'linear-gradient(45deg, transparent 25%, #10b981 25%, #10b981 50%, transparent 50%, transparent 75%, #10b981 75%, #10b981 100%)', backgroundSize: '8px 8px' }} />
+                {/* Metallic Background Pattern */}
+                <div className="absolute inset-0 opacity-[0.1] pointer-events-none" style={{ background: 'linear-gradient(135deg, transparent 25%, #4a4a4a 25%, #4a4a4a 50%, transparent 50%, transparent 75%, #4a4a4a 75%, #4a4a4a 100%)', backgroundSize: '4px 4px' }} />
 
-                {/* Animated Edge Line */}
-                <motion.div className="absolute bottom-0 left-0 h-[1px] bg-gradient-to-r from-transparent via-emerald-400 to-transparent w-full pointer-events-none" animate={{ x: ['100%', '-100%'] }} transition={{ duration: 2.5, repeat: Infinity, ease: 'linear' }} />
-
-                {/* Tech UI Corners */}
-                <div className="absolute top-0 right-0 w-2 h-2 border-t-[2px] border-r-[2px] border-emerald-500 bg-transparent opacity-70 pointer-events-none" />
-                <div className="absolute bottom-0 left-0 w-2 h-2 border-b-[2px] border-l-[2px] border-emerald-500 bg-transparent opacity-70 pointer-events-none" />
+                {/* Neon Border Animation */}
+                <motion.div className="absolute inset-0 rounded-md pointer-events-none" style={{ boxShadow: 'inset 0 0 10px rgba(0,229,255,0.3)' }}>
+                  <motion.div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-cyan-400 to-transparent animate-pulse" />
+                  <motion.div className="absolute bottom-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-cyan-400 to-transparent animate-pulse" style={{ animationDelay: '0.5s' }} />
+                  <motion.div className="absolute top-0 left-0 h-full w-[2px] bg-gradient-to-b from-transparent via-cyan-400 to-transparent animate-pulse" style={{ animationDelay: '1s' }} />
+                  <motion.div className="absolute top-0 right-0 h-full w-[2px] bg-gradient-to-b from-transparent via-cyan-400 to-transparent animate-pulse" style={{ animationDelay: '1.5s' }} />
+                </motion.div>
 
                 <div className="flex items-center gap-3 z-10 w-full">
-                  <div className="relative bg-[#12141c] border border-emerald-500/50 shadow-[0_0_8px_rgba(16,185,129,0.3)] p-[5px] rounded-sm flex items-center justify-center group-hover:bg-emerald-500/10 transition-colors">
-                    <span className="text-emerald-400 text-lg">🔧</span>
+                  <div className="relative bg-[#3a3a3a] border border-cyan-500/50 shadow-[0_0_8px_rgba(0,229,255,0.3)] p-[5px] rounded-sm flex items-center justify-center group-hover:bg-cyan-500/20 transition-colors">
+                    <span className="text-cyan-400 text-lg">🔧</span>
                   </div>
 
                   <div className="flex flex-col items-start leading-none flex-grow justify-center h-full">
-                     <span className="text-emerald-400 text-lg drop-shadow-[0_0_8px_rgba(16,185,129,0.6)] tracking-wider" style={{ imageRendering: 'pixelated' }}>
+                     <span className="text-cyan-300 text-lg sm:text-xl font-bold drop-shadow-[0_0_8px_rgba(0,229,255,0.6)] tracking-wider" style={{ imageRendering: 'pixelated' }}>
                        {techPoints.toLocaleString()} TP
                      </span>
                   </div>
@@ -628,37 +648,42 @@ export default function LobbyScreen() {
               </motion.div>
 
               {/* Prestige bar */}
-              <motion.div 
-                className={`relative bg-[#080810]/80 backdrop-blur-md rounded-md p-3 w-full flex flex-col gap-2 overflow-hidden border cursor-default group ${
+              <motion.div
+                className={`relative bg-gradient-to-br from-[#2a2a2a] to-[#1a1a1a] backdrop-blur-md rounded-md p-3 w-full flex flex-col gap-2 overflow-hidden border cursor-default group ${
                   isBurning
-                    ? 'border-[#ef4444] shadow-[0_0_20px_rgba(239,68,68,0.6),inset_0_0_15px_rgba(239,68,68,0.4)]'
-                    : 'border-[#a855f7]/30 shadow-[0_0_15px_rgba(168,85,247,0.05),inset_0_0_10px_rgba(168,85,247,0.05)]'
+                    ? 'border-red-600/50 shadow-[0_0_20px_rgba(239,68,68,0.6),inset_0_0_15px rgba(239,68,68,0.4)]'
+                    : 'border-gray-600/50 shadow-[0_0_15px_rgba(0,229,255,0.1),inset_0_0_10px rgba(0,229,255,0.05)]'
                 }`}
-                animate={isBurning ? { x: [-3, 3, -3, 3, -2, 2, 0], backgroundColor: ['rgba(8,8,16,0.8)', 'rgba(60,10,10,0.9)', 'rgba(8,8,16,0.8)'] } : {}}
+                animate={isBurning ? { x: [-3, 3, -3, 3, -2, 2, 0], backgroundColor: ['rgba(42,42,42,0.8)', 'rgba(60,10,10,0.9)', 'rgba(42,42,42,0.8)'] } : {}}
                 transition={{ duration: 0.5, repeat: isBurning ? Infinity : 0 }}
-                whileHover={{ scale: 1.02, boxShadow: isBurning ? "0 0 30px rgba(239,68,68,0.9), inset 0 0 20px rgba(239,68,68,0.7)" : "0 0 20px rgba(168,85,247,0.3), inset 0 0 15px rgba(168,85,247,0.2)" }}
+                whileHover={{ scale: 1.02, boxShadow: isBurning ? "0 0 30px rgba(239,68,68,0.9), inset 0 0 20px rgba(239,68,68,0.7)" : "0 0 20px rgba(0,229,255,0.5), inset 0 0 15px rgba(0,229,255,0.1)" }}
               >
-                {/* Tech Background Pattern */}
-                <div className="absolute inset-0 opacity-[0.05] pointer-events-none" style={{ backgroundImage: isBurning ? 'linear-gradient(#ef4444 1px, transparent 1px), linear-gradient(90deg, #ef4444 1px, transparent 1px)' : 'linear-gradient(rgba(168,85,247,1) 1px, transparent 1px), linear-gradient(90deg, rgba(168,85,247,1) 1px, transparent 1px)', backgroundSize: '10px 10px' }} />
+                {/* Metallic Background Pattern */}
+                <div className="absolute inset-0 opacity-[0.1] pointer-events-none" style={{ backgroundImage: isBurning ? 'linear-gradient(#4a4a4a 1px, transparent 1px), linear-gradient(90deg, #4a4a4a 1px, transparent 1px)' : 'linear-gradient(#4a4a4a 1px, transparent 1px), linear-gradient(90deg, #4a4a4a 1px, transparent 1px)', backgroundSize: '10px 10px' }} />
 
-                {/* Animated Edge Line */}
-                <motion.div className="absolute top-0 right-0 w-[1px] h-full pointer-events-none" 
-                  style={{ backgroundImage: isBurning ? 'linear-gradient(to bottom, transparent, #ef4444, transparent)' : 'linear-gradient(to bottom, transparent, #a855f7, transparent)' }}
-                  animate={{ y: ['-100%', '100%'] }} transition={{ duration: isBurning ? 0.3 : 2, repeat: Infinity, ease: 'linear' }} />
+                {/* Neon Border Animation */}
+                {!isBurning && (
+                  <motion.div className="absolute inset-0 rounded-md pointer-events-none" style={{ boxShadow: 'inset 0 0 10px rgba(0,229,255,0.3)' }}>
+                    <motion.div className="absolute top-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-cyan-400 to-transparent animate-pulse" />
+                    <motion.div className="absolute bottom-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-cyan-400 to-transparent animate-pulse" style={{ animationDelay: '0.5s' }} />
+                    <motion.div className="absolute top-0 left-0 h-full w-[2px] bg-gradient-to-b from-transparent via-cyan-400 to-transparent animate-pulse" style={{ animationDelay: '1s' }} />
+                    <motion.div className="absolute top-0 right-0 h-full w-[2px] bg-gradient-to-b from-transparent via-cyan-400 to-transparent animate-pulse" style={{ animationDelay: '1.5s' }} />
+                  </motion.div>
+                )}
 
                 {/* Tech UI Corners */}
-                <div className={`absolute top-0 left-0 w-2 h-2 border-t-[2px] border-l-[2px] bg-transparent opacity-70 pointer-events-none ${isBurning ? 'border-[#ef4444]' : 'border-[#a855f7]'}`} />
-                <div className={`absolute bottom-0 right-0 w-2 h-2 border-b-[2px] border-r-[2px] bg-transparent opacity-70 pointer-events-none ${isBurning ? 'border-[#ef4444]' : 'border-[#a855f7]'}`} />
+                <div className={`absolute top-0 left-0 w-2 h-2 border-t-[2px] border-l-[2px] bg-transparent opacity-70 pointer-events-none ${isBurning ? 'border-red-500' : 'border-cyan-500'}`} />
+                <div className={`absolute bottom-0 right-0 w-2 h-2 border-b-[2px] border-r-[2px] bg-transparent opacity-70 pointer-events-none ${isBurning ? 'border-red-500' : 'border-cyan-500'}`} />
 
                 {/* EXP Bar - Small bar above Reputation */}
                 <div className="flex justify-between items-center w-full z-10 mb-1">
-                  <span className="text-[10px] text-cyan-400 tracking-widest drop-shadow-[1px_1px_0_rgba(0,0,0,1)]" style={{ imageRendering: 'pixelated' }}>EXP</span>
-                  <span className="text-[10px] text-cyan-300 tracking-wider drop-shadow-[1px_1px_0_rgba(0,0,0,1)]">{currentExp} / {expForCurrentLevel}</span>
+                  <span className="text-[10px] text-cyan-400 tracking-widest font-bold drop-shadow-[1px_1px_0_rgba(0,0,0,1)]" style={{ imageRendering: 'pixelated' }}>EXP</span>
+                  <span className="text-[10px] text-cyan-300 tracking-wider font-bold drop-shadow-[1px_1px_0_rgba(0,0,0,1)]">{currentExp} / {expForCurrentLevel}</span>
                 </div>
-                <Progress.Root className="relative w-full h-2 bg-[#0f111a] border border-cyan-500/30 rounded-sm overflow-hidden shadow-[inset_0_2px_3px_rgba(0,0,0,0.6)] z-10 mb-2" value={expProgress}>
+                <Progress.Root className="relative w-full h-2 bg-[#3a3a3a] border border-cyan-500/50 rounded-sm overflow-hidden shadow-[inset_0_2px_3px_rgba(0,0,0,0.6)] z-10 mb-2" value={expProgress}>
                   <Progress.Indicator
                     className="h-full transition-all duration-500 ease-in-out"
-                    style={{ 
+                    style={{
                       width: `${expProgress}%`,
                       background: 'linear-gradient(90deg, #06b6d4 0%, #22d3ee 100%)',
                     }}
@@ -667,29 +692,30 @@ export default function LobbyScreen() {
 
                 <div className="flex justify-between items-end w-full z-10 mb-1">
                   <div className="flex flex-col leading-none gap-1 justify-end h-full">
-                    <span className={`text-lg lg:text-xl drop-shadow-[1px_1px_0_rgba(0,0,0,1)] tracking-widest ${isBurning ? 'text-[#fca5a5] animate-pulse' : 'text-[#d8b4fe]'}`} style={{ imageRendering: 'pixelated' }}>UY TÍN</span>
+                    <span className={`text-lg lg:text-xl font-bold drop-shadow-[1px_1px_0_rgba(0,0,0,1)] tracking-widest ${isBurning ? 'text-red-400 animate-pulse' : 'text-cyan-300'}`} style={{ imageRendering: 'pixelated' }}>UY TÍN</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <div className="flex gap-[2px]">
-                       <motion.div className="w-1 h-3 bg-[#a855f7]/40 transform skew-x-[-20deg]" animate={{ opacity: [0.3, 1, 0.3] }} transition={{ duration: 1, repeat: Infinity, delay: 0 }} />
-                       <motion.div className="w-1 h-3 bg-[#a855f7]/70 transform skew-x-[-20deg]" animate={{ opacity: [0.3, 1, 0.3] }} transition={{ duration: 1, repeat: Infinity, delay: 0.2 }} />
-                       <motion.div className="w-1 h-3 bg-[#c026d3] transform skew-x-[-20deg]" animate={{ opacity: [0.3, 1, 0.3] }} transition={{ duration: 1, repeat: Infinity, delay: 0.4 }} />
+                       <motion.div className="w-1 h-3 bg-cyan-500/40 transform skew-x-[-20deg]" animate={{ opacity: [0.3, 1, 0.3] }} transition={{ duration: 1, repeat: Infinity, delay: 0 }} />
+                       <motion.div className="w-1 h-3 bg-cyan-500/70 transform skew-x-[-20deg]" animate={{ opacity: [0.3, 1, 0.3] }} transition={{ duration: 1, repeat: Infinity, delay: 0.2 }} />
+                       <motion.div className="w-1 h-3 bg-cyan-400 transform skew-x-[-20deg]" animate={{ opacity: [0.3, 1, 0.3] }} transition={{ duration: 1, repeat: Infinity, delay: 0.4 }} />
                     </div>
-                    <span className="text-white text-lg lg:text-xl drop-shadow-[1px_1px_0_rgba(0,0,0,1)] tracking-widest" style={{ imageRendering: 'pixelated' }}>LV <span className="text-[#ff79c6]">{currentLevel}</span></span>
+                    <span className="text-white text-lg lg:text-xl drop-shadow-[1px_1px_0_rgba(0,0,0,1)] tracking-widest" style={{ imageRendering: 'pixelated' }}>LV <span className="text-cyan-400">{currentLevel}</span></span>
                   </div>
                 </div>
+
                 
-                <Progress.Root className={`relative w-full h-5 bg-[#0f111a] border rounded-sm overflow-hidden shadow-[inset_0_4px_6px_rgba(0,0,0,0.6)] z-10 p-[2px] ${isBurning ? 'border-[#ef4444]/60' : 'border-[#a855f7]/40'}`} value={prestigePoints}>
+                <Progress.Root className={`relative w-full h-5 bg-[#3a3a3a] border rounded-sm overflow-hidden shadow-[inset_0_4px_6px_rgba(0,0,0,0.6)] z-10 p-[2px] ${isBurning ? 'border-red-600/50' : 'border-cyan-500/50'}`} value={prestigePoints}>
                   {/* Neon Glow beneath indicator */}
-                  <div className={`absolute top-0 left-0 h-full blur-md opacity-60 pointer-events-none ${isBurning ? 'bg-[#ef4444]' : 'bg-[#c026d3]'}`} style={{ width: `${(prestigePoints / maxPrestige) * 100}%` }} />
-                  
+                  <div className={`absolute top-0 left-0 h-full blur-md opacity-60 pointer-events-none ${isBurning ? 'bg-red-500' : 'bg-cyan-400'}`} style={{ width: `${(prestigePoints / maxPrestige) * 100}%` }} />
+
                   <Progress.Indicator
                     className="relative h-full transition-all duration-500 ease-in-out border-r-[2px] border-white rounded-[1px] overflow-hidden"
-                    style={{ 
+                    style={{
                       width: `${(prestigePoints / maxPrestige) * 100}%`,
-                      background: isBurning 
+                      background: isBurning
                         ? 'linear-gradient(90deg, #b91c1c 0%, #ef4444 100%)'
-                        : 'linear-gradient(90deg, rgba(168,85,247,0.8) 0%, rgba(217,70,239,1) 100%)',
+                        : 'linear-gradient(90deg, rgba(0,229,255,0.8) 0%, rgba(34,211,238,1) 100%)',
                       boxShadow: 'inset 0 2px 4px rgba(255,255,255,0.3)'
                     }}
                   >
@@ -702,7 +728,7 @@ export default function LobbyScreen() {
                   {/* Scanline overlay for the bar */}
                   <div className="absolute inset-0 pointer-events-none opacity-30" style={{ backgroundImage: 'repeating-linear-gradient(45deg, transparent, transparent 4px, rgba(0,0,0,0.4) 4px, rgba(0,0,0,0.4) 8px)' }} />
 
-                  <span className="absolute inset-0 flex items-center justify-center text-white/90 text-[13px] drop-shadow-[0_2px_2px_rgba(0,0,0,1)] z-10 pointer-events-none tracking-widest" style={{ WebkitTextStroke: '0.5px rgba(0,0,0,0.8)', imageRendering: 'pixelated' }}>
+                  <span className="absolute inset-0 flex items-center justify-center text-[#ffd700] text-[13px] drop-shadow-[0_2px_2px_rgba(0,0,0,1)] z-10 pointer-events-none tracking-widest font-bold" style={{ WebkitTextStroke: '0.5px rgba(0,0,0,0.8)', imageRendering: 'pixelated' }}>
                     {prestigePoints} / {maxPrestige}
                   </span>
                 </Progress.Root>
@@ -747,9 +773,9 @@ export default function LobbyScreen() {
               whileTap={{ scale: 0.95 }}
             >
               <div className="rounded-md w-full h-full transition-colors relative flex items-center justify-center">
-                  <img 
-                    src={quests.filter((q) => q.status === 'PENDING').length > 0 ? "/endaybuttongrayout.jpg" : "/enddaybutton.jpg"} 
-                    alt="End Day Button" 
+                  <img
+                    src={quests.filter((q) => q.status === 'PENDING').length > 0 ? "/endaybuttongrayout.jpg" : "/enddaybutton.jpg"}
+                    alt="End Day Button"
                     className="w-[200px] sm:w-[240px] object-contain drop-shadow-[0_4px_4px_rgba(0,0,0,0.5)] group-hover:brightness-110 transition-all duration-300 rounded-[12px]"
                     style={{ imageRendering: 'pixelated' }}
                   />
@@ -767,6 +793,7 @@ export default function LobbyScreen() {
 
       <BuyTpModal />
       <TopupGoldModal />
+      <AccountInfoModal isOpen={isAccountInfoModalOpen} onClose={() => setAccountInfoModalOpen(false)} />
     </motion.div>
   );
 }

@@ -181,7 +181,7 @@ export async function POST(request: NextRequest) {
           // YES branch: no FUEL allowed
           if (cardTypes.includes('FUEL')) {
             return NextResponse.json(
-              { error: `🚫 Boss "${quest.bossConfig.name}" nổi giận: Đã nói YES thì cơ thể phải tự cháy, KHÔNG ĐƯỢC dùng thẻ Nhiên Liệu (FUEL)!` },
+              { error: `� xe này yếu quá!!! Đã nói YES thì cơ thể phải tự cháy, KHÔNG ĐƯỢC dùng thẻ Nhiên Liệu (FUEL)!` },
               { status: 400 }
             );
           }

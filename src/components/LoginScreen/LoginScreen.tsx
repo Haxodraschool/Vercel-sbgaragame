@@ -211,6 +211,11 @@ export default function LoginScreen() {
       setIsOpening(true);
       setErrorMessage('');
 
+      // Play garage door sound after successful login
+      const garageSound = new Audio('/sfx/garadoor-sfx.mp3');
+      garageSound.volume = 0.7;
+      garageSound.play().catch(err => console.error('Error playing garage door sound:', err));
+
       // Login/register success - no toast
 
       // Door open + slit lighting run in parallel

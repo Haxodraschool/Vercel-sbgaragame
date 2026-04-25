@@ -8,3 +8,4 @@ export { default as DevTool } from './DevTool';
 export { default as DeckOverlay } from './Inventory/DeckOverlay';
 export { default as ShopScreen } from './Shop/ShopScreen';
 export { default as WorkshopScreen } from './Workshop/WorkshopScreen';
+export { default as AccountInfoModal } from './AccountInfoModal/AccountInfoModal';

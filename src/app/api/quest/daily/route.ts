@@ -74,6 +74,7 @@ export async function POST(request: NextRequest) {
       where: { userId: auth.userId, dayNumber: user.currentDay },
     });
     if (existingQuests > 0) {
+      console.warn(`[Quest Generation] Attempted to generate quests for day ${user.currentDay} but ${existingQuests} quests already exist for user ${user.username}`);
       return NextResponse.json(
         { error: 'Quest ngày hôm nay đã được tạo rồi!' },
         { status: 400 }
@@ -84,11 +85,14 @@ export async function POST(request: NextRequest) {
     let customerCount: number;
     const isBossDay = user.currentDay % GAME_CONSTANTS.BOSS_INTERVAL === 0;
 
+    console.log(`[Quest Generation] User ${user.username}: Day=${user.currentDay}, Level=${user.level}, FIXED_QUEST_DAYS=${GAME_CONSTANTS.FIXED_QUEST_DAYS}, BOSS_INTERVAL=${GAME_CONSTANTS.BOSS_INTERVAL}`);
+
     if (user.currentDay <= GAME_CONSTANTS.FIXED_QUEST_DAYS) {
-      // Ngày 1-5: số lượng khách tăng dần
+      // Ngày 1-5: số lượng khách tăng dần (capped at 4)
       customerCount = Math.min(user.currentDay, 4);
+      console.log(`[Quest Generation] Day ${user.currentDay}: Fixed customer count = ${customerCount} (Math.min(${user.currentDay}, 4))`);
     } else {
-      // Ngày 6+: Random
+      // Ngày 6+: Random based on level
       const config = await prisma.questConfig.findFirst({
         where: {
           minLevel: { lte: user.level },
@@ -98,7 +102,10 @@ export async function POST(request: NextRequest) {
       customerCount = config
         ? randomInt(config.minCustomers, Math.max(config.maxCustomers, 8))
         : randomInt(4, 8);
+      console.log(`[Quest Generation] Day ${user.currentDay}: Random customer count = ${customerCount} (Level ${user.level})`);
     }
+
+    console.log(`[Quest Generation] isBossDay = ${isBossDay} (${user.currentDay} % ${GAME_CONSTANTS.BOSS_INTERVAL} = ${user.currentDay % GAME_CONSTANTS.BOSS_INTERVAL})`);
 
     // Get quest config for power/gold range
     let questConfig = await prisma.questConfig.findFirst({
@@ -200,6 +207,13 @@ export async function POST(request: NextRequest) {
     }
 
     await prisma.dailyQuest.createMany({ data: questsData });
+
+    console.log(`[Quest Generation] Created ${questsData.length} quests for day ${user.currentDay}:`, {
+      customerCount,
+      isBossDay,
+      totalShadows: questsData.length,
+      quests: questsData.map(q => ({ isBoss: q.isBoss, requiredPower: q.requiredPower }))
+    });
 
     return NextResponse.json({
       message: `Ngày ${user.currentDay} bắt đầu! ${customerCount} khách hàng${isBossDay ? ' + 1 BOSS' : ''} đã đến.`,

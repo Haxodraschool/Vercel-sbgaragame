@@ -553,6 +553,7 @@ export default function WorkshopScreen() {
     const [isTesting, setIsTesting] = useState(false);
     const [scanIndex, setScanIndex] = useState<number>(-1);
     const [testResult, setTestResult] = useState<'none' | 'success' | 'fail'>('none');
+    const [failureReason, setFailureReason] = useState<'power' | 'heat' | null>(null);
     const [accumulatedPower, setAccumulatedPower] = useState(0);
     const [accumulatedHeat, setAccumulatedHeat] = useState(0);
     const [showVFX, setShowVFX] = useState<{index: number, text: string} | null>(null);
@@ -851,6 +852,10 @@ export default function WorkshopScreen() {
                 newSlots[targetIndex] = card;
                 setSlots(newSlots);
                 triggerInstallVFX(targetIndex);
+                // Play drop card sound
+                const dropSound = new Audio('/sfx/dropcard.mp3');
+                dropSound.volume = 0.5;
+                dropSound.play().catch(err => console.error('Error playing drop sound:', err));
 
             } else if (source === 'slot') {
                 const sourceIndex = active.data.current?.index as number;
@@ -883,6 +888,10 @@ export default function WorkshopScreen() {
                 if (newCrew.some(c => c && c.id === card.id)) return;
                 newCrew[targetIndex] = card;
                 setCrewSlots(newCrew);
+                // Play drop card sound for crew
+                const dropSound = new Audio('/sfx/dropcard.mp3');
+                dropSound.volume = 0.5;
+                dropSound.play().catch(err => console.error('Error playing drop sound:', err));
 
             } else if (source === 'crew') {
                 const sourceIndex = active.data.current?.index as number;
@@ -957,6 +966,28 @@ export default function WorkshopScreen() {
         const filledSlots = slots.filter(s => s !== null);
         if (filledSlots.length === 0) return;
 
+        // Calculate minimum required slots
+        const isBoss = activeQuest?.isBoss;
+        let minRequiredSlots = 10; // Default for normal NPCs
+
+        if (isBoss && activeQuest?.bossConfig?.specialCondition) {
+            // Boss may ban certain card groups, reducing required slots
+            const bannedGroups = activeQuest.bossConfig.specialCondition.split(',').filter(Boolean);
+            minRequiredSlots = 10 - bannedGroups.length;
+        }
+
+        if (filledSlots.length < minRequiredSlots) {
+            setTestErrorMsg(isBoss
+                ? `Boss yêu cầu ít nhất ${minRequiredSlots} thẻ (do bị cấm ${10 - minRequiredSlots} nhóm thẻ). Hiện tại bạn chỉ có ${filledSlots.length} thẻ.`
+                : `NPC thường yêu cầu đầy đủ 10 thẻ. Hiện tại bạn chỉ có ${filledSlots.length} thẻ.`);
+            return;
+        }
+
+        // Play on test sound
+        const testSound = new Audio('/sfx/ontest-sfx.mp3');
+        testSound.volume = 0.6;
+        testSound.play().catch(err => console.error('Error playing test sound:', err));
+
         // Reset UI trước khi gọi API
         setTestErrorMsg(null);
         setTestSteps(null);
@@ -968,6 +999,7 @@ export default function WorkshopScreen() {
         setPenaltyApplied(false);
         setFlyingCoins([]);
         setTestResult('none');
+        setFailureReason(null);
 
         // Cần quest để chạy backend (áp effect/boss). Nếu không có → báo lỗi.
         if (!activeQuest?.id) {
@@ -1019,7 +1051,18 @@ export default function WorkshopScreen() {
     const isOverheated = currentDisplayHeat >= 100 || testResult === 'fail';
 
     const filledSlotsCount = slots.filter(Boolean).length;
-    const canStartTest = filledSlotsCount > 0 && !isTesting && testResult === 'none';
+
+    // Calculate minimum required slots
+    const isBoss = activeQuest?.isBoss;
+    let minRequiredSlots = 10; // Default for normal NPCs
+
+    if (isBoss && activeQuest?.bossConfig?.specialCondition) {
+        // Boss may ban certain card groups, reducing required slots
+        const bannedGroups = activeQuest.bossConfig.specialCondition.split(',').filter(Boolean);
+        minRequiredSlots = 10 - bannedGroups.length;
+    }
+
+    const canStartTest = filledSlotsCount >= minRequiredSlots && !isTesting && testResult === 'none';
 
     // ─── Car Frame Brightness (10% → 100%) ───
     // Cơ chế: khung xe mờ (10%). Mỗi thẻ lắp vào → sáng dần.
@@ -1656,7 +1699,9 @@ export default function WorkshopScreen() {
                                 onClick={goToLobby}
                                 className="w-full py-3 rounded-lg border-2 bg-red-950/80 border-red-700 text-center cursor-pointer hover:bg-red-900/80 hover:border-red-500 hover:shadow-[0_0_25px_rgba(239,68,68,0.5)] transition-all"
                             >
-                                <div className="text-red-300 font-bold text-sm tracking-widest">💥 MÁY QUÁ TẢI!</div>
+                                <div className="text-red-300 font-bold text-sm tracking-widest">
+                                    {failureReason === 'heat' ? '💥 thiết bị quá tải!!!' : '💀 xe này yếu quá!!!!'}
+                                </div>
                                 <div className="text-red-400 text-[9px] mt-0.5 tracking-wider">-{isBossQuest ? 20 : 10} UY TÍN ĐÃ BỊ KHẤU TRỪ</div>
                                 <div className="text-red-500/80 text-[8px] mt-1 tracking-wider italic">▶ Nhấn để quay về lobby</div>
                             </button>
@@ -1666,7 +1711,7 @@ export default function WorkshopScreen() {
                         {testResult === 'none' && !isTesting && (
                             <div className="flex gap-2 w-full">
                                 <button
-                                    onClick={() => { setSlots(Array(10).fill(null)); setCrewSlots(Array(MAX_CREW_SLOTS).fill(null)); setIsTesting(false); setScanIndex(-1); setTestResult('none'); setTestSteps(null); setTestFinalResult(null); setTestErrorMsg(null); setAccumulatedPower(0); setAccumulatedHeat(0); setShowVFX(null); }}
+                                    onClick={() => { setSlots(Array(10).fill(null)); setCrewSlots(Array(MAX_CREW_SLOTS).fill(null)); setIsTesting(false); setScanIndex(-1); setTestResult('none'); setFailureReason(null); setTestSteps(null); setTestFinalResult(null); setTestErrorMsg(null); setAccumulatedPower(0); setAccumulatedHeat(0); setShowVFX(null); }}
                                     className="flex-1 py-2.5 bg-red-950/60 text-red-400 border border-red-800/50 flex items-center justify-center font-bold tracking-widest hover:bg-red-900 transition-colors uppercase text-[10px]"
                                 >
                                     XOÁ TẤT CẢ
@@ -1694,13 +1739,12 @@ export default function WorkshopScreen() {
                         onClick={goToLobby}
                         className="relative text-red-400 text-5xl font-black tracking-widest drop-shadow-[0_0_30px_#ef4444] border-4 border-red-500 px-10 py-6 bg-slate-950/90 transform -rotate-6 backdrop-blur-md flex flex-col items-center gap-2 cursor-pointer hover:scale-105 hover:shadow-[0_0_60px_rgba(239,68,68,0.8)] transition-all"
                     >
-                        <span>💥 MÁY MÓC QUÁ TẢI!</span>
+                        <span>{failureReason === 'heat' ? 'Thiết bị quá tải!!!' : 'Xe này yếu quá!!!!'}</span>
                         <span className="text-xl text-red-300 font-bold tracking-widest">-{isBossQuest ? 20 : 10} UY TÍN</span>
                         <span className="text-sm text-slate-400 font-normal tracking-wider mt-1">▶ Nhấn để quay về lobby</span>
                     </button>
                 </div>
             )}
-
             {/* WIN STATE OVERLAY */}
             {testResult === 'success' && (
                 <div className="absolute inset-0 z-50 flex flex-col items-center justify-center">

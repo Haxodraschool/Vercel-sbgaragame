@@ -112,28 +112,17 @@ export async function POST(
 
     // ============================================================
     // BUDGET PROFIT BONUS - Chỉ áp dụng cho khách thường (không phải Boss)
-    // Nếu role lắp xe rẻ hơn vốn của khách, người chơi được giữ phần tiếm năng thuữf lại
+    // Người chơi luôn nhận được customerBudget như phần thưởng thêm
     // ============================================================
-    if (status === 'SUCCESS' && !quest.isBoss && quest.customerBudget > 0 && Array.isArray(usedCardIds) && usedCardIds.length > 0) {
-      // Lấy thông tin giá của các thẻ được sử dụng
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const usedCards = await prisma.card.findMany({ where: { id: { in: usedCardIds as number[] } }, select: { id: true, cost: true, rarity: true } });
+    let budgetProfit = 0;
+    if (status === 'SUCCESS' && !quest.isBoss && quest.customerBudget > 0) {
+      // Luôn cộng customerBudget vào gold (không trừ chi phí thẻ)
+      budgetProfit = quest.customerBudget;
       
-      // Tính tổng giá sau khi áp dụng luật 5 sao chỉ tính 50%
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const totalCardCost = usedCards.reduce((sum: number, card: any) => {
-        const effectiveCost = card.rarity === 5 ? Math.floor(card.cost * 0.5) : card.cost;
-        return sum + effectiveCost;
-      }, 0);
-
-      // Nếu tổng chi phí thấp hơn ngân sách khách, tiền thừa là lợi nhuận thuế thêm
-      const profit = quest.customerBudget - totalCardCost;
-      if (profit > 0) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const currentGoldInc = (updates.gold as any)?.increment || quest.rewardGold || 0;
-        updates.gold = { increment: currentGoldInc + profit };
-        actualGoldReward = (actualGoldReward || quest.rewardGold || 0) + profit;
-      }
+      const currentGoldInc = (updates.gold as any)?.increment || quest.rewardGold || 0;
+      updates.gold = { increment: currentGoldInc + quest.customerBudget };
+      actualGoldReward = (actualGoldReward || quest.rewardGold || 0) + quest.customerBudget;
     }
 
     // ============================================================
@@ -498,6 +487,8 @@ export async function POST(
       rewards: status === 'SUCCESS' ? {
         gold: actualGoldReward,
         originalGold: quest.rewardGold,
+        customerBudget: quest.customerBudget || 0,
+        budgetProfit: budgetProfit,
         smugglerPenalty: smugglerPenaltyApplied,
         exp: quest.isBoss ? GAME_CONSTANTS.BOSS_SUCCESS_EXP : GAME_CONSTANTS.SUCCESS_EXP,
       } : null,

@@ -60,9 +60,10 @@ export async function POST(request: Request) {
         break;
 
       case 'CLEAR_QUESTS':
-        await prisma.dailyQuest.deleteMany({
+        const deletedCount = await prisma.dailyQuest.deleteMany({
           where: { userId: user.id, status: 'PENDING' }
         });
+        console.log(`[DEV CHEAT] Cleared ${deletedCount.count} pending quests for user ${user.username}`);
         updatedUser = user;
         break;
 
