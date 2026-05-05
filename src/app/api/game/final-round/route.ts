@@ -79,7 +79,7 @@ export async function POST(request: NextRequest) {
       data: { isFinalRound: true, currentDay: 51 },
     });
 
-    // Generate 10 boss quests for Final Round
+    // Generate 8 boss quests for Final Round
     const bosses = await prisma.bossConfig.findMany();
     const shuffledBosses = bosses.sort(() => Math.random() - 0.5);
     const finalBosses = shuffledBosses.slice(0, GAME_CONSTANTS.FINAL_ROUND_BOSSES);
@@ -98,7 +98,7 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json({
-      message: '🔥 FINAL ROUND! 10 Boss mạnh nhất đang chờ bạn trên Sofa!',
+      message: '🔥 FINAL ROUND! 8 Boss mạnh nhất đang chờ bạn trên Sofa!',
       isFinalRound: true,
       totalBosses: finalBosses.length,
       bosses: finalBosses.map((b) => ({

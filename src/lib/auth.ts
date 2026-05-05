@@ -69,7 +69,7 @@ export const GAME_CONSTANTS = {
   HEAT_THRESHOLD: 100,
   BOSS_INTERVAL: 5, // Boss xuất hiện mỗi 5 ngày
   FIXED_QUEST_DAYS: 5, // Ngày 1-5 quest cố định
-  FINAL_ROUND_BOSSES: 10,
+  FINAL_ROUND_BOSSES: 8,
   SHOP_UNLOCK_DAY: 2,
   PACK_CARDS_COUNT: 5,
   PACK_CHANCE_IN_SHOP: 0.1, // 10% chance pack xuất hiện

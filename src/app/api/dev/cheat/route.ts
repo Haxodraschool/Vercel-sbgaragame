@@ -53,9 +53,29 @@ export async function POST(request: Request) {
         break;
 
       case 'ADD_LEVEL':
+        const levelIncrease = Number(value);
+        const newLevel = Math.max(1, user.level + levelIncrease);
         updatedUser = await prisma.user.update({
           where: { id: user.id },
-          data: { level: Math.max(1, user.level + Number(value)) },
+          data: { level: newLevel },
+        });
+        // Trigger level up rewards similar to end-day logic
+        const levelRewards = await prisma.levelReward.findMany({
+          where: { level: newLevel },
+          include: { card: true },
+        });
+        for (const reward of levelRewards) {
+          await prisma.userInventory.upsert({
+            where: { userId_cardId: { userId: user.id, cardId: reward.cardId } },
+            create: { userId: user.id, cardId: reward.cardId, quantity: reward.quantity },
+            update: { quantity: { increment: reward.quantity } },
+          });
+        }
+        // Add gold reward based on new level
+        const levelUpGold = newLevel * newLevel * 100;
+        updatedUser = await prisma.user.update({
+          where: { id: user.id },
+          data: { gold: { increment: levelUpGold } },
         });
         break;
 

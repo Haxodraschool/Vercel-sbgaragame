@@ -260,6 +260,13 @@ export default function ShadowManager({ quests, onQuestAccepted, onQuestRejected
     if (!selectedQuest) return;
     const quest = selectedQuest;
     setSelectedQuest(null);
+    
+    // Hide this quest immediately locally so it doesn't blink when returning from workshop
+    setRemovedQuestIds(prev => {
+      const next = new Set(prev);
+      next.add(quest.id);
+      return next;
+    });
 
     // Ghi nhớ nhạc boss vào store để Workshop tiếp tục phát
     if (quest.isBoss && bossMusicRef.current) {
@@ -398,6 +405,10 @@ export default function ShadowManager({ quests, onQuestAccepted, onQuestRejected
           }
         });
         setLeavingQuestIds(new Set());
+        // Notify parent to refresh quests (critical: so handleEndDayClick sees updated statuses)
+        if (onQuestRejected) {
+          onQuestRejected(quest);
+        }
       }, 2500);
       return;
     }

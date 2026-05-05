@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGameStore } from '@/stores/useGameStore';
+import { ToolIcon } from '@/components/CategoryIcons';
 
 // ═══════════════════════════════════════════════════════════
 // 1. BUY TECHPOINTS MODAL (Gold -> TP)
@@ -76,7 +77,7 @@ export function BuyTpModal() {
           {/* Header */}
           <div className="bg-emerald-900/20 border-b border-emerald-500/30 p-6 flex justify-between items-center">
             <h2 className="text-xl text-emerald-400 font-bold tracking-widest flex items-center gap-2">
-              <span>🔧</span> TRẠM QUY ĐỔI TECHPOINTS
+              <ToolIcon size={20} className="inline-block" /> TRẠM QUY ĐỔI TECHPOINTS
             </h2>
             <button onClick={() => setOpen(false)} className="text-emerald-500/50 hover:text-emerald-400 transition-colors">✕</button>
           </div>

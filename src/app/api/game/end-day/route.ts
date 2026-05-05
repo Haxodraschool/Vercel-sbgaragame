@@ -111,23 +111,38 @@ export async function POST(request: NextRequest) {
     const expNeeded = updatedUser.level * 500; // Simple formula
     let leveledUp = false;
     let levelRewardsGiven: any[] = [];
-    if (Number(updatedUser.exp) >= expNeeded) {
+    let levelUpGold = 0;
+    let garageHealthGain = 0;
+    
+    // Level cap at 50
+    if (updatedUser.level < 50 && Number(updatedUser.exp) >= expNeeded) {
+      const newLevel = updatedUser.level + 1;
+      
+      // Tiered gold reward
+      if (newLevel <= 10) {
+        levelUpGold = 500;
+      } else if (newLevel <= 20) {
+        levelUpGold = 1000;
+      } else if (newLevel <= 30) {
+        levelUpGold = 2000;
+      } else {
+        levelUpGold = 2500;
+      }
+      
+      // +5 garageHealth, capped at 100
+      const currentHealth = updatedUser.garageHealth;
+      garageHealthGain = Math.min(5, 100 - currentHealth);
+      
       await prisma.user.update({
         where: { id: auth.userId },
         data: {
           level: { increment: 1 },
           exp: { decrement: expNeeded },
+          gold: { increment: levelUpGold },
+          garageHealth: { increment: garageHealthGain },
         },
       });
       leveledUp = true;
-
-      // Gold thưởng khi lên cấp: cấp mới² × 100 → cấp càng cao tiền càng nhiều
-      const newLevel = updatedUser.level + 1;
-      const levelUpGold = newLevel * newLevel * 100;
-      await prisma.user.update({
-        where: { id: auth.userId },
-        data: { gold: { increment: levelUpGold } },
-      });
 
       // Give level rewards (thẻ bài)
       const rewards = await prisma.levelReward.findMany({
@@ -208,7 +223,8 @@ export async function POST(request: NextRequest) {
       ending,
       leveledUp,
       newLevel: leveledUp ? (updatedUser.level + 1) : updatedUser.level,
-      levelUpGoldReward: leveledUp ? (updatedUser.level + 1) * (updatedUser.level + 1) * 100 : 0,
+      levelUpGoldReward: levelUpGold,
+      garageHealthGain,
       levelRewards: leveledUp ? (levelRewardsGiven || []) : [],
       techPointsEarned: GAME_CONSTANTS.TECH_POINTS_PER_DAY,
       garageHealth: finalUser?.garageHealth,

@@ -14,6 +14,13 @@ export const metadata: Metadata = {
     "Lắp ráp linh kiện, chạy thử xe, chinh phục boss và trở thành huyền thoại gara!",
 };
 
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{

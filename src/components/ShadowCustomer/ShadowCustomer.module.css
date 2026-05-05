@@ -264,13 +264,9 @@
 }
 
 .chatHeader {
-  font-size: 14px;
-  font-weight: bold;
-  color: #fbbf24;
   margin-bottom: 10px;
   text-transform: uppercase;
-  letter-spacing: 1px;
-  text-shadow: 1px 1px 0 #000;
+  line-height: 1;
 }
 
 .chatBody {
@@ -502,4 +498,86 @@
 .reputationGainIndicator {
   color: #22c55e !important;
   text-shadow: 2px 2px 0 #000, 0 0 10px rgba(34, 197, 94, 0.8) !important;
+}
+
+/* ═══ RESPONSIVE ═══ */
+@media (max-width: 768px) {
+  .newDialogContainer {
+    width: 90%;
+    max-width: 420px;
+    bottom: 3vh;
+  }
+
+  .pixelChatBox {
+    padding: 12px;
+  }
+
+  .chatHeader {
+    margin-bottom: 6px;
+  }
+
+  .chatBody {
+    min-height: 50px;
+    font-size: 14px;
+    line-height: 1.4;
+  }
+
+  .portraitWrapper {
+    width: 80vw;
+    max-width: 600px;
+    height: 60vh;
+  }
+
+  .pixelBtn {
+    width: 36px;
+    height: 36px;
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 480px) {
+  .newDialogContainer {
+    width: 95%;
+    max-width: none;
+    bottom: 2vh;
+  }
+
+  .pixelChatBox {
+    padding: 10px;
+    border-width: 3px;
+  }
+
+  .chatHeader {
+    margin-bottom: 4px;
+  }
+
+  .chatBody {
+    min-height: 40px;
+    font-size: 12px;
+    line-height: 1.3;
+  }
+
+  .portraitWrapper {
+    width: 90vw;
+    max-width: 400px;
+    height: 50vh;
+    top: -80%;
+  }
+
+  .pixelBtn {
+    width: 32px;
+    height: 32px;
+    font-size: 16px;
+  }
+
+  .chatActions {
+    bottom: -16px;
+    right: -6px;
+    gap: 8px;
+  }
+
+  .questStatBadge {
+    font-size: 10px;
+    padding: 3px 6px;
+  }
 }

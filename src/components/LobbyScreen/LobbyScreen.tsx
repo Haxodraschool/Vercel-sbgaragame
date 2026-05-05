@@ -11,6 +11,8 @@ import { useTheme } from 'next-themes';
 import * as Progress from '@radix-ui/react-progress';
 import { ShadowManager, DeckOverlay } from '@/components';
 import AccountInfoModal from '@/components/AccountInfoModal/AccountInfoModal';
+import LevelUpModal from '@/components/LevelUpModal/LevelUpModal';
+import { ToolIcon } from '@/components/CategoryIcons';
 import type { QuestData } from '@/components/ShadowCustomer/ShadowCustomer';
 
 /* ─── Inline SVG Icons ─── */
@@ -158,10 +160,17 @@ export default function LobbyScreen() {
   const setBuyTpModalOpen = useGameStore((s) => s.setBuyTpModalOpen);
   const isAccountInfoModalOpen = useGameStore((s) => s.isAccountInfoModalOpen);
   const setAccountInfoModalOpen = useGameStore((s) => s.setAccountInfoModalOpen);
+  const isLevelUpModalOpen = useGameStore((s) => s.isLevelUpModalOpen);
+  const setLevelUpModalOpen = useGameStore((s) => s.setLevelUpModalOpen);
+  const setActiveEvent = useGameStore((s) => s.setActiveEvent);
 
   // --- Loading readiness tracking (tell global LoadingScreen when we're done) ---
   const [questsLoaded, setQuestsLoaded] = useState(false);
   const [bgImgLoaded, setBgImgLoaded] = useState(false);
+  // Re-fetch quests every time transitionScreen('lobby') is called
+  // transitionKey increments on each transitionScreen() call, so this acts as a re-entry trigger
+  const transitionKey = useGameStore((s) => s.transitionKey);
+  const currentScreen = useGameStore((s) => s.currentScreen);
 
   // Sync user profile upon entering Lobby
   useEffect(() => {
@@ -204,7 +213,45 @@ export default function LobbyScreen() {
           transitionScreen('ending');
           return;
         }
-        
+
+        // Nếu có level up, mở modal level up trước
+        if (data.leveledUp) {
+          setLevelUpModalOpen(true, {
+            newLevel: data.newLevel,
+            goldReward: data.levelUpGoldReward,
+            garageHealthGain: data.garageHealthGain,
+            cardRewards: data.levelRewards || []
+          });
+          // Refresh user data to show updated stats
+          const userRes = await fetch('/api/user/profile', {
+            headers: { 'Authorization': `Bearer ${token}` },
+            cache: 'no-store'
+          });
+          const userData = await userRes.json();
+          if (userRes.ok && userData.user) {
+            setUser(userData.user);
+          }
+          return;
+        }
+
+        // Check for Random Event first
+        try {
+          const eventRes = await fetch(`/api/events/random?t=${Date.now()}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          });
+          const eventData = await eventRes.json();
+          
+          if (eventData.event) {
+            setActiveEvent(eventData.event);
+            // Tell the event screen where to go next
+            useGameStore.getState().setNextScreen(data.shopPhase ? 'shop' : 'lobby');
+            transitionScreen('event');
+            return;
+          }
+        } catch (eventErr) {
+          console.error('Error fetching random event:', eventErr);
+        }
+
         // Mở shop nếu có shopPhase (ngày 2+)
         if (data.shopPhase) {
           transitionScreen('shop');
@@ -282,6 +329,8 @@ export default function LobbyScreen() {
   // Fetch daily quests — get full quest data
   useEffect(() => {
     if (!mounted || !token) return;
+    // Only re-fetch when lobby is the active screen
+    if (currentScreen !== 'lobby') return;
 
     const fetchQuests = async () => {
       try {
@@ -317,7 +366,9 @@ export default function LobbyScreen() {
     };
 
     fetchQuests();
-  }, [mounted, token, user?.currentDay, completeTask]);
+  // transitionKey changes every time transitionScreen() is called — re-fetch on lobby re-entry
+  // currentScreen guards so we only fetch when lobby is truly active
+  }, [mounted, token, completeTask, transitionKey, currentScreen]);
 
   // --- Preload background images so the loader stays visible until assets are ready ---
   useEffect(() => {
@@ -413,10 +464,11 @@ export default function LobbyScreen() {
             quests={quests}
             lobbyBgmRef={bgmRef}
             onQuestRejected={async () => {
-              // Refresh quests after rejection to update status
+              // Refresh quests after rejection — must bust cache to get fresh statuses
               try {
-                const res = await fetch('/api/quest/daily', {
-                  headers: { 'Authorization': `Bearer ${token}` }
+                const res = await fetch(`/api/quest/daily?t=${Date.now()}`, {
+                  headers: { 'Authorization': `Bearer ${token}` },
+                  cache: 'no-store',
                 });
                 if (res.ok) {
                   const data = await res.json();
@@ -464,7 +516,7 @@ export default function LobbyScreen() {
             {/* Top-Left: Branding + Day */}
             <div className="flex flex-col gap-3 pointer-events-auto">
               <motion.div
-                className="relative bg-[#080810]/80 backdrop-blur-md rounded-md flex items-center justify-center px-6 py-3 min-w-[240px] overflow-hidden cursor-pointer"
+                className="relative bg-[#080810]/80 backdrop-blur-md rounded-md flex items-center justify-center px-3 sm:px-6 py-2 sm:py-3 min-w-[140px] sm:min-w-[240px] overflow-hidden cursor-pointer"
                 animate={{
                   boxShadow: [
                     "0 0 10px rgba(0,229,255,0.1), inset 0 0 10px rgba(0,229,255,0.1)",
@@ -495,7 +547,7 @@ export default function LobbyScreen() {
                 <motion.div className="absolute left-1 w-[2px] h-1/3 bg-[#00e5ff]" animate={{ opacity: [0.3, 1, 0.3] }} transition={{ duration: 1.5, repeat: Infinity }} />
                 <motion.div className="absolute right-1 w-[2px] h-1/3 bg-[#ff2d55]" animate={{ opacity: [1, 0.3, 1] }} transition={{ duration: 1.5, repeat: Infinity }} />
 
-                <div className="flex items-center justify-center gap-0 text-3xl sm:text-[34px] pb-1 tracking-[0.15em] font-bold z-10 w-full relative">
+                <div className="flex items-center justify-center gap-0 text-xl sm:text-3xl md:text-[34px] pb-1 tracking-[0.1em] sm:tracking-[0.15em] font-bold z-10 w-full relative">
                   <span
                     className="relative"
                     style={{
@@ -542,13 +594,13 @@ export default function LobbyScreen() {
                   </span>
                 </div>
               </motion.div>
-              <div className="text-white text-3xl sm:text-[34px] drop-shadow-[3px_3px_0_#111] font-bold tracking-wider ml-1">
+              <div className="text-white text-xl sm:text-3xl md:text-[34px] drop-shadow-[3px_3px_0_#111] font-bold tracking-wider ml-1">
                 NGÀY {currentDay}/50
               </div>
             </div>
 
             {/* Top-Right: Clock / Gold / Prestige */}
-            <div className="flex flex-col gap-3 items-end w-[280px] pointer-events-auto">
+            <div className="flex flex-col gap-2 sm:gap-3 items-end w-[160px] sm:w-[220px] md:w-[280px] pointer-events-auto">
 
               {/* Clock */}
               <motion.div 
@@ -636,7 +688,7 @@ export default function LobbyScreen() {
 
                 <div className="flex items-center gap-3 z-10 w-full">
                   <div className="relative bg-[#3a3a3a] border border-cyan-500/50 shadow-[0_0_8px_rgba(0,229,255,0.3)] p-[5px] rounded-sm flex items-center justify-center group-hover:bg-cyan-500/20 transition-colors">
-                    <span className="text-cyan-400 text-lg">🔧</span>
+                    <ToolIcon className="w-5 h-5 sm:w-6 sm:h-6 text-cyan-400" />
                   </div>
 
                   <div className="flex flex-col items-start leading-none flex-grow justify-center h-full">
@@ -752,7 +804,7 @@ export default function LobbyScreen() {
               whileTap={{ scale: 0.95 }}
               onClick={() => setIsDeckOpen(true)}
             >
-              <div className="relative flex items-center justify-center w-[200px] sm:w-[240px]">
+              <div className="relative flex items-center justify-center w-[140px] sm:w-[200px] md:w-[240px]">
                 <Image 
                   src="/deckbutton.png" 
                   alt="Deck Button" 
@@ -768,7 +820,7 @@ export default function LobbyScreen() {
             {/* Bottom-Right: End Day */}
             <motion.button
               onClick={handleEndDayClick}
-              className={`bg-[#1e1e21] rounded-[12px] shadow-[0_5px_0_rgba(0,0,0,0.8)] pointer-events-auto transition-all group min-w-[200px] sm:min-w-[240px] active:translate-y-1 active:shadow-none cursor-pointer`}
+              className={`bg-[#1e1e21] rounded-[12px] shadow-[0_5px_0_rgba(0,0,0,0.8)] pointer-events-auto transition-all group min-w-[140px] sm:min-w-[200px] md:min-w-[240px] active:translate-y-1 active:shadow-none cursor-pointer`}
               whileHover={{ y: -2 }}
               whileTap={{ scale: 0.95 }}
             >
@@ -776,7 +828,7 @@ export default function LobbyScreen() {
                   <img
                     src={quests.filter((q) => q.status === 'PENDING').length > 0 ? "/endaybuttongrayout.jpg" : "/enddaybutton.jpg"}
                     alt="End Day Button"
-                    className="w-[200px] sm:w-[240px] object-contain drop-shadow-[0_4px_4px_rgba(0,0,0,0.5)] group-hover:brightness-110 transition-all duration-300 rounded-[12px]"
+                    className="w-[140px] sm:w-[200px] md:w-[240px] object-contain drop-shadow-[0_4px_4px_rgba(0,0,0,0.5)] group-hover:brightness-110 transition-all duration-300 rounded-[12px]"
                     style={{ imageRendering: 'pixelated' }}
                   />
               </div>
@@ -794,6 +846,7 @@ export default function LobbyScreen() {
       <BuyTpModal />
       <TopupGoldModal />
       <AccountInfoModal isOpen={isAccountInfoModalOpen} onClose={() => setAccountInfoModalOpen(false)} />
+      <LevelUpModal isOpen={isLevelUpModalOpen} onClose={() => setLevelUpModalOpen(false)} />
     </motion.div>
   );
 }

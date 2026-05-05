@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ShopItemData } from './ShopCard';
+import { CrewIcon, ToolIcon } from '@/components/CategoryIcons';
 
 const RARITY_GLOW: Record<number, string> = {
   1: '0 0 18px 6px rgba(180,180,180,0.35), 0 0 40px 10px rgba(180,180,180,0.15)',
@@ -104,7 +105,7 @@ export default function CardPreviewModal({
                     borderRadius: 12,
                   }}
                 >
-                  {item.type === 'CREW' ? '👤' : '🔧'}
+                  {item.type === 'CREW' ? <CrewIcon size={64} /> : <ToolIcon size={64} />}
                 </div>
               )}
             </motion.div>
@@ -236,7 +237,7 @@ function PreviewCardImage({ cardId, name, type }: { cardId: number; name: string
           borderRadius: 12,
         }}
       >
-        {type === 'CREW' ? '👤' : '🔧'}
+        {type === 'CREW' ? <CrewIcon size={64} /> : <ToolIcon size={64} />}
       </div>
     );
   }

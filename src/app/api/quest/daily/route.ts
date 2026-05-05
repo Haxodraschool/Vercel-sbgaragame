@@ -193,37 +193,71 @@ export async function POST(request: NextRequest) {
         bosses = bosses.filter((b: any) => b.name !== 'Kẻ Bí Ẩn');
       }
       if (bosses.length > 0) {
-        // Tăng tỉ lệ xuất hiện của Chủ Tịch Kim 20%
+        // Parse bossAppeared JSON array
+        let appearedBossIds: number[] = [];
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        if ((user as any).bossAppeared) {
+          try {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            appearedBossIds = JSON.parse((user as any).bossAppeared);
+          } catch (e) {
+            console.error('Error parsing bossAppeared:', e);
+            appearedBossIds = [];
+          }
+        }
+
+        // Tăng tỉ lệ xuất hiện của Chủ Tịch Kim 20%
         const bossPool: any[] = [];
         for (const b of bosses) {
-          bossPool.push(b);
-          if (b.specialCondition === 'KIM_JONG_UN') {
-            const extraTickets = Math.max(1, Math.ceil(bosses.length * 0.2));
-            for (let k = 0; k < extraTickets; k++) bossPool.push(b);
-          }
-          // Tăng tỉ lệ Nga Đại Đế 20% nếu Kim bị ám sát hoặc đã thắng Đỗ Nam Trung
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          if (b.specialCondition === 'RUSSIA_EMPEROR' && ((user as any).isKimAssassinated || (user as any).hasDefeatedDonaldTrump)) {
-            const extraTickets = Math.max(1, Math.ceil(bosses.length * 0.2));
-            for (let k = 0; k < extraTickets; k++) bossPool.push(b);
+          // Boss đã xuất hiện → giảm tỉ lệ xuống 5%
+          if (appearedBossIds.includes(b.id)) {
+            if (Math.random() < 0.05) { // 5% chance for re-appearing bosses
+              bossPool.push(b);
+            }
+          } else {
+            // Boss chưa xuất hiện → tỉ lệ bình thường
+            bossPool.push(b);
+            if (b.specialCondition === 'KIM_JONG_UN') {
+              const extraTickets = Math.max(1, Math.ceil(bosses.length * 0.2));
+              for (let k = 0; k < extraTickets; k++) bossPool.push(b);
+            }
+            // Tăng tỉ lệ Nga Đại Đế 20% nếu Kim bị ám sát hoặc đã thắng Đỗ Nam Trung
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            if (b.specialCondition === 'RUSSIA_EMPEROR' && ((user as any).isKimAssassinated || (user as any).hasDefeatedDonaldTrump)) {
+              const extraTickets = Math.max(1, Math.ceil(bosses.length * 0.2));
+              for (let k = 0; k < extraTickets; k++) bossPool.push(b);
+            }
           }
         }
         
-        const randomBoss = bossPool[Math.floor(Math.random() * bossPool.length)];
-        const bossQuest = {
-          userId: auth.userId,
-          dayNumber: user.currentDay,
-          isBoss: true,
-          bossConfigId: randomBoss.id,
-          requiredPower: randomBoss.requiredPower,
-          rewardGold: randomBoss.rewardGold,
-          customerBudget: 0, // Boss không có ngân sách khách
-          status: 'PENDING' as const,
-        };
-        // Random vị trí boss trong array để trà trộn với khách thường
-        const randomIndex = Math.floor(Math.random() * (questsData.length + 1));
-        questsData.splice(randomIndex, 0, bossQuest);
+        if (bossPool.length > 0) {
+          const randomBoss = bossPool[Math.floor(Math.random() * bossPool.length)];
+          
+          // Add to appearedBossIds and update user
+          if (!appearedBossIds.includes(randomBoss.id)) {
+            appearedBossIds.push(randomBoss.id);
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            await prisma.user.update({
+              where: { id: auth.userId },
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              data: { bossAppeared: JSON.stringify(appearedBossIds) as any }
+            });
+          }
+
+          const bossQuest = {
+            userId: auth.userId,
+            dayNumber: user.currentDay,
+            isBoss: true,
+            bossConfigId: randomBoss.id,
+            requiredPower: randomBoss.requiredPower,
+            rewardGold: randomBoss.rewardGold,
+            customerBudget: 0, // Boss không có ngân sách khách
+            status: 'PENDING' as const,
+          };
+          // Random vị trí boss trong array để trà trộn với khách thường
+          const randomIndex = Math.floor(Math.random() * (questsData.length + 1));
+          questsData.splice(randomIndex, 0, bossQuest);
+        }
       }
     }
 

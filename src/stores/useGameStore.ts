@@ -24,6 +24,7 @@ export interface BossChoiceData {
   kimChoice?: 'YES' | 'NO';
   russiaPhase?: number;
   vodkaChoice?: 'YES' | 'NO';
+  russiaPendingPhase2?: boolean; // Flag to show phase 2 dialog after completing phase 1
 }
 
 interface GameState {
@@ -41,6 +42,8 @@ interface GameState {
   transitionKey: number; // increments per transition — destination screens use this to guard stale markReady() calls
   activeQuestId: number | null;
   activeQuest: any | null; // Storing full QuestData object
+  activeEvent: any | null; // Storing the active event data
+  nextScreen: 'login' | 'lobby' | 'workshop' | 'testrun' | 'shop' | 'event' | 'endday' | 'ending' | null;
   bossChoice: BossChoiceData | null; // Stores boss-specific choices for workshop
   skipShadowIntro: boolean; // Skip shadow-walking animation khi quay lại lobby từ workshop
 
@@ -51,6 +54,8 @@ interface GameState {
   isTopupGoldModalOpen: boolean;
   isBuyTpModalOpen: boolean;
   isAccountInfoModalOpen: boolean;
+  isLevelUpModalOpen: boolean;
+  levelUpData: { newLevel: number; goldReward: number; garageHealthGain: number; cardRewards: any[]; bossRewards?: any[] } | null;
 
   // Loading progress tracking (cho LoadingScreen)
   loadingPending: string[]; // list of pending task IDs
@@ -65,6 +70,7 @@ interface GameState {
   setTopupGoldModalOpen: (open: boolean) => void;
   setAccountInfoModalOpen: (open: boolean) => void;
   setBuyTpModalOpen: (open: boolean) => void;
+  setLevelUpModalOpen: (open: boolean, data?: { newLevel: number; goldReward: number; garageHealthGain: number; cardRewards: any[]; bossRewards?: any[] } | null) => void;
   /** Transition to a destination screen WITH a loading overlay; call markScreenReady() from destination when its resources are fully loaded. */
   transitionScreen: (screen: GameState['currentScreen']) => void;
   markScreenReady: () => void;
@@ -74,6 +80,8 @@ interface GameState {
   completeTask: (taskId: string) => void;
   setLoading: (loading: boolean) => void;
   setActiveQuest: (quest: any | null) => void;
+  setActiveEvent: (event: any | null) => void;
+  setNextScreen: (screen: 'login' | 'lobby' | 'workshop' | 'testrun' | 'shop' | 'event' | 'endday' | 'ending' | null) => void;
   setBossChoice: (choice: BossChoiceData | null) => void;
   setSkipShadowIntro: (skip: boolean) => void;
   setActiveBossMusic: (track: string | null) => void;
@@ -94,12 +102,16 @@ export const useGameStore = create<GameState>((set) => ({
   transitionKey: 0,
   activeQuestId: null,
   activeQuest: null,
+  activeEvent: null,
+  nextScreen: null,
   bossChoice: null,
   skipShadowIntro: false,
   activeBossMusic: null,
   isTopupGoldModalOpen: false,
   isBuyTpModalOpen: false,
   isAccountInfoModalOpen: false,
+  isLevelUpModalOpen: false,
+  levelUpData: null,
   loadingPending: [],
   loadingTotal: 0,
   loadingLabel: '',
@@ -163,6 +175,8 @@ export const useGameStore = create<GameState>((set) => ({
   setLoading: (loading) => set({ isLoading: loading }),
 
   setActiveQuest: (quest) => set({ activeQuestId: quest?.id || null, activeQuest: quest }),
+  setActiveEvent: (event) => set({ activeEvent: event }),
+  setNextScreen: (screen) => set({ nextScreen: screen }),
   setBossChoice: (choice) => set({ bossChoice: choice }),
   setSkipShadowIntro: (skip) => set({ skipShadowIntro: skip }),
   setActiveBossMusic: (track) => set({ activeBossMusic: track }),
@@ -182,6 +196,7 @@ export const useGameStore = create<GameState>((set) => ({
   setTopupGoldModalOpen: (open) => set({ isTopupGoldModalOpen: open }),
   setBuyTpModalOpen: (open) => set({ isBuyTpModalOpen: open }),
   setAccountInfoModalOpen: (open) => set({ isAccountInfoModalOpen: open }),
+  setLevelUpModalOpen: (open, data) => set({ isLevelUpModalOpen: open, levelUpData: data || null }),
 
   logout: () => {
     localStorage.removeItem('sb-token');
@@ -193,6 +208,8 @@ export const useGameStore = create<GameState>((set) => ({
       activeQuestId: null,
       activeBossMusic: null,
       isAccountInfoModalOpen: false,
+      isLevelUpModalOpen: false,
+      levelUpData: null,
     });
   },
 }));

@@ -71,8 +71,8 @@ export async function POST(request: NextRequest) {
     const { rerollCount } = await request.json();
     const count = Math.max(0, Math.floor(rerollCount || 0));
 
-    // Tính giá reroll: 50 * 2^count
-    const rerollCost = REROLL_BASE_COST * Math.pow(2, count);
+    // Tính giá reroll: 50 * 2^(count/3) - doubles every 3 rerolls
+    const rerollCost = REROLL_BASE_COST * Math.pow(2, Math.floor(count / 3));
 
     const user = await prisma.user.findUnique({ where: { id: auth.userId } });
     if (!user) {
@@ -264,7 +264,7 @@ export async function POST(request: NextRequest) {
     }
 
     const newGold = Number(user.gold) - rerollCost;
-    const nextRerollCost = REROLL_BASE_COST * Math.pow(2, count + 1);
+    const nextRerollCost = REROLL_BASE_COST * Math.pow(2, Math.floor((count + 1) / 3));
 
     return NextResponse.json({
       shopUnlocked: true,

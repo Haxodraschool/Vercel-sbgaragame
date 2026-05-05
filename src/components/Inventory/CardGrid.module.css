@@ -97,3 +97,39 @@
   text-align: center;
   line-height: 2;
 }
+
+/* ═══ RESPONSIVE ═══ */
+@media (max-width: 768px) {
+  .grid {
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    gap: 8px;
+    padding: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .grid {
+    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    gap: 6px;
+    padding: 6px;
+  }
+
+  .resultsInfo {
+    font-size: 9px;
+    padding: 5px 8px;
+  }
+
+  .noResults {
+    padding: 30px 12px;
+    gap: 8px;
+  }
+
+  .noResults .emoji {
+    font-size: 28px;
+  }
+
+  .noResults p {
+    font-size: 13px;
+  }
+}
+

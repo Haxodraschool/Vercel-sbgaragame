@@ -1,5 +1,5 @@
 ---
-name: SB-GARAGE Game Bible
+name: sb-garage-game-bible
 description: Tổng hợp toàn bộ nội dung, cơ chế, cách hoạt động, tiến trình game SB-GARAGE
 ---
 
@@ -59,7 +59,7 @@ description: Tổng hợp toàn bộ nội dung, cơ chế, cách hoạt động
 | **Ngày đầu**    | 1–5  | Số khách cố định (1→4), không có Boss         |
 | **Phát triển**  | 6–49 | Số khách random theo level, Boss mỗi 5 ngày   |
 | **Kết thúc**    | 50   | Ngày cuối → Good Ending hoặc chọn Final Round |
-| **Final Round** | 51   | 10 Boss liên tiếp, thưởng x2                  |
+| **Final Round** | 51   | 8 Boss liên tiếp, thưởng x2                   |
 
 ---
 
@@ -230,7 +230,7 @@ Mỗi slot:
 | --------------------- | ------------------------------------------------------ | ------------- | ----------- |
 | **Ông Hoàng Drift**   | `DRIFT_KING_CHALLENGE` — Trượt ly tâm, Stability ≥ 150 | 350           | 2200        |
 | **Huyền Thoại F1**    | `NO_COOLING` — Cấm dùng thẻ COOLING                    | 400           | 2800        |
-| **Nhà Sưu Tập**       | `MIN_RARITY_3` — Chỉ thẻ ≥ 3★                          | 400           | 2900        |
+| **Nhà Sưu Tập**       | `MIN_RARITY_3` — buộc phải có ít nhất 3 thẻ ≥ 3★     | 400           | 2900        |
 | **Cô Gái Liều Lĩnh**  | `DAREDEVIL_DEATH_WISH` — Bơm Heat tử thần, Đáy 85%     | 325           | 2700        |
 | **Kẻ Bí Ẩn**          | Không có — Pure power check 800. **Chỉ xuất hiện sau ngày 10** | 666           | 5500        |
 | **Đảo Chủ EP**        | `EP_ISLAND_CHOICE` — Nhánh lựa chọn                    | 467           | 3333        |
@@ -258,7 +258,7 @@ Mỗi slot:
 #### Đảo Chủ EP (`EP_ISLAND_CHOICE`)
 
 - **Hỏi**: "Có đồng ý lên đảo không?"
-- **Nhánh YES**: -50 Uy tín, power ≥ 400, Heat ≤ 69%, ≥1 Combo
+- **Nhánh YES**: -50 Uy tín, power ≥ 467, Heat ≤ 69%, ≥1 Combo
 - **Nhánh NO**: +15 Uy tín, cấm dùng COOLING 5★, cần 1 thẻ 5★ + 1 thẻ 4★, power ≥ 470
 - **Thưởng thắng**: 3 Pack + 1 thẻ 4★ + Unlock Donald Trump appearance (`hasDefeatedEP = true`)
 
@@ -384,24 +384,24 @@ Chỉ khi event "Tay Buôn Lậu Gõ Cửa" đang active:
 
 ### 7.1 Events thông thường
 
-| Event                    | Type    | Xác suất | Hiệu ứng                                         |
-| ------------------------ | ------- | -------- | ------------------------------------------------ |
-| **Tay Buôn Lậu Gõ Cửa**  | CHOICE  | 30%      | Mở Smuggler Shop, -10 Uy tín, -15% Gold ngày sau |
-| **Ánh Trăng Racing**     | CHOICE  | 15%      | +800 Gold, -15 Uy tín (cần Uy tín > 15)          |
-| **Băng Đảng Xăng Dầu**   | PASSIVE | 15%      | -10% tổng Gold hiện có                           |
-| **Độ Channel Bốc Phốt**  | PASSIVE | 10%      | +40 Uy tín, -200 Gold                            |
-| **Đấu Giá Kho Xưởng**    | CHOICE  | 15%      | -300 Gold, +500 Tech Points                      |
-| **Kẻ Chế Tạo Cuồng Tín** | CHOICE  | 10%      | +400 Tech Points, -20 Uy tín                     |
-| **Cảnh Sát Đột Kích**    | PASSIVE | 15%      | -150 Gold, -10 Uy tín                            |
+| Event                    | Type    | Xác suất | Hiệu ứng chi tiết                                                                                                                              |
+| ------------------------ | ------- | -------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Tay Buôn Lậu Gõ Cửa**  | CHOICE  | 30%      | Smuggler xuất hiện. Chấp nhận: Mua linh kiện hiếm giá rẻ (-5 uy tín/món) hoặc bán thẻ lấy 50% giá. Từ chối: -10 uy tín, -15% gold ngày sau. |
+| **Ánh Trăng Racing**     | CHOICE  | 15%      | Tổ đội đua xe ngầm thách thức. Chấp nhận: Trừ 15 uy tín để đua, nhận 800 gold (sau ngày 25: 1600 gold x2). Từ chối: Không có gì xảy ra. |
+| **Băng Đảng Xăng Dầu**   | PASSIVE | 15%      | Băng đảng thao túng giá nguyên liệu. Tự động mất 10% tổng số gold hiện có làm "phí bảo kê" (không có lựa chọn).                              |
+| **Độ Channel Bốc Phốt**  | PASSIVE | 10%      | Kênh Youtube triệu view live-stream xưởng. Tự động: +40 uy tín nhưng phải trả 200 gold "phí bôi trơn PR" (không có lựa chọn).                      |
+| **Đấu Giá Kho Xưởng**    | CHOICE  | 10%      | Ngân hàng thanh lý kho JDM cũ. Chấp nhận: Cược 700 gold mua mù. Thắng: Nhận 400 Tech Points từ đồ phế liệu. Thua: Mất 700 gold.                |
+| **Kẻ Chế Tạo Cuồng Tín** | CHOICE  | 10%      | Kỹ sư điên đưa bản thiết kế cấm kỵ. Chấp nhận: Nhận 400 Tech Points thăng cấp nhanh, mất 20 uy tín (gara mang tiếng nguy hiểm). Từ chối: Không. |
+| **Cảnh Sát Đột Kích**    | PASSIVE | 15%      | Cơ động xét hỏi xưởng chui. Tự động: Mất 150 gold tiền phạt ngầm và -10 uy tín (bêu rếu trên báo) (không có lựa chọn).                          |
 
 ### 7.2 Events Triều Tiên (chỉ khi `isInNorthKorea = true`)
 
-| Event                   | Xác suất                         | Hiệu ứng                                                  |
-| ----------------------- | -------------------------------- | --------------------------------------------------------- |
-| **Camera Ngoại Bang**   | 40%                              | Tố cáo gián điệp → +1000 Gold                             |
-| **Kiểm Tra Ảnh Cán Bộ** | 50%                              | Pass (65–100% tùy Uy tín), Fail → **Bad Ending**          |
-| **Sát Thủ Gọi Mời**     | 100% (Ngày NK 10)                | Chấp nhận ám sát Kim → thoát NK. Từ chối → **Bad Ending** |
-| **Cảnh Sát Triều Tiên** | 10% (sau khi có Underworld Buff) | Nếu mua Smuggler hôm qua → -80 Uy tín                     |
+| Event                   | Xác suất                         | Hiệu ứng chi tiết                                                                                                                                                                                           |
+| ----------------------- | -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Camera Ngoại Bang**   | 40%                              | Phát hiện gián điệp cầm máy quay. Chấp nhận: Tố cáo hắn để được vinh danh và thưởng nóng (+1000 gold). Từ chối: Không có gì xảy ra.                                                                             |
+| **Kiểm Tra Ảnh Cán Bộ** | 50%                              | Đoàn kiểm tra đột xuất xem quán có treo ảnh Chủ Tịch không. Tự động: Nếu uy tín thấp sẽ gặp xui xẻo (không có lựa chọn). Fail → Bad Ending.                                                                      |
+| **Sát Thủ Gọi Mời**     | 100% (Ngày NK 10)                | Sát thủ yêu cầu giúp ám sát Chủ Tịch Kim. Chấp nhận: Nguy hiểm cực độ, tỉ lệ thành công cao hơn nếu uy tín càng thấp. Từ chối: Bad Ending. Chỉ xuất hiện 100% tại ngày 10 NK.                                            |
+| **Cảnh Sát Triều Tiên** | 10% (sau khi có Underworld Buff) | Cảnh sát đến thanh tra. Tự động: Nếu hôm qua giao dịch buôn lậu (Smuggler), sẽ bị phạt nặng (-80 uy tín) (không có lựa chọn).                                                                                   |
 
 ### 7.3 Cơ chế Event
 
@@ -579,7 +579,7 @@ Boss Kim Jong Un xuất hiện (ngày chia hết 5)
 | **Good Ending**               | STANDARD    | Sống sót 50 ngày (có ≥1 fail)     |
 | **The Absolute Victory**      | PERFECT     | 50 ngày, **0 fail**               |
 | **Wasted Potential**          | STANDARD    | Uy tín = 0 bất kỳ lúc nào         |
-| **Invictus**                  | FINAL       | Final Round: Thắng hết 10 Boss    |
+| **Invictus**                  | FINAL       | Final Round: Thắng hết 8 Boss     |
 | **The Missing Percent**       | FINAL       | Final Round: Thua bất kỳ boss nào |
 | **Bóng Ma Tốc Độ**            | BOSS_HIDDEN | Final Round: Thua boss "Kẻ Bí Ẩn" |
 | **Bị Tiêu Diệt Bởi Chủ Tịch** | BAD         | Từ chối Kim / Fail Kiểm Tra Ảnh   |
@@ -589,9 +589,10 @@ Boss Kim Jong Un xuất hiện (ngày chia hết 5)
 
 - Chỉ có thể vào sau Ngày 50 khi đạt Good Ending
 - Set `isFinalRound = true`, `currentDay = 51`
-- Sinh 10 Boss quest random từ pool
+- Sinh 8 Boss quest random từ pool (đã sửa từ 10 xuống 8 để match 8 ghế sofa)
 - Thưởng **x2 Gold** cho mỗi boss
-- Thắng hết 10 → **Invictus** (ending tốt nhất)
+- Thắng hết 8 → **Invictus** (ending tốt nhất)
+- **Bóng Ma Tốc Độ ending**: Nếu fail boss "Kẻ Bí Ẩn" trong Final Round → unlock ending này và game over
 
 ---
 
@@ -620,7 +621,7 @@ GAME_CONSTANTS = {
   HEAT_THRESHOLD: 100, // Ngưỡng nổ máy
   BOSS_INTERVAL: 5, // Boss mỗi 5 ngày
   FIXED_QUEST_DAYS: 5, // 5 ngày đầu quest cố định
-  FINAL_ROUND_BOSSES: 10, // Số boss Final Round
+  FINAL_ROUND_BOSSES: 8, // Số boss Final Round (đã sửa từ 10 xuống 8 để match 8 ghế sofa)
   SHOP_UNLOCK_DAY: 2, // Shop mở Ngày 2
   PACK_CARDS_COUNT: 5, // Số thẻ trong pack
   PACK_CHANCE_IN_SHOP: 0.1, // 10% pack trong shop

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ShopItemData } from './ShopCard';
+import { ToolIcon } from '@/components/CategoryIcons';
 
 const RARITY_COLORS: Record<number, string> = {
   1: 'var(--rarity-1)',
@@ -580,7 +581,7 @@ function RevealCardImage({ cardId, name, rarity }: { cardId: number; name: strin
   if (imgError >= 3) {
     return (
       <div style={{ width: '100%', aspectRatio: '3 / 4', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem', background: 'rgba(20,20,30,0.6)', borderRadius: 8 }}>
-        🔧
+        <ToolIcon size={32} />
       </div>
     );
   }

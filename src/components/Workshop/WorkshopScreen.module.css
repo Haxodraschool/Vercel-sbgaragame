@@ -797,4 +797,173 @@
     padding: 8px 14px;
     font-size: 10px;
   }
+
+  .crewZone {
+    right: 8px;
+  }
 }
+
+@media (max-width: 640px) {
+  .header {
+    padding: 8px 10px;
+  }
+
+  .headerLeft {
+    padding: 8px 12px;
+  }
+
+  .title {
+    font-size: 13px;
+    letter-spacing: 2px;
+  }
+
+  .questInfo {
+    gap: 8px;
+    font-size: 9px;
+  }
+
+  .questValue {
+    font-size: 10px;
+  }
+
+  .statsPanel {
+    gap: 8px;
+    padding: 6px 10px;
+    top: 8px;
+  }
+
+  .statItem {
+    min-width: 50px;
+  }
+
+  .statLabel {
+    font-size: 7px;
+    letter-spacing: 1px;
+  }
+
+  .statValue {
+    font-size: 13px;
+  }
+
+  .heatBarContainer {
+    width: 90%;
+    top: 60px;
+  }
+
+  .actionButtons {
+    right: 8px;
+    top: 8px;
+    gap: 3px;
+  }
+
+  .btnBase {
+    padding: 6px 10px;
+    font-size: 9px;
+    letter-spacing: 1px;
+  }
+
+  .crewZone {
+    top: 90px;
+    right: 6px;
+    padding: 5px 8px;
+  }
+
+  .crewTitle {
+    font-size: 8px;
+    letter-spacing: 1px;
+  }
+
+  .comboIndicator {
+    top: 62px;
+    right: 8px;
+  }
+
+  .comboBadge {
+    font-size: 7px;
+    padding: 3px 6px;
+  }
+}
+
+@media (max-width: 480px) {
+  .header {
+    padding: 6px 8px;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .headerLeft {
+    padding: 6px 8px;
+    max-width: 140px;
+  }
+
+  .title {
+    font-size: 11px;
+    letter-spacing: 1px;
+  }
+
+  .questInfo {
+    display: none;
+  }
+
+  .statsPanel {
+    gap: 6px;
+    padding: 4px 8px;
+    top: 6px;
+  }
+
+  .statValue {
+    font-size: 11px;
+  }
+
+  .statLabel {
+    font-size: 6px;
+  }
+
+  .heatBarContainer {
+    width: 94%;
+    top: 48px;
+  }
+
+  .heatBarTrack {
+    height: 10px;
+  }
+
+  .heatBarLabel {
+    font-size: 8px;
+  }
+
+  .heatBarValue {
+    font-size: 10px;
+  }
+
+  .actionButtons {
+    right: 4px;
+    top: 6px;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .btnBase {
+    padding: 5px 8px;
+    font-size: 8px;
+    letter-spacing: 0.5px;
+  }
+
+  .crewZone {
+    top: 70px;
+    right: 4px;
+    padding: 4px 6px;
+  }
+
+  .comboSlotBadge {
+    font-size: 6px;
+    padding: 1px 4px;
+    top: -22px;
+  }
+
+  .bottomBar {
+    font-size: 8px;
+    letter-spacing: 1px;
+  }
+}
+

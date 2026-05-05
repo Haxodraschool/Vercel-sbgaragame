@@ -5,6 +5,10 @@ import { useGameStore } from '@/stores/useGameStore';
 import { BuyTpModal, TopupGoldModal } from '@/components/CurrencyModal/CurrencyModals';
 import { DndContext, DragOverlay, useDraggable, useDroppable, DragStartEvent, DragEndEvent, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { motion, AnimatePresence } from 'framer-motion';
+import BossDetailModal from '../BossDetailModal/BossDetailModal';
+import RussiaPhase2Dialog from '../RussiaPhase2Dialog/RussiaPhase2Dialog';
+import { CategoryIcon } from '@/components/CategoryIcons';
+import { BossTitleCompact } from '@/components/BossTitle/BossTitle';
 
 import styles from './WorkshopScreen.module.css';
 
@@ -13,17 +17,17 @@ import styles from './WorkshopScreen.module.css';
 // ═══════════════════════════════════════════════════════════
 
 const CATEGORIES = [
-  { type: 'ENGINE',     label: 'Đ.CƠ',    icon: '⚙️' },
-  { type: 'TURBO',      label: 'TURBO',   icon: '💨' },
-  { type: 'EXHAUST',    label: 'Ố.XẢ',    icon: '🔥' },
-  { type: 'COOLING',    label: 'L.MÁT',   icon: '❄️' },
-  { type: 'FILTER',     label: 'L.GIÓ',   icon: '🌬️' },
-  { type: 'FUEL',       label: 'N.LIỆU',  icon: '⛽' },
-  { type: 'SUSPENSION', label: 'TREO',    icon: '🔩' },
-  { type: 'TIRE',       label: 'LỐP',     icon: '🛞' },
-  { type: 'NITROUS',    label: 'NOS',     icon: '💥' },
-  { type: 'TOOL',       label: 'D.CỤ',    icon: '🔧' },
-  { type: 'CREW',       label: 'CREW',    icon: '👥' },
+  { type: 'ENGINE',     label: 'Đ.CƠ' },
+  { type: 'TURBO',      label: 'TURBO' },
+  { type: 'EXHAUST',    label: 'Ố.XẢ' },
+  { type: 'COOLING',    label: 'L.MÁT' },
+  { type: 'FILTER',     label: 'L.GIÓ' },
+  { type: 'FUEL',       label: 'N.LIỆU' },
+  { type: 'SUSPENSION', label: 'TREO' },
+  { type: 'TIRE',       label: 'LỐP' },
+  { type: 'NITROUS',    label: 'NOS' },
+  { type: 'TOOL',       label: 'D.CỤ' },
+  { type: 'CREW',       label: 'CREW' },
 ];
 
 // Nhóm thẻ linh kiện (không tính CREW)
@@ -79,13 +83,52 @@ const getQuestNpcImage = (quest: any, isInNK: boolean): string => {
     return `/gamenpcimg/npc${safeIndex}.png`;
 };
 
-// ─── Map required power → car frame level (1..5) ───
-// Dải theo SKILL.md mục 17.4: <=200, 350, 500, 750, 1000+
-const getCarLevelFromPower = (power: number): number => {
-    if (!power || power <= 200) return 1;
-    if (power <= 350) return 2;
-    if (power <= 500) return 3;
-    if (power <= 750) return 4;
+// ─── Map car frame level — theo tính cách boss hoặc user level ───
+// lvl1 = Toyota pickup (quân sự, off-road)
+// lvl2 = Audi RS wagon (sang trọng, tinh tế)
+// lvl3 = Cybertruck (lập dị, tương lai)
+// lvl4 = Camaro vàng (muscle car, drift, nổi bật)
+// lvl5 = Lamborghini (siêu xe, tốc độ, bí ẩn)
+const BOSS_CAR_MAP: Record<string, number> = {
+    // Ông Hoàng Drift → Camaro (xe cơ bắp drift)
+    'Ông Hoàng Drift': 4,
+    // Huyền Thoại F1 → Lamborghini (siêu xe tốc độ cao)
+    'Huyền Thoại F1': 5,
+    // Nhà Sưu Tập → Lamborghini (sưu tầm xe hiếm nhất, đắt nhất)
+    'Nhà Sưu Tập': 5,
+    // Cô Gái Liều Lĩnh → Camaro (liều lĩnh, nổi bật, táo bạo)
+    'Cô Gái Liều Lĩnh': 4,
+    // Kẻ Bí Ẩn → Lamborghini (bóng tối, bí ẩn, sang trọng u ám)
+    'Kẻ Bí Ẩn': 5,
+    // Đảo Chủ EP → Cybertruck (đại gia lập dị, đảo riêng)
+    'Đảo Chủ': 3,
+    // Chúa Tể Dầu Em Bé → Cybertruck (tỷ phú dầu mỏ, quái dị)
+    'Dầu Em Bé': 3,
+    'Baby Oil': 3,
+    // Chủ Tịch Kim → Toyota truck (quân đội, xe bọc thép)
+    'Chủ Tịch': 1,
+    'Kim': 1,
+    // Đỗ Nam Trung (Trump) → Camaro vàng (phô trương, vàng chóe)
+    'Đỗ Nam Trung': 4,
+    'Trump': 4,
+    // Nga Đại Đế → Toyota truck (quân sự Nga, xe chịu lạnh)
+    'Đại Đế': 1,
+    'Nga': 1,
+};
+const getCarLevel = (userLevel: number, isBoss: boolean, bossName?: string): number => {
+    // Boss quest: map theo tính cách boss
+    if (isBoss && bossName) {
+        for (const [keyword, level] of Object.entries(BOSS_CAR_MAP)) {
+            if (bossName.includes(keyword)) return level;
+        }
+        // Fallback cho boss chưa map: dựa trên level
+        return Math.min(5, Math.max(3, Math.ceil(userLevel / 10)));
+    }
+    // Quest thường: theo user level
+    if (userLevel <= 5) return 1;
+    if (userLevel <= 12) return 2;
+    if (userLevel <= 22) return 3;
+    if (userLevel <= 35) return 4;
     return 5;
 };
 
@@ -190,7 +233,7 @@ function DraggableInventoryCard({ card, quantity, onHoverPreview }: {
 // WORKSHOP SLOT (10 khe xe)
 // ═══════════════════════════════════════════════════════════
 
-function WorkshopSlot({ index, card, isScanning, isTested, vfxText, disabledDnd, rejected, isCombo, comboName }: {
+function WorkshopSlot({ index, card, isScanning, isTested, vfxText, disabledDnd, rejected, isCombo, comboName, onHoverCard }: {
     index: number;
     card: any | null;
     isScanning?: boolean;
@@ -200,6 +243,7 @@ function WorkshopSlot({ index, card, isScanning, isTested, vfxText, disabledDnd,
     rejected?: boolean;
     isCombo?: boolean;
     comboName?: string;
+    onHoverCard?: (card: any | null, rect: DOMRect | null) => void;
 }) {
     const { isOver, setNodeRef: setDropRef } = useDroppable({
         id: `slot-${index}`,
@@ -212,9 +256,29 @@ function WorkshopSlot({ index, card, isScanning, isTested, vfxText, disabledDnd,
         disabled: !card || disabledDnd
     });
 
+    const slotRef = useRef<HTMLDivElement>(null);
+
+    // Hover handlers — only show preview when NOT dragging
+    const handleMouseEnter = () => {
+        if (card && !isDragging && onHoverCard && slotRef.current) {
+            const rect = slotRef.current.getBoundingClientRect();
+            onHoverCard(card, rect);
+        }
+    };
+    const handleMouseLeave = () => {
+        if (onHoverCard) onHoverCard(null, null);
+    };
+
+    // Clear hover when drag starts
+    useEffect(() => {
+        if (isDragging && onHoverCard) onHoverCard(null, null);
+    }, [isDragging, onHoverCard]);
+
     return (
         <div
-            ref={setDropRef}
+            ref={(node) => { setDropRef(node); (slotRef as any).current = node; }}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
             className={`w-14 lg:w-[4rem] h-20 lg:h-24 border-2 border-dashed bg-slate-800/50 rounded-md flex flex-col items-center justify-center relative backdrop-blur-sm group transition-all overflow-visible shadow-lg ${
                 rejected ? 'border-red-500 bg-red-900/30 ring-2 ring-red-500/50' :
                 isScanning ? 'border-amber-400 bg-amber-900/60 ring-4 ring-amber-500/50 scale-110 z-30 transition-transform duration-200' :
@@ -375,7 +439,13 @@ function MissingTypesTooltip({ slots, crewSlots, activeQuest }: {
         if (!activeQuest?.bossConfig?.specialCondition) return [];
         const cond = activeQuest.bossConfig.specialCondition.toUpperCase();
         const banned: string[] = [];
-        if (cond.includes('COOLING') || cond.includes('TẢN NHIỆT')) banned.push('COOLING');
+        // F1: Cấm COOLING
+        if (cond.includes('NO_COOLING') || cond.includes('COOLING')) banned.push('COOLING');
+        // Baby Oil: Cấm FUEL
+        if (cond.includes('BABY_OIL')) banned.push('FUEL');
+        // Drift King: Cấm SUSPENSION 3★+ (hiện thị, backend sẽ check rarity)
+        if (cond.includes('DRIFT_KING') || cond.includes('DRIFT')) banned.push('SUSPENSION');
+        // Trump: Khóa thẻ 5★ (không cấm type cụ thể, nhưng hiện thị cảnh báo)
         if (cond.includes('NITROUS') || cond.includes('NOS')) banned.push('NITROUS');
         if (cond.includes('TURBO')) banned.push('TURBO');
         return banned;
@@ -399,14 +469,27 @@ function MissingTypesTooltip({ slots, crewSlots, activeQuest }: {
                     <div className="text-[8px] font-bold text-red-400 tracking-widest mb-1">⛔ BỊ CẤM BỞI KHÁCH</div>
                     {bannedTypes.map(t => {
                         const cat = CATEGORIES.find(c => c.type === t);
+                        // Thêm ghi chú đặc biệt cho từng loại cấm
+                        let note = 'CẤM';
+                        const cond = activeQuest?.bossConfig?.specialCondition?.toUpperCase() || '';
+                        if (t === 'SUSPENSION' && cond.includes('DRIFT')) note = 'CẤM 3★+';
+                        if (t === 'FUEL' && cond.includes('BABY_OIL')) note = 'CẤM';
                         return (
                             <div key={t} className="flex items-center gap-1.5 py-0.5 px-1.5 bg-red-900/20 rounded border border-red-800/40 mb-1">
-                                <span className="text-sm">{cat?.icon}</span>
+                                <CategoryIcon type={cat?.type || ''} size={14} />
                                 <span className="text-[9px] text-red-300 font-bold">{cat?.label}</span>
-                                <span className="ml-auto text-red-500 text-[8px]">CẤM</span>
+                                <span className="ml-auto text-red-500 text-[8px] font-bold">{note}</span>
                             </div>
                         );
                     })}
+                    {/* Trump 5★ lock — special warning */}
+                    {activeQuest?.bossConfig?.specialCondition?.toUpperCase()?.includes('TRUMP') && (
+                        <div className="flex items-center gap-1.5 py-0.5 px-1.5 bg-amber-900/20 rounded border border-amber-800/40 mb-1">
+                            <span className="text-amber-400 text-[10px]">★</span>
+                            <span className="text-[9px] text-amber-300 font-bold">Thẻ 5★</span>
+                            <span className="ml-auto text-amber-500 text-[8px] font-bold">KHÓA</span>
+                        </div>
+                    )}
                 </div>
             )}
 
@@ -421,7 +504,7 @@ function MissingTypesTooltip({ slots, crewSlots, activeQuest }: {
                             <div key={t} className={`flex items-center gap-1.5 py-0.5 px-1.5 rounded border mb-1 ${
                                 isInSlot ? 'bg-emerald-900/20 border-emerald-800/40' : 'bg-slate-900/60 border-slate-700/40'
                             }`}>
-                                <span className="text-sm">{cat?.icon}</span>
+                                <CategoryIcon type={cat?.type || ''} size={14} />
                                 <span className={`text-[9px] font-bold ${isInSlot ? 'text-emerald-300' : 'text-slate-400'}`}>{cat?.label}</span>
                                 <span className={`ml-auto text-[8px] ${isInSlot ? 'text-emerald-400' : 'text-slate-600'}`}>
                                     {isInSlot ? '✓' : '—'}
@@ -441,7 +524,7 @@ function MissingTypesTooltip({ slots, crewSlots, activeQuest }: {
             {/* Crew status */}
             <div className="mt-2 pt-1.5 border-t border-slate-800">
                 <div className={`flex items-center gap-1.5 py-0.5 px-1.5 rounded border ${hasCrew ? 'bg-fuchsia-900/20 border-fuchsia-800/40' : 'bg-slate-900/60 border-slate-700/40'}`}>
-                    <span className="text-sm">👥</span>
+                    <CategoryIcon type="CREW" size={14} />
                     <span className={`text-[9px] font-bold ${hasCrew ? 'text-fuchsia-300' : 'text-slate-400'}`}>CREW</span>
                     <span className={`ml-auto text-[8px] ${hasCrew ? 'text-fuchsia-400' : 'text-slate-600'}`}>
                         {hasCrew ? '✓' : '—'}
@@ -486,6 +569,7 @@ export default function WorkshopScreen() {
     const setSkipShadowIntro = useGameStore((state) => state.setSkipShadowIntro);
     const activeBossMusic = useGameStore((state) => state.activeBossMusic);
     const setActiveBossMusic = useGameStore((state) => state.setActiveBossMusic);
+    const bossChoice = useGameStore((state) => state.bossChoice);
 
     // --- Loading readiness (global LoadingScreen) ---
     const [inventoryLoaded, setInventoryLoaded] = useState(false);
@@ -534,8 +618,11 @@ export default function WorkshopScreen() {
     const [activeCategory, setActiveCategory] = useState<string | null>(null);
     const [isBoxOpen, setIsBoxOpen] = useState(false);
 
-    // Hover preview state
+    // Hover preview state (inventory box)
     const [hoverPreviewCard, setHoverPreviewCard] = useState<any | null>(null);
+
+    // Hover preview state (slot cards — enlarged view with stats)
+    const [hoverSlotCard, setHoverSlotCard] = useState<{ card: any; rect: DOMRect } | null>(null);
 
     // Combo system state
     const [combos, setCombos] = useState<any[]>([]);
@@ -576,6 +663,12 @@ export default function WorkshopScreen() {
     const [unlockInfo, setUnlockInfo] = useState<{ nextCost: number; techPoints: number; currentSlots: number } | null>(null);
     const [isUnlocking, setIsUnlocking] = useState(false);
 
+    // Boss detail modal
+    const [showBossDetail, setShowBossDetail] = useState(false);
+
+    // Russia Phase 2 dialog
+    const [showRussiaPhase2Dialog, setShowRussiaPhase2Dialog] = useState(false);
+
     // ─── Install VFX (chớp / tóe lửa / rung) khi lắp thẻ vào slot ───
     // flashKey: increment mỗi lần để re-trigger animation overlay
     // sparkSlot: {index, key} — slot vừa lắp, key để restart animation
@@ -601,11 +694,21 @@ export default function WorkshopScreen() {
     };
 
     // Sensors config — allow clicking buttons without dragging
+    // Distance 8 prevents accidental drags on quick clicks/hovers
     const sensors = useSensors(
         useSensor(PointerSensor, {
-            activationConstraint: { distance: 5 },
+            activationConstraint: { distance: 8 },
         })
     );
+
+    // Slot hover handler — clears on drag start
+    const handleSlotHover = useCallback((card: any | null, rect: DOMRect | null) => {
+        if (card && rect && !activeDragCard) {
+            setHoverSlotCard({ card, rect });
+        } else {
+            setHoverSlotCard(null);
+        }
+    }, [activeDragCard]);
 
     // ─── Fetch Inventory ───
     useEffect(() => {
@@ -718,6 +821,61 @@ export default function WorkshopScreen() {
         return totalOwned - usedInSlots - usedInCrew;
     };
 
+    // ─── Russia Phase 2 Choice Handler ───
+    const handleRussiaPhase2Choice = useCallback(async (choice: 'YES' | 'NO') => {
+        setShowRussiaPhase2Dialog(false);
+        
+        if (!activeQuest || !token) return;
+        
+        // Send phase 2 choice to backend
+        try {
+            const res = await fetch(`/api/quest/${activeQuest.id}/complete`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    status: 'SUCCESS',
+                    russiaPhase: 2,
+                    vodkaChoice: choice,
+                    usedCardIds: [],
+                    russiaPendingPhase2: true,
+                }),
+            });
+            
+            if (res.ok) {
+                const data = await res.json();
+                // Update user state
+                if (data.userState?.gold !== undefined) {
+                    updateGold(data.userState.gold);
+                }
+                if (data.userState?.garageHealth !== undefined) {
+                    updateGarageHealth(data.userState.garageHealth);
+                }
+                
+                // Show boss rewards if any
+                if (data.bossRewards && data.bossRewards.length > 0) {
+                    const setLevelUpModalOpen = useGameStore.getState().setLevelUpModalOpen;
+                    setLevelUpModalOpen(true, {
+                        newLevel: data.newLevel || user?.level || 1,
+                        goldReward: 0,
+                        garageHealthGain: 0,
+                        cardRewards: [],
+                        bossRewards: data.bossRewards
+                    });
+                }
+            }
+        } catch (err) {
+            console.error('Error submitting Russia Phase 2 choice:', err);
+        }
+        
+        // Return to lobby after phase 2
+        setSkipShadowIntro(true);
+        setActiveBossMusic(null);
+        transitionScreen('lobby');
+    }, [activeQuest, token, user, updateGold, updateGarageHealth, setSkipShadowIntro, setActiveBossMusic, transitionScreen]);
+
     // ─── Unlock Crew Slot Handler ───
     const handleLockedCrewClick = async () => {
         if (!token) return;
@@ -772,12 +930,26 @@ export default function WorkshopScreen() {
         // Check for banned types from active quest
         if (activeQuest?.bossConfig?.specialCondition) {
             const cond = activeQuest.bossConfig.specialCondition.toUpperCase();
+            // F1: Cấm COOLING
+            if (card.type === 'COOLING' && (cond.includes('COOLING') || cond.includes('NO_COOLING'))) {
+                return { ok: false, reason: 'Cấm lắp Tản Nhiệt — yêu cầu của khách' };
+            }
+            // Baby Oil: Cấm FUEL
+            if (card.type === 'FUEL' && cond.includes('BABY_OIL')) {
+                return { ok: false, reason: 'Cấm lắp Nhiên Liệu — yêu cầu của khách' };
+            }
+            // Drift King: Cấm SUSPENSION 3★+
+            if (card.type === 'SUSPENSION' && (cond.includes('DRIFT_KING') || cond.includes('DRIFT'))) {
+                if ((card.rarity || 1) >= 3) {
+                    return { ok: false, reason: 'Cấm Phuộc 3★+ — Ông Hoàng Drift yêu cầu phuộc mềm' };
+                }
+            }
+            // Generic bans
             if (
-                (card.type === 'COOLING' && (cond.includes('COOLING') || cond.includes('TẢN NHIỆT'))) ||
                 (card.type === 'NITROUS' && (cond.includes('NITROUS') || cond.includes('NOS'))) ||
                 (card.type === 'TURBO' && cond.includes('TURBO'))
             ) {
-                return { ok: false, reason: `Thẻ ${card.type} bị cấm bởi khách hàng` };
+                return { ok: false, reason: `Cấm lắp ${card.type} — yêu cầu của khách` };
             }
         }
 
@@ -799,6 +971,7 @@ export default function WorkshopScreen() {
     const handleDragStart = (e: DragStartEvent) => {
         setIsBoxOpen(false);
         setHoverPreviewCard(null);
+        setHoverSlotCard(null); // Clear slot hover preview on drag
         const { active } = e;
         if (active.data.current?.card) {
             setActiveDragCard(active.data.current.card);
@@ -1102,7 +1275,11 @@ export default function WorkshopScreen() {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ status, usedCardIds }),
+                    body: JSON.stringify({ 
+                        status, 
+                        usedCardIds,
+                        ...bossChoice
+                    }),
                 });
                 if (res.ok) {
                     const data = await res.json();
@@ -1113,6 +1290,36 @@ export default function WorkshopScreen() {
                     // Cập nhật vàng (bao gồm cả thưởng ngân sách nếu có)
                     if (data.userState?.gold !== undefined) {
                         updateGold(data.userState.gold);
+                    }
+                    // Update user level if changed
+                    if (data.userState?.level !== undefined && user) {
+                        setUser({ ...user, level: data.userState.level });
+                    }
+                    // Show boss rewards popup if boss rewards received
+                    if (data.bossRewards && data.bossRewards.length > 0) {
+                        const setLevelUpModalOpen = useGameStore.getState().setLevelUpModalOpen;
+                        setLevelUpModalOpen(true, {
+                            newLevel: data.newLevel || user?.level || 1,
+                            goldReward: 0,
+                            garageHealthGain: 0,
+                            cardRewards: [],
+                            bossRewards: data.bossRewards
+                        });
+                    }
+                    // Show Russia Phase 2 dialog if pending
+                    if (data.russiaPhase2Pending) {
+                        setShowRussiaPhase2Dialog(true);
+                    }
+                    // Show level up popup if leveled up
+                    if (data.leveledUp && data.levelRewards) {
+                        const setLevelUpModalOpen = useGameStore.getState().setLevelUpModalOpen;
+                        setLevelUpModalOpen(true, {
+                            newLevel: data.newLevel,
+                            goldReward: data.rewards?.gold || 0,
+                            garageHealthGain: 5,
+                            cardRewards: data.levelRewards.map((r: any) => r.card),
+                            bossRewards: data.bossRewards || []
+                        });
                     }
                     // Game over check
                     if (data.gameOver) {
@@ -1166,12 +1373,71 @@ export default function WorkshopScreen() {
         : activeQuest ? `Khách #${activeQuest.id}` : 'Không có Quest';
     const questDesc = activeQuest?.isBoss && activeQuest?.bossConfig?.description
         ? activeQuest.bossConfig.description
-        : activeQuest ? `"Cần ${activeQuest.requiredPower > 0 ? activeQuest.requiredPower + ' mã lực' : 'xe chạy tốt'}. Làm nhanh lên!"` : '"Chưa nhận Quest"';
+        : null; // handled by getCustomerDialogue below
     const questPower = activeQuest?.requiredPower || 0;
     const questGold = activeQuest?.rewardGold || activeQuest?.customerBudget || 0;
     const questBanned = activeQuest?.bossConfig?.specialCondition || null;
     const questImageUrl = activeQuest?.bossConfig?.imageUrl || null;
     const isBossQuest = activeQuest?.isBoss || false;
+
+    // ─── Creative customer dialogues for normal quests ───
+    const getCustomerDialogue = (): { before: string; power: string; after: string } | null => {
+        if (isBossQuest || !activeQuest) return null;
+        const pw = activeQuest.requiredPower;
+        const pwStr = pw > 0 ? `${pw} mã lực` : '';
+        const id = activeQuest.id || 0;
+
+        const templates = pw > 0 ? [
+            { before: '"Tao muốn con xe này phải đạt ', power: pwStr, after: '. Không đạt thì miễn trả tiền."' },
+            { before: '"Ê bro, cần ít nhất ', power: pwStr, after: ' nha. Tao còn phải đi đua tối nay."' },
+            { before: '"Vợ tao bảo cần ', power: pwStr, after: '. Không đạt là tao ngủ ngoài đường."' },
+            { before: '"Nghe nói xưởng giỏi lắm? Chứng minh đi — ', power: pwStr, after: ' là tối thiểu."' },
+            { before: '"Con trai tao mới 18 tuổi, nhưng nó muốn ', power: pwStr, after: '. Tuổi trẻ mà..."' },
+            { before: '"Tao đặt cọc rồi đó, ', power: pwStr, after: ' là phải có. Đừng có mà lừa tao."' },
+            { before: '"Ủa sao rẻ vậy? Tao tưởng ', power: pwStr, after: ' phải đắt hơn chứ. Làm đi!"' },
+            { before: '"Đêm qua tao nằm mơ thấy xe chạy ', power: pwStr, after: '. Giúp tao hiện thực hoá đi."' },
+            { before: '"Bạn tao khoe xe nó có ', power: pwStr, after: '. Tao phải hơn nó mới chịu!"' },
+            { before: '"Xe cũ tao chỉ có 50 mã lực... giờ cần ', power: pwStr, after: '. Nâng cấp thôi!"' },
+            { before: '"Mẹ tao bảo đừng chơi xe, nhưng ', power: pwStr, after: ' thì ai mà cưỡng lại được?"' },
+            { before: '"Tao cần chính xác ', power: pwStr, after: '. Không hơn, không kém. Tao khó tính lắm."' },
+            { before: '"Sếp tao đang chờ, làm cho tao ', power: pwStr, after: ' trước 5 giờ chiều nhé."' },
+            { before: '"Con gái tao thích tốc độ, ', power: pwStr, after: ' là quà sinh nhật cho nó."' },
+            { before: '"Xe taxi tao mà có ', power: pwStr, after: ' thì khách đông lắm anh ơi."' },
+            { before: '"Ông nội tao ngày xưa lái xe ', power: pwStr, after: '. Tao muốn nối tiếp truyền thống."' },
+            { before: '"Tao vừa ly dị, cần ', power: pwStr, after: ' để bắt đầu cuộc sống mới!"' },
+            { before: '"Dealer bảo xe này chạy ', power: pwStr, after: ' mới đủ tiêu chuẩn xuất xưởng."' },
+            { before: '"Đua với thằng hàng xóm, tao cần ', power: pwStr, after: '. Không thắng là mất mặt!"' },
+            { before: '"Nghe nói ', power: pwStr, after: ' là đủ đi Đà Lạt rồi? Làm luôn đi!"' },
+        ] : [
+            { before: '"Xe tao hư rồi, sửa cho nó ', power: 'chạy được', after: ' là được. Đơn giản thôi."' },
+            { before: '"Không cần nhanh đâu, ', power: 'chạy êm', after: ' là tao vui rồi."' },
+            { before: '"Tao chỉ cần con xe ', power: 'qua đăng kiểm', after: '. Đừng hỏi nhiều."' },
+            { before: '"Xe cũ mà, ', power: 'nổ máy được', after: ' là tao cảm ơn lắm rồi."' },
+            { before: '"Làm gì cũng được, miễn ', power: 'chạy tốt', after: ' là tao trả tiền."' },
+        ];
+
+        const index = Math.abs(id * 7 + 13) % templates.length;
+        return templates[index];
+    };
+
+    const customerDialogue = getCustomerDialogue();
+
+    // ─── Human-readable boss condition labels ───
+    const getConditionLabel = (cond: string): string => {
+        if (!cond) return '';
+        const c = cond.toUpperCase();
+        if (c.includes('NO_COOLING')) return 'Cấm Tản Nhiệt';
+        if (c.includes('DRIFT_KING')) return 'Cấm Phuộc 3★+';
+        if (c.includes('DAREDEVIL')) return 'Heat ≥ 75%';
+        if (c.includes('MIN_RARITY')) return 'Cần 3 thẻ ≥ 3★';
+        if (c.includes('EP_ISLAND')) return 'Lựa chọn YES/NO';
+        if (c.includes('BABY_OIL')) return 'Cấm Nhiên Liệu';
+        if (c.includes('KIM_JONG')) return 'Triều Tiên';
+        if (c.includes('TRUMP') || c.includes('DONALD')) return 'Khóa thẻ 5★';
+        if (c.includes('RUSSIA')) return '2 Phase + Vodka';
+        if (c.includes('MYSTERIOUS')) return 'Pure Power 666';
+        return cond;
+    };
 
     // Customer Budget (chỉ áp dụng cho quest thường)
     const customerBudget: number = (!isBossQuest && activeQuest?.customerBudget > 0) ? activeQuest.customerBudget : 0;
@@ -1282,6 +1548,61 @@ export default function WorkshopScreen() {
                 );
             })()}
 
+            {/* Slot Card Hover Preview — appears above the hovered slot as an enlarged tooltip */}
+            <AnimatePresence>
+                {hoverSlotCard && !activeDragCard && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 10, scale: 0.9 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 10, scale: 0.9 }}
+                        transition={{ duration: 0.15 }}
+                        className="fixed z-[100] pointer-events-none"
+                        style={{
+                            left: Math.max(10, Math.min(hoverSlotCard.rect.left + hoverSlotCard.rect.width / 2 - 100, window.innerWidth - 220)),
+                            top: Math.max(10, hoverSlotCard.rect.top - 270),
+                        }}
+                    >
+                        <div className="w-[200px] bg-slate-950/97 border-2 border-cyan-500/50 p-3 shadow-[0_0_40px_rgba(34,211,238,0.35),0_15px_40px_rgba(0,0,0,0.9)] backdrop-blur-xl rounded-lg">
+                            <img
+                                src={getImageUrl(hoverSlotCard.card)}
+                                alt={hoverSlotCard.card.name}
+                                onError={(e) => handleImageError(e, hoverSlotCard.card.id)}
+                                className="w-full h-auto object-contain rounded"
+                            />
+                            <div className="mt-2 px-0.5">
+                                <div className="text-[11px] font-bold text-cyan-300 text-center leading-tight truncate">{hoverSlotCard.card.name}</div>
+                                <div className="flex items-center justify-center gap-0.5 mt-1">
+                                    {Array.from({ length: hoverSlotCard.card.rarity || 1 }).map((_, i) => (
+                                        <span key={i} className="text-amber-400 text-[10px]">★</span>
+                                    ))}
+                                </div>
+                                <div className="flex justify-between mt-2 px-1 py-1.5 bg-slate-900/80 rounded border border-slate-700/50">
+                                    <div className="flex flex-col items-center">
+                                        <span className="text-[8px] text-slate-500 tracking-wider">PWR</span>
+                                        <span className="text-[11px] font-bold text-amber-400">⚡ {hoverSlotCard.card.statPower || 0}</span>
+                                    </div>
+                                    <div className="flex flex-col items-center">
+                                        <span className="text-[8px] text-slate-500 tracking-wider">HEAT</span>
+                                        <span className="text-[11px] font-bold text-red-400">🌡 {hoverSlotCard.card.statHeat || 0}</span>
+                                    </div>
+                                    <div className="flex flex-col items-center">
+                                        <span className="text-[8px] text-slate-500 tracking-wider">STB</span>
+                                        <span className="text-[11px] font-bold text-blue-400">❄ {hoverSlotCard.card.statStability || 0}</span>
+                                    </div>
+                                </div>
+                                {hoverSlotCard.card.description && (
+                                    <div className="text-[8px] text-slate-400 text-center mt-1.5 leading-tight line-clamp-2 italic">
+                                        {hoverSlotCard.card.description}
+                                    </div>
+                                )}
+                            </div>
+                            {/* Arrow pointing down */}
+                            <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-slate-950/97 border-b-2 border-r-2 border-cyan-500/50 transform rotate-45" />
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
             <div className="relative w-full h-screen flex p-6 gap-6">
 
                 {/* ══════════════════════════════════════════════
@@ -1317,7 +1638,7 @@ export default function WorkshopScreen() {
                                         ${isActive ? 'bg-cyan-900/50 border-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.4)] scale-105' : 'bg-slate-900/50 border-transparent hover:border-slate-600 hover:bg-slate-800/80'}
                                     `}
                                 >
-                                    <div className={`text-2xl mb-1 ${isActive ? '' : 'opacity-70'}`}>{cat.icon}</div>
+                                    <div className={`text-2xl mb-1 ${isActive ? '' : 'opacity-70'}`}><CategoryIcon type={cat.type} size={20} /></div>
                                     <div className={`text-[8px] tracking-widest font-bold text-center ${isActive ? 'text-cyan-200' : 'text-slate-500'}`}>
                                         {cat.label}
                                     </div>
@@ -1341,7 +1662,7 @@ export default function WorkshopScreen() {
                 >
                     <div className="flex justify-between items-center border-b border-slate-700 pb-3 mb-4 shrink-0">
                         <div className="flex items-center gap-3">
-                            <span className="text-2xl">{CATEGORIES.find(c => c.type === activeCategory)?.icon}</span>
+                            <CategoryIcon type={activeCategory || ''} size={20} />
                             <h2 className="text-xl font-bold text-cyan-400 tracking-widest">
                                 {CATEGORIES.find(c => c.type === activeCategory)?.label || 'LINH KIỆN'}
                             </h2>
@@ -1527,6 +1848,7 @@ export default function WorkshopScreen() {
                                         rejected={rejectedSlotIndex === i}
                                         isCombo={comboSlotSet.has(i)}
                                         comboName={comboSlotBadgeMap.get(i)}
+                                        onHoverCard={handleSlotHover}
                                     />
                                     {/* Install spark burst — tóe lửa khi vừa lắp thẻ vào slot này */}
                                     {sparkSlot?.index === i && (
@@ -1559,10 +1881,10 @@ export default function WorkshopScreen() {
                         }}
                     >
                         <img
-                            src={`/carframeimg/lvl${getCarLevelFromPower(questPower)}.png`}
-                            alt={`Car Frame Lv${getCarLevelFromPower(questPower)}`}
+                            src={`/carframeimg/lvl${getCarLevel(user?.level || 1, isBossQuest, activeQuest?.bossConfig?.name)}.png`}
+                            alt={`Car Frame Lv${getCarLevel(user?.level || 1, isBossQuest, activeQuest?.bossConfig?.name)}`}
                             onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                            className="max-w-full max-h-full object-contain drop-shadow-[0_10px_25px_rgba(0,0,0,0.7)] select-none transition-[filter] duration-500"
+                            className="max-w-full max-h-full object-contain drop-shadow-[0_10px_25px_rgba(0,0,0,0.7)] select-none transition-all duration-700"
                             style={{ filter: `brightness(${carBrightnessPct}%)` }}
                         />
                     </div>
@@ -1574,11 +1896,13 @@ export default function WorkshopScreen() {
                 <div className="absolute top-6 right-6 w-[240px] flex flex-col gap-3 z-30 pointer-events-none">
 
                     {/* Active Quest Box */}
-                    <div className={`border p-3 backdrop-blur-md shadow-2xl pointer-events-auto relative overflow-hidden ${
-                        isBossQuest
-                            ? 'bg-red-950/80 border-red-700/60'
-                            : 'bg-slate-950/80 border-slate-700/50'
-                    }`}>
+                    <div 
+                        className={`border p-3 backdrop-blur-md shadow-2xl pointer-events-auto relative overflow-hidden transition-all ${
+                            isBossQuest
+                                ? 'bg-red-950/80 border-red-700/60'
+                                : 'bg-slate-950/80 border-slate-700/50'
+                        }`}
+                    >
                         {/* Live indicator */}
                         <div className="absolute top-0 right-0 p-2">
                             <div className={`w-1.5 h-1.5 rounded-full animate-pulse shadow-lg ${isBossQuest ? 'bg-red-400 shadow-[0_0_8px_rgba(239,68,68,1)]' : 'bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,1)]'}`} />
@@ -1605,13 +1929,23 @@ export default function WorkshopScreen() {
                             </div>
                             <div className="flex flex-col justify-center gap-0.5">
                                 <div className="text-[8px] font-bold tracking-widest text-slate-400 leading-none">KHÁCH HÀNG</div>
-                                <div className={`font-bold text-xs leading-none ${isBossQuest ? 'text-red-200' : 'text-cyan-100'}`}>{questName}</div>
+                                <BossTitleCompact name={questName} isBoss={isBossQuest} />
                             </div>
                         </div>
 
                         {/* Quote */}
                         <div className={`px-2 py-1 rounded border-l-2 text-[9px] leading-relaxed italic mb-2 ${isBossQuest ? 'bg-red-900/40 border-red-500 text-red-200/80' : 'bg-slate-900/80 border-amber-500 text-cyan-100/90'}`}>
-                            {questDesc}
+                            {questDesc ? (
+                                questDesc
+                            ) : customerDialogue ? (
+                                <>
+                                    {customerDialogue.before}
+                                    <span className="font-black not-italic text-amber-400" style={{ textShadow: '0 0 8px rgba(251,191,36,0.6)' }}>{customerDialogue.power}</span>
+                                    {customerDialogue.after}
+                                </>
+                            ) : (
+                                '"Chưa nhận Quest"'
+                            )}
                         </div>
 
                         {/* Quest Stats */}
@@ -1633,32 +1967,26 @@ export default function WorkshopScreen() {
                                         <span className="text-[8px] font-bold text-emerald-600 tracking-wider">NGÂN SÁCH KH</span>
                                         <span className="font-bold text-emerald-400 text-[10px]">{customerBudget.toLocaleString()} G</span>
                                     </div>
-                                    <div className="flex justify-between items-center">
-                                        <span className="text-[8px] font-bold text-slate-500 tracking-wider">↳ CHI PHÍ THẺ</span>
-                                        <span className={`font-bold text-[10px] ${
-                                            estimatedCardCost === 0 ? 'text-slate-500' :
-                                            estimatedCardCost <= customerBudget ? 'text-cyan-400' : 'text-red-400'
-                                        }`}>{estimatedCardCost > 0 ? `${estimatedCardCost.toLocaleString()} G` : '---'}</span>
-                                    </div>
-                                    {estimatedCardCost > 0 && (
-                                        <div className="flex justify-between items-center">
-                                            <span className="text-[8px] font-bold text-slate-500 tracking-wider">↳ LỢI NHUẬN DỰ ĐỰ</span>
-                                            <span className={`font-bold text-[10px] ${
-                                                estimatedBudgetProfit > 0 ? 'text-emerald-300 drop-shadow-[0_0_4px_rgba(52,211,153,0.6)]' : 'text-red-400'
-                                            }`}>
-                                                {estimatedBudgetProfit > 0 ? `+${estimatedBudgetProfit.toLocaleString()} G` : 'âm lợi'}
-                                            </span>
-                                        </div>
-                                    )}
                                 </>
                             )}
                             {questBanned && (
                                 <div className="flex justify-between items-center border-t border-slate-800/50 pt-1">
                                     <span className="text-[8px] font-bold text-slate-500 tracking-wider">ĐIỀU KIỆN</span>
-                                    <span className="font-bold text-red-400 text-[8px] tracking-wider">{questBanned}</span>
+                                    <span className="font-bold text-red-400 text-[8px] tracking-wider">{getConditionLabel(questBanned)}</span>
                                 </div>
                             )}
                         </div>
+
+                        {/* Boss detail button — visible and clear */}
+                        {isBossQuest && (
+                            <button
+                                onClick={() => setShowBossDetail(true)}
+                                className="w-full mt-2 py-1.5 bg-red-950/60 border border-red-600/50 text-red-300 font-bold text-[9px] tracking-[0.15em] rounded flex items-center justify-center gap-1.5 hover:bg-red-900/60 hover:border-red-400 hover:shadow-[0_0_15px_rgba(255,45,85,0.4)] transition-all uppercase"
+                            >
+                                <span className="text-xs">⚠</span>
+                                XEM CHI TIẾT BOSS
+                            </button>
+                        )}
                     </div>
 
                     {/* Stats & Rep */}
@@ -1741,62 +2069,280 @@ export default function WorkshopScreen() {
             </div>
 
             {/* ══════════════════════════════════════════════
-                FAIL STATE OVERLAY (no làm lại + penalty)
+                FAIL STATE MODAL — Beautiful glassmorphism
             ═══════════════════════════════════════════════*/}
+            <AnimatePresence>
             {testResult === 'fail' && (
-                <div className="absolute inset-0 z-50 flex flex-col items-center justify-center">
-                    <div className="absolute inset-0 bg-red-950/50 mix-blend-multiply animate-pulse pointer-events-none" />
-                    <button
-                        onClick={goToLobby}
-                        className="relative text-red-400 text-5xl font-black tracking-widest drop-shadow-[0_0_30px_#ef4444] border-4 border-red-500 px-10 py-6 bg-slate-950/90 transform -rotate-6 backdrop-blur-md flex flex-col items-center gap-2 cursor-pointer hover:scale-105 hover:shadow-[0_0_60px_rgba(239,68,68,0.8)] transition-all"
+                <motion.div
+                    key="fail-overlay"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="absolute inset-0 z-[80] flex items-center justify-center"
+                    style={{ backdropFilter: 'blur(6px)', background: 'radial-gradient(ellipse at center, rgba(127,0,0,0.45) 0%, rgba(0,0,0,0.80) 100%)' }}
+                >
+                    {/* Scanline overlay */}
+                    <div className="absolute inset-0 pointer-events-none opacity-10"
+                        style={{ backgroundImage: 'repeating-linear-gradient(transparent,transparent 2px,rgba(255,0,0,0.25) 3px)', backgroundSize: '100% 4px' }} />
+
+                    <motion.div
+                        initial={{ scale: 0.7, opacity: 0, y: 60 }}
+                        animate={{ scale: 1, opacity: 1, y: 0 }}
+                        exit={{ scale: 0.85, opacity: 0, y: 40 }}
+                        transition={{ type: 'spring', stiffness: 260, damping: 22 }}
+                        className="relative w-[460px] max-w-[90vw] bg-gradient-to-b from-slate-950/98 to-red-950/60 border-2 border-red-500/70 shadow-[0_0_80px_rgba(239,68,68,0.5),0_0_200px_rgba(239,68,68,0.15)] overflow-hidden"
                     >
-                        <span>{failureReason === 'heat' ? 'Thiết bị quá tải!!!' : 'Xe này yếu quá!!!!'}</span>
-                        <span className="text-xl text-red-300 font-bold tracking-widest">-{isBossQuest ? 20 : 10} UY TÍN</span>
-                        <span className="text-sm text-slate-400 font-normal tracking-wider mt-1">▶ Nhấn để quay về lobby</span>
-                    </button>
-                </div>
+                        {/* Top glow strip */}
+                        <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-transparent via-red-500 to-transparent" />
+
+                        {/* Corner accents */}
+                        <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-red-400" />
+                        <div className="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-red-400" />
+                        <div className="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-red-700/60" />
+                        <div className="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-red-700/60" />
+
+                        {/* Header */}
+                        <div className="px-6 pt-6 pb-4 border-b border-red-900/50">
+                            <div className="flex items-center gap-3">
+                                <motion.div
+                                    animate={{ scale: [1, 1.15, 1], rotate: [-5, 5, -5, 0] }}
+                                    transition={{ duration: 0.8, repeat: 2, repeatDelay: 1 }}
+                                    className="text-4xl"
+                                >
+                                    {failureReason === 'heat' ? '🔥' : '💀'}
+                                </motion.div>
+                                <div>
+                                    <div className="text-[10px] text-red-400/70 tracking-[0.3em] font-bold uppercase mb-0.5">KẾT QUẢ KIỂM TRA</div>
+                                    <div className="text-2xl font-black text-red-400 tracking-wider leading-tight"
+                                        style={{ textShadow: '0 0 20px rgba(239,68,68,0.8), 0 0 40px rgba(239,68,68,0.4)' }}>
+                                        {failureReason === 'heat' ? 'THIẾT BỊ QUÁ TẢI' : 'CHƯA ĐỦ MÃ LỰC'}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Body */}
+                        <div className="px-6 py-5 space-y-3">
+                            {/* Failure reason */}
+                            <div className="flex items-start gap-3 p-3 bg-red-950/50 border border-red-800/40 rounded">
+                                <span className="text-red-400 text-lg mt-0.5">⚠</span>
+                                <div>
+                                    <div className="text-[10px] text-red-400/70 tracking-widest font-bold mb-1">NGUYÊN NHÂN</div>
+                                    <div className="text-sm text-red-200 font-semibold leading-snug">
+                                        {failureReason === 'heat'
+                                            ? 'Nhiệt độ hệ thống vượt quá ngưỡng 100%. Động cơ nổ tung.'
+                                            : `Tổng mã lực ${accumulatedPower} không đạt yêu cầu ${questPower} của khách.`}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Stats row */}
+                            <div className="grid grid-cols-2 gap-2">
+                                <div className="p-2.5 bg-slate-900/80 border border-slate-700/50 rounded flex flex-col gap-1">
+                                    <span className="text-[9px] text-slate-500 tracking-widest font-bold">MÃ LỰC ĐẠT ĐƯỢC</span>
+                                    <span className="text-lg font-black text-amber-400">⚡ {accumulatedPower}<span className="text-slate-600 text-sm font-normal"> / {questPower > 0 ? questPower : '—'}</span></span>
+                                </div>
+                                <div className="p-2.5 bg-slate-900/80 border border-red-800/30 rounded flex flex-col gap-1">
+                                    <span className="text-[9px] text-slate-500 tracking-widest font-bold">NHIỆT ĐỘ CUỐI</span>
+                                    <span className={`text-lg font-black ${accumulatedHeat >= 100 ? 'text-red-400' : 'text-orange-400'}`}>🌡 {accumulatedHeat}%</span>
+                                </div>
+                            </div>
+
+                            {/* Penalty */}
+                            <div className="flex items-center justify-between p-3 bg-red-950/40 border border-red-700/40 rounded">
+                                <div className="flex items-center gap-2">
+                                    <span className="text-red-400 text-base">🏚</span>
+                                    <span className="text-[11px] text-red-300/80 font-bold tracking-wider">UY TÍN BỊ KHẤU TRỪ</span>
+                                </div>
+                                <motion.span
+                                    initial={{ scale: 0.5 }}
+                                    animate={{ scale: 1 }}
+                                    transition={{ delay: 0.4, type: 'spring' }}
+                                    className="text-xl font-black text-red-400"
+                                    style={{ textShadow: '0 0 12px rgba(239,68,68,0.9)' }}
+                                >
+                                    -{isBossQuest ? 20 : 10}
+                                </motion.span>
+                            </div>
+                        </div>
+
+                        {/* Footer CTA */}
+                        <div className="px-6 pb-6">
+                            <motion.button
+                                onClick={goToLobby}
+                                whileHover={{ scale: 1.02, boxShadow: '0 0 30px rgba(239,68,68,0.6)' }}
+                                whileTap={{ scale: 0.97 }}
+                                className="w-full py-3.5 bg-red-900/70 border-2 border-red-500/80 text-red-200 font-black tracking-[0.2em] uppercase text-sm transition-all flex items-center justify-center gap-2"
+                            >
+                                <span>◀</span>
+                                <span>QUAY VỀ LOBBY</span>
+                            </motion.button>
+                        </div>
+
+                        {/* Bottom glow */}
+                        <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-red-700/50 to-transparent" />
+                    </motion.div>
+                </motion.div>
             )}
-            {/* WIN STATE OVERLAY */}
+            </AnimatePresence>
+
+            {/* ══════════════════════════════════════════════
+                WIN STATE MODAL — Beautiful glassmorphism
+            ═══════════════════════════════════════════════*/}
+            <AnimatePresence>
             {testResult === 'success' && (
-                <div className="absolute inset-0 z-50 flex flex-col items-center justify-center">
-                    <div className="absolute inset-0 bg-cyan-950/30 mix-blend-color-dodge animate-pulse pointer-events-none" />
-                    <div className="relative text-emerald-400 text-5xl font-black tracking-widest drop-shadow-[0_0_30px_#10b981] border-4 border-emerald-500 px-10 py-6 bg-slate-950/90 rounded-xl transform rotate-3 backdrop-blur-md flex flex-col items-center gap-2">
-                        <span>🏆 THÀNH CÔNG RỰC RỠ!</span>
-                        {questPower > 0 && (
-                            <span className="text-lg text-emerald-300 font-bold tracking-widest">Mã lực đạt yêu cầu ✓</span>
-                        )}
-                        {questGold > 0 && (
-                            <span className="text-2xl text-amber-400 font-black tracking-widest drop-shadow-[0_0_15px_rgba(251,191,36,0.8)]">+{questGold.toLocaleString()} 💰</span>
-                        )}
-                        {/* Budget profit bonus */}
-                        {estimatedBudgetProfit > 0 && (
-                            <span className="text-xl text-emerald-300 font-black tracking-widest drop-shadow-[0_0_12px_rgba(52,211,153,0.8)]">
-                                +{estimatedBudgetProfit.toLocaleString()} 💵 lời ngân sách!
-                            </span>
-                        )}
-                        <button
-                            onClick={goToLobby}
-                            className="mt-3 px-8 py-3 bg-emerald-900/80 border-2 border-emerald-400 text-emerald-200 text-base font-bold tracking-[0.2em] rounded-lg uppercase cursor-pointer hover:bg-emerald-800 hover:text-white hover:shadow-[0_0_30px_rgba(16,185,129,0.6)] transition-all"
-                        >
-                            ▶ VỀ LOBBY
-                        </button>
-                    </div>
-                    {/* Flying coin animation */}
+                <motion.div
+                    key="win-overlay"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="absolute inset-0 z-[80] flex items-center justify-center"
+                    style={{ backdropFilter: 'blur(6px)', background: 'radial-gradient(ellipse at center, rgba(0,60,50,0.55) 0%, rgba(0,0,0,0.80) 100%)' }}
+                >
+                    {/* Particle coins */}
                     {flyingCoins.map(coin => (
-                        <div
-                            key={coin.id}
-                            className="absolute text-2xl pointer-events-none"
-                            style={{
-                                left: `${coin.x}%`,
-                                top: `${coin.y}%`,
-                                animation: `coinFly 1.8s ease-out ${coin.delay}ms forwards`,
-                            }}
-                        >
+                        <div key={coin.id} className="absolute text-2xl pointer-events-none z-[85]"
+                            style={{ left: `${coin.x}%`, top: `${coin.y}%`, animation: `coinFly 1.8s ease-out ${coin.delay}ms forwards` }}>
                             💰
                         </div>
                     ))}
-                </div>
+
+                    {/* Scanline overlay */}
+                    <div className="absolute inset-0 pointer-events-none opacity-10"
+                        style={{ backgroundImage: 'repeating-linear-gradient(transparent,transparent 2px,rgba(16,185,129,0.2) 3px)', backgroundSize: '100% 4px' }} />
+
+                    <motion.div
+                        initial={{ scale: 0.7, opacity: 0, y: -50 }}
+                        animate={{ scale: 1, opacity: 1, y: 0 }}
+                        exit={{ scale: 0.85, opacity: 0, y: -30 }}
+                        transition={{ type: 'spring', stiffness: 240, damping: 20 }}
+                        className="relative w-[480px] max-w-[90vw] bg-gradient-to-b from-slate-950/98 to-emerald-950/60 border-2 border-emerald-500/70 shadow-[0_0_80px_rgba(16,185,129,0.5),0_0_200px_rgba(16,185,129,0.15)] overflow-hidden"
+                    >
+                        {/* Top glow strip */}
+                        <motion.div
+                            animate={{ opacity: [0.6, 1, 0.6] }}
+                            transition={{ duration: 2, repeat: Infinity }}
+                            className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-transparent via-emerald-400 to-transparent"
+                        />
+
+                        {/* Corner accents */}
+                        <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-emerald-400" />
+                        <div className="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-emerald-400" />
+                        <div className="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-emerald-700/60" />
+                        <div className="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-emerald-700/60" />
+
+                        {/* Header */}
+                        <div className="px-6 pt-6 pb-4 border-b border-emerald-900/50">
+                            <div className="flex items-center gap-3">
+                                <motion.div
+                                    animate={{ rotate: [0, 10, -10, 0], scale: [1, 1.2, 1] }}
+                                    transition={{ duration: 1, delay: 0.3 }}
+                                    className="text-4xl"
+                                >
+                                    🏆
+                                </motion.div>
+                                <div>
+                                    <div className="text-[10px] text-emerald-400/70 tracking-[0.3em] font-bold uppercase mb-0.5">KẾT QUẢ KIỂM TRA</div>
+                                    <motion.div
+                                        animate={{ textShadow: ['0 0 20px rgba(16,185,129,0.6)', '0 0 40px rgba(16,185,129,1)', '0 0 20px rgba(16,185,129,0.6)'] }}
+                                        transition={{ duration: 2, repeat: Infinity }}
+                                        className="text-2xl font-black text-emerald-400 tracking-wider leading-tight"
+                                    >
+                                        THÀNH CÔNG RỰC RỠ!
+                                    </motion.div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Body */}
+                        <div className="px-6 py-5 space-y-3">
+                            {/* Power / heat stats */}
+                            <div className="grid grid-cols-2 gap-2">
+                                <div className="p-2.5 bg-slate-900/80 border border-emerald-800/30 rounded flex flex-col gap-1">
+                                    <span className="text-[9px] text-slate-500 tracking-widest font-bold">MÃ LỰC ĐẠT ĐƯỢC</span>
+                                    <motion.span initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3 }}
+                                        className="text-lg font-black text-amber-400">⚡ {accumulatedPower}<span className="text-emerald-600 text-sm font-bold ml-1">✓</span></motion.span>
+                                </div>
+                                <div className="p-2.5 bg-slate-900/80 border border-slate-700/50 rounded flex flex-col gap-1">
+                                    <span className="text-[9px] text-slate-500 tracking-widest font-bold">NHIỆT ĐỘ CUỐI</span>
+                                    <motion.span initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.35 }}
+                                        className={`text-lg font-black ${accumulatedHeat >= 75 ? 'text-orange-400' : 'text-emerald-400'}`}>🌡 {accumulatedHeat}%</motion.span>
+                                </div>
+                            </div>
+
+                            {/* Rewards */}
+                            <div className="space-y-2">
+                                {questGold > 0 && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.45 }}
+                                        className="flex items-center justify-between p-3 bg-amber-950/40 border border-amber-700/40 rounded"
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-amber-400 text-base">💰</span>
+                                            <span className="text-[11px] text-amber-300/80 font-bold tracking-wider">TIỀN THƯỞNG</span>
+                                        </div>
+                                        <span className="text-xl font-black text-amber-400"
+                                            style={{ textShadow: '0 0 12px rgba(251,191,36,0.9)' }}>
+                                            +{questGold.toLocaleString()} G
+                                        </span>
+                                    </motion.div>
+                                )}
+
+                                {estimatedBudgetProfit > 0 && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.55 }}
+                                        className="flex items-center justify-between p-3 bg-emerald-950/40 border border-emerald-700/40 rounded"
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-emerald-400 text-base">💵</span>
+                                            <span className="text-[11px] text-emerald-300/80 font-bold tracking-wider">LỜI NGÂN SÁCH</span>
+                                        </div>
+                                        <span className="text-xl font-black text-emerald-400"
+                                            style={{ textShadow: '0 0 12px rgba(52,211,153,0.9)' }}>
+                                            +{estimatedBudgetProfit.toLocaleString()} G
+                                        </span>
+                                    </motion.div>
+                                )}
+
+                                {isBossQuest && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}
+                                        className="flex items-center justify-between p-3 bg-cyan-950/40 border border-cyan-700/40 rounded"
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            <span className="text-cyan-400 text-base">🛡</span>
+                                            <span className="text-[11px] text-cyan-300/80 font-bold tracking-wider">UY TÍN THƯỞNG</span>
+                                        </div>
+                                        <span className="text-xl font-black text-cyan-400">+5</span>
+                                    </motion.div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Footer CTA */}
+                        <div className="px-6 pb-6">
+                            <motion.button
+                                onClick={goToLobby}
+                                whileHover={{ scale: 1.02, boxShadow: '0 0 30px rgba(16,185,129,0.6)' }}
+                                whileTap={{ scale: 0.97 }}
+                                initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.7 }}
+                                className="w-full py-3.5 bg-emerald-900/70 border-2 border-emerald-500/80 text-emerald-200 font-black tracking-[0.2em] uppercase text-sm transition-all flex items-center justify-center gap-2"
+                            >
+                                <span>▶</span>
+                                <span>VỀ LOBBY</span>
+                            </motion.button>
+                        </div>
+
+                        {/* Bottom glow */}
+                        <motion.div
+                            animate={{ opacity: [0.4, 0.9, 0.4] }}
+                            transition={{ duration: 2, repeat: Infinity }}
+                            className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-emerald-500/60 to-transparent"
+                        />
+                    </motion.div>
+                </motion.div>
             )}
+            </AnimatePresence>
 
             <DragOverlay dropAnimation={{ duration: 250, easing: 'cubic-bezier(0.18, 0.67, 0.6, 1.22)' }}>
                 {activeDragCard ? (
@@ -1859,6 +2405,24 @@ export default function WorkshopScreen() {
                         </div>
                     </motion.div>
                 </div>
+            )}
+
+            {/* Boss Detail Modal */}
+            {showBossDetail && activeQuest?.bossConfig && (
+                <BossDetailModal
+                    isOpen={showBossDetail}
+                    onClose={() => setShowBossDetail(false)}
+                    bossConfig={activeQuest.bossConfig}
+                    quest={activeQuest}
+                />
+            )}
+
+            {/* Russia Phase 2 Dialog */}
+            {showRussiaPhase2Dialog && (
+                <RussiaPhase2Dialog
+                    isOpen={showRussiaPhase2Dialog}
+                    onChoice={handleRussiaPhase2Choice}
+                />
             )}
         </div>
         </DndContext>

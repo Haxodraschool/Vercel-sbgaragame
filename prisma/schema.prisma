@@ -37,6 +37,7 @@ model User {
   activePerkCode         String?           @map("active_perk_code") @db.VarChar(50)
   totalShopSpent         BigInt            @default(0) @map("total_shop_spent")
   totalPacksOpened       Int               @default(0) @map("total_packs_opened")
+  bossAppeared           String?           @map("boss_appeared") @db.Text // JSON array of boss IDs that have appeared
   createdAt              DateTime          @default(now()) @map("created_at")
   updatedAt              DateTime          @updatedAt @map("updated_at")
   dailyQuests            DailyQuest[]

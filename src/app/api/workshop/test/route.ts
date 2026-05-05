@@ -210,20 +210,18 @@ export async function POST(request: NextRequest) {
 
     // Fetch crew cards (passive buffs)
     const crewBuffs = { power: 0, heat: 0, stability: 0 };
+    const crewEffects: any[] = [];
     if (crewCardIds && Array.isArray(crewCardIds)) {
       const crewCards = await prisma.card.findMany({
         where: { id: { in: crewCardIds as number[] }, type: 'CREW' },
         include: { effects: true },
       });
       for (const crew of crewCards) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        for (const effect of (crew as any).effects) {
-          if (effect.triggerCondition === 'PASSIVE') {
-            if (effect.targetStat === 'POWER') crewBuffs.power += effect.effectValue;
-            if (effect.targetStat === 'HEAT') crewBuffs.heat += effect.effectValue;
-            if (effect.targetStat === 'STABILITY') crewBuffs.stability += effect.effectValue;
-          }
-        }
+        crewEffects.push({
+          id: crew.id,
+          name: crew.name,
+          description: crew.description,
+        });
       }
     }
 
@@ -343,10 +341,34 @@ export async function POST(request: NextRequest) {
         powerAdded = Math.floor(powerAdded * 0.8);
       }
 
-      // Apply crew buffs
-      powerAdded += crewBuffs.power;
-      heatAdded = Math.max(0, heatAdded + crewBuffs.heat);
-      stabilityReduced += crewBuffs.stability;
+      // Apply crew buffs (complex conditional effects)
+      for (const crew of crewEffects) {
+        // Kỹ Sư Nhiệt (187): Giảm 10% tổng Heat của tất cả thẻ TURBO
+        if (crew.id === 187 && card.type === 'TURBO') {
+          heatAdded = Math.floor(heatAdded * 0.9);
+        }
+        // Chuyên Gia Ống Xả (188): +15 Power cho EXHAUST, không tăng Heat
+        if (crew.id === 188 && card.type === 'EXHAUST') {
+          powerAdded += 15;
+        }
+        // Bác Sĩ Xăng (193): x2 Power cho FUEL, x1.5 Heat cho FUEL
+        if (crew.id === 193 && card.type === 'FUEL') {
+          powerAdded = Math.floor(powerAdded * 2);
+          heatAdded = Math.floor(heatAdded * 1.5);
+        }
+        // Thợ Hàn Ngầm (194): +10 Stability cho EXHAUST
+        if (crew.id === 194 && card.type === 'EXHAUST') {
+          stabilityReduced += 10;
+        }
+        // Thợ Điện Ngầm (195): Xóa hoàn toàn chỉ số âm Stability của NITROUS
+        if (crew.id === 195 && card.type === 'NITROUS' && stabilityReduced < 0) {
+          stabilityReduced = 0;
+        }
+        // Chiến Binh Đêm (196): Từ Ngày 25+, +15 Power cho TIRE và TURBO
+        if (crew.id === 196 && user && user.currentDay >= 25 && (card.type === 'TIRE' || card.type === 'TURBO')) {
+          powerAdded += 15;
+        }
+      }
 
       // ============================================================
       // PASSIVE EFFECTS của chính thẻ (luôn có hiệu lực khi được lắp)
@@ -484,9 +506,14 @@ export async function POST(request: NextRequest) {
       }
 
       // Check explosion — HOT_HANDS perk raises threshold to 115
-      const heatThreshold = (user as any)?.activePerkCode === 'HOT_HANDS'
-        ? GAME_CONSTANTS.HEAT_THRESHOLD + 15
-        : GAME_CONSTANTS.HEAT_THRESHOLD;
+      // Tay Lái Thử (190) raises threshold by 5 points (from 100 to 105)
+      let heatThreshold = GAME_CONSTANTS.HEAT_THRESHOLD;
+      if ((user as any)?.activePerkCode === 'HOT_HANDS') {
+        heatThreshold += 15;
+      }
+      if (crewEffects.some(c => c.id === 190)) {
+        heatThreshold += 5;
+      }
       if (currentHeat >= heatThreshold) {
         exploded = true;
       }
@@ -511,6 +538,32 @@ export async function POST(request: NextRequest) {
       });
 
       if (exploded) break;
+    }
+
+    // ============================================================
+    // POST-RUN CREW EFFECTS (depend on total stats)
+    // ============================================================
+    for (const crew of crewEffects) {
+      // Chuyên Gia Lốp (192): Nếu tổng Power xe vượt 400, cộng thêm +20 Stability
+      if (crew.id === 192 && totalPower > 400) {
+        totalStability += 20;
+      }
+      // Thầy Phong Thuỷ Xe (197): Nếu cả 3 slot FILTER + ENGINE + COOLING đều có thẻ cùng độ hiếm
+      if (crew.id === 197) {
+        const filterCard = filledCardIds.find(id => cardMap.get(id)?.type === 'FILTER');
+        const engineCard = filledCardIds.find(id => cardMap.get(id)?.type === 'ENGINE');
+        const coolingCard = filledCardIds.find(id => cardMap.get(id)?.type === 'COOLING');
+        if (filterCard && engineCard && coolingCard) {
+          const filterRarity = cardMap.get(filterCard)?.rarity;
+          const engineRarity = cardMap.get(engineCard)?.rarity;
+          const coolingRarity = cardMap.get(coolingCard)?.rarity;
+          if (filterRarity === engineRarity && engineRarity === coolingRarity) {
+            totalStability += 25;
+          }
+        }
+      }
+      // Tay Lái Thử (190): Ngưỡng nổ máy tăng thêm +5 điểm (từ 100 lên 105)
+      // This is handled in the heat threshold check below
     }
 
     // ============================================================

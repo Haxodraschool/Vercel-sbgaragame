@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import styles from './ShadowCustomer.module.css';
 import type { QuestData } from './ShadowCustomer';
 import { useGameStore } from '@/stores/useGameStore';
+import BossTitle from '@/components/BossTitle/BossTitle';
 
 interface Props {
   quest: QuestData;
@@ -132,9 +133,48 @@ export default function QuestDialog({ quest, onAccept, onReject, onClose, penalt
   const isPositiveReputation = condition === 'EP_ISLAND_CHOICE';
 
   // 6. Typewriter Effect Logic
+  const customerDialogue = useMemo(() => {
+    if (quest.isBoss || !quest) return null;
+    const pw = quest.requiredPower || 0;
+    const pwStr = pw > 0 ? `${pw} mã lực` : '';
+    const id = quest.id || 0;
+
+    const templates = pw > 0 ? [
+        { before: '"Tao muốn con xe này phải đạt ', power: pwStr, after: '. Không đạt thì miễn trả tiền."' },
+        { before: '"Ê bro, cần ít nhất ', power: pwStr, after: ' nha. Tao còn phải đi đua tối nay."' },
+        { before: '"Vợ tao bảo cần ', power: pwStr, after: '. Không đạt là tao ngủ ngoài đường."' },
+        { before: '"Nghe nói xưởng giỏi lắm? Chứng minh đi — ', power: pwStr, after: ' là tối thiểu."' },
+        { before: '"Con trai tao mới 18 tuổi, nhưng nó muốn ', power: pwStr, after: '. Tuổi trẻ mà..."' },
+        { before: '"Tao đặt cọc rồi đó, ', power: pwStr, after: ' là phải có. Đừng có mà lừa tao."' },
+        { before: '"Ủa sao rẻ vậy? Tao tưởng ', power: pwStr, after: ' phải đắt hơn chứ. Làm đi!"' },
+        { before: '"Đêm qua tao nằm mơ thấy xe chạy ', power: pwStr, after: '. Giúp tao hiện thực hoá đi."' },
+        { before: '"Bạn tao khoe xe nó có ', power: pwStr, after: '. Tao phải hơn nó mới chịu!"' },
+        { before: '"Xe cũ tao chỉ có 50 mã lực... giờ cần ', power: pwStr, after: '. Nâng cấp thôi!"' },
+        { before: '"Mẹ tao bảo đừng chơi xe, nhưng ', power: pwStr, after: ' thì ai mà cưỡng lại được?"' },
+        { before: '"Tao cần chính xác ', power: pwStr, after: '. Không hơn, không kém. Tao khó tính lắm."' },
+        { before: '"Sếp tao đang chờ, làm cho tao ', power: pwStr, after: ' trước 5 giờ chiều nhé."' },
+        { before: '"Con gái tao thích tốc độ, ', power: pwStr, after: ' là quà sinh nhật cho nó."' },
+        { before: '"Xe taxi tao mà có ', power: pwStr, after: ' thì khách đông lắm anh ơi."' },
+        { before: '"Ông nội tao ngày xưa lái xe ', power: pwStr, after: '. Tao muốn nối tiếp truyền thống."' },
+        { before: '"Tao vừa ly dị, cần ', power: pwStr, after: ' để bắt đầu cuộc sống mới!"' },
+        { before: '"Dealer bảo xe này chạy ', power: pwStr, after: ' mới đủ tiêu chuẩn xuất xưởng."' },
+        { before: '"Đua với thằng hàng xóm, tao cần ', power: pwStr, after: '. Không thắng là mất mặt!"' },
+        { before: '"Nghe nói ', power: pwStr, after: ' là đủ đi Đà Lạt rồi? Làm luôn đi!"' },
+    ] : [
+        { before: '"Xe tao hư rồi, sửa cho nó ', power: 'chạy được', after: ' là được. Đơn giản thôi."' },
+        { before: '"Không cần nhanh đâu, ', power: 'chạy êm', after: ' là tao vui rồi."' },
+        { before: '"Tao chỉ cần con xe ', power: 'qua đăng kiểm', after: '. Đừng hỏi nhiều."' },
+        { before: '"Xe cũ mà, ', power: 'nổ máy được', after: ' là tao cảm ơn lắm rồi."' },
+        { before: '"Làm gì cũng được, miễn ', power: 'chạy tốt', after: ' là tao trả tiền."' },
+    ];
+
+    const index = Math.abs(id * 7 + 13) % templates.length;
+    return templates[index];
+  }, [quest]);
+
   const questDescription = quest.isBoss && quest.bossConfig?.description
     ? quest.bossConfig.description
-    : `"Tôi cần một con xe có mã lực cỡ ${quest.requiredPower} HP. Các cậu có thể làm được không?"`;
+    : customerDialogue ? (customerDialogue.before + customerDialogue.power + customerDialogue.after) : '';
     
   const [displayedText, setDisplayedText] = useState('');
   const [isTyping, setIsTyping] = useState(true);
@@ -233,6 +273,41 @@ export default function QuestDialog({ quest, onAccept, onReject, onClose, penalt
     startTypingSegment(randomLine, 25, true);
   };
 
+  const renderTypedText = () => {
+    // If it's a boss or a reject message, or no dialogue, just return text
+    if (isRejecting || quest.isBoss || !customerDialogue) {
+      return displayedText;
+    }
+
+    const bLen = customerDialogue.before.length;
+    const pLen = customerDialogue.power.length;
+    const currentLen = displayedText.length;
+
+    if (currentLen <= bLen) {
+      return <span>{displayedText}</span>;
+    } else if (currentLen <= bLen + pLen) {
+      const typedBefore = customerDialogue.before;
+      const typedPower = displayedText.slice(bLen);
+      return (
+        <>
+          <span>{typedBefore}</span>
+          <span className="font-black" style={{ color: '#fbbf24', textShadow: '0 0 8px rgba(251,191,36,0.6)' }}>{typedPower}</span>
+        </>
+      );
+    } else {
+      const typedBefore = customerDialogue.before;
+      const typedPower = customerDialogue.power;
+      const typedAfter = displayedText.slice(bLen + pLen);
+      return (
+        <>
+          <span>{typedBefore}</span>
+          <span className="font-black" style={{ color: '#fbbf24', textShadow: '0 0 8px rgba(251,191,36,0.6)' }}>{typedPower}</span>
+          <span>{typedAfter}</span>
+        </>
+      );
+    }
+  };
+
   return (
     <div className={styles.dialogOverlay} onClick={(e) => e.stopPropagation()}>
       <div className={styles.newDialogContainer}>
@@ -252,12 +327,12 @@ export default function QuestDialog({ quest, onAccept, onReject, onClose, penalt
 
             <div className={styles.chatHeader}>
                {quest.isBoss && quest.bossConfig 
-                 ? `⚠ ${quest.bossConfig.name.toUpperCase()}` 
-                 : `👤 KHÁCH HÀNG`}
+                 ? <BossTitle name={quest.bossConfig.name.toUpperCase()} autoDetect /> 
+                 : <BossTitle name="KHÁCH HÀNG" theme="npc" />}
             </div>
             
             <div className={styles.chatBody}>
-               <p className={styles.typewriterText}>{displayedText}</p>
+               <p className={styles.typewriterText}>{renderTypedText()}</p>
                
                {/* Quest Stats - Hide if rejecting */}
                {!isRejecting && (

@@ -343,3 +343,22 @@ body {
     opacity: 0;
   }
 }
+
+/* ════════════════════════════════════════════════
+   RESPONSIVE BREAKPOINTS — GLOBAL GAME
+   ════════════════════════════════════════════════ */
+
+/* ─── Small tablets & large phones (<=768px) ─── */
+@media (max-width: 768px) {
+  html {
+    font-size: 14px;
+  }
+}
+
+/* ─── Phones (<=480px) ─── */
+@media (max-width: 480px) {
+  html {
+    font-size: 12px;
+  }
+}
+

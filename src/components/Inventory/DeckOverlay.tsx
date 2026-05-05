@@ -6,6 +6,7 @@ import TypeTabs from './TypeTabs';
 import CardThumbnail from './CardThumbnail';
 import CardDetail from './CardDetail';
 import CardGridStyles from './CardGrid.module.css';
+import { AllIcon, EngineIcon } from '@/components/CategoryIcons';
 import type { Card, CardEffect } from '@/stores/useInventoryStore';
 
 /* ─── Types ─── */
@@ -269,7 +270,7 @@ export default function DeckOverlay({ isOpen, onClose }: DeckOverlayProps) {
             {/* Header */}
             <div className={styles.header}>
               <div>
-                <h1 className={styles.title}>📒 SỔ TAY KỸ THUẬT</h1>
+                <h1 className={styles.title}><AllIcon size={20} className="inline-block align-middle mr-1" /> SỔ TAY KỸ THUẬT</h1>
                 <div className={styles.collectionStats}>
                   Bộ sưu tập: <span>{ownedCount}</span> / {allCards.length} thẻ
                 </div>
@@ -289,7 +290,9 @@ export default function DeckOverlay({ isOpen, onClose }: DeckOverlayProps) {
             {/* Toolbar: Search + Sort + Rarity Filter */}
             <div className={styles.toolbar}>
               <div className={styles.searchBox}>
-                <span className={styles.searchIcon}>🔍</span>
+                <span className={styles.searchIcon}>
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                </span>
                 <input
                   type="text"
                   className={styles.searchInput}
@@ -337,12 +340,14 @@ export default function DeckOverlay({ isOpen, onClose }: DeckOverlayProps) {
             <div className={CardGridStyles.gridContainer}>
               {isLoading ? (
                 <div className={CardGridStyles.noResults}>
-                  <div className={CardGridStyles.emoji}>⚙️</div>
+                  <div className={CardGridStyles.emoji}><EngineIcon size={40} /></div>
                   <p>Đang tải dữ liệu...</p>
                 </div>
               ) : filteredCards.length === 0 ? (
                 <div className={CardGridStyles.noResults}>
-                  <div className={CardGridStyles.emoji}>🔍</div>
+                  <div className={CardGridStyles.emoji}>
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+                  </div>
                   <p>Không tìm thấy thẻ nào<br/>phù hợp bộ lọc.</p>
                 </div>
               ) : (

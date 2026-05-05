@@ -1,0 +1,646 @@
+/* ═══════════════════════════════════════════════════════════════
+   BossTitle.module.css — Special animated titles for bosses/events
+   Each boss type has a unique visual identity with CSS-only effects.
+   ═══════════════════════════════════════════════════════════════ */
+
+.bossTitle {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-size: 14px;
+  line-height: 1;
+  overflow: hidden;
+  /* Default color (event) */
+  color: #fbbf24;
+  text-shadow: 1px 1px 0 #000;
+}
+
+.icon {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+  filter: drop-shadow(0 0 3px currentColor);
+  animation: iconPulse 2s ease-in-out infinite;
+}
+
+.text {
+  position: relative;
+  z-index: 2;
+}
+
+/* ── Glitch Layers ── */
+.glitch1,
+.glitch2 {
+  position: absolute;
+  top: 0;
+  left: 6px; /* offset for icon */
+  right: 0;
+  z-index: 1;
+  opacity: 0;
+  pointer-events: none;
+  clip-path: inset(0);
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-size: inherit;
+}
+
+.glitch1 {
+  animation: glitchFlicker1 4s infinite;
+}
+
+.glitch2 {
+  animation: glitchFlicker2 4s infinite;
+}
+
+
+/* ═══════════════════════════════════════════
+   THEME: oil_gangster — Orange fire + shake
+   ═══════════════════════════════════════════ */
+.oil_gangster {
+  color: #ff8c00;
+  text-shadow:
+    1px 1px 0 #000,
+    0 0 8px rgba(255, 140, 0, 0.8),
+    0 0 20px rgba(255, 69, 0, 0.4),
+    0 0 40px rgba(255, 69, 0, 0.2);
+  animation: fireFlicker 0.15s infinite alternate;
+}
+
+.oil_gangster .icon { color: #ff4500; }
+
+.oil_gangster .glitch1 {
+  color: #ff4500;
+  text-shadow: 2px 0 #ff0000;
+  animation: glitchFlicker1 3s infinite;
+}
+.oil_gangster .glitch2 {
+  color: #ffaa00;
+  text-shadow: -2px 0 #ff6600;
+  animation: glitchFlicker2 3s infinite;
+}
+
+/* ═══════════════════════════════════════════
+   THEME: kim — Blood red + military flash
+   ═══════════════════════════════════════════ */
+.kim {
+  color: #dc2626;
+  text-shadow:
+    1px 1px 0 #000,
+    0 0 10px rgba(220, 38, 38, 0.9),
+    0 0 30px rgba(220, 38, 38, 0.5),
+    0 0 50px rgba(185, 28, 28, 0.3);
+  animation: militaryFlash 3s ease-in-out infinite;
+}
+
+.kim .icon { color: #ef4444; }
+
+.kim .glitch1 {
+  color: #ff0000;
+  text-shadow: 3px 0 #b91c1c;
+  animation: glitchFlicker1 2.5s infinite;
+}
+.kim .glitch2 {
+  color: #fca5a5;
+  text-shadow: -2px 0 #dc2626;
+  animation: glitchFlicker2 2.5s infinite;
+}
+
+/* ═══════════════════════════════════════════
+   THEME: trump — Gold luxury + shine sweep
+   ═══════════════════════════════════════════ */
+.trump {
+  color: transparent;
+  background: linear-gradient(
+    90deg,
+    #b8860b 0%,
+    #ffd700 25%,
+    #fffacd 50%,
+    #ffd700 75%,
+    #b8860b 100%
+  );
+  background-size: 200% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: goldSweep 3s linear infinite;
+  filter: drop-shadow(1px 1px 0 #000) drop-shadow(0 0 6px rgba(255, 215, 0, 0.5));
+}
+
+.trump .icon {
+  color: #ffd700;
+  -webkit-text-fill-color: #ffd700;
+  filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.8));
+}
+
+.trump .glitch1 {
+  color: #ffd700;
+  -webkit-text-fill-color: #ffd700;
+  text-shadow: 2px 0 #b8860b;
+  animation: glitchFlicker1 5s infinite;
+}
+.trump .glitch2 {
+  color: #fffacd;
+  -webkit-text-fill-color: #fffacd;
+  text-shadow: -1px 0 #ffd700;
+  animation: glitchFlicker2 5s infinite;
+}
+
+/* ═══════════════════════════════════════════
+   THEME: russia — Icy blue + frost shimmer
+   ═══════════════════════════════════════════ */
+.russia {
+  color: #7dd3fc;
+  text-shadow:
+    1px 1px 0 #000,
+    0 0 8px rgba(125, 211, 252, 0.8),
+    0 0 20px rgba(56, 189, 248, 0.5),
+    0 0 40px rgba(14, 165, 233, 0.3);
+  animation: frostShimmer 2.5s ease-in-out infinite;
+}
+
+.russia .icon { color: #38bdf8; }
+
+.russia .glitch1 {
+  color: #38bdf8;
+  text-shadow: 2px 0 #0ea5e9;
+  animation: glitchFlicker1 4s infinite;
+}
+.russia .glitch2 {
+  color: #bae6fd;
+  text-shadow: -2px 0 #7dd3fc;
+  animation: glitchFlicker2 4s infinite;
+}
+
+/* ═══════════════════════════════════════════
+   THEME: ep_island — Tropical green + wave
+   ═══════════════════════════════════════════ */
+.ep_island {
+  color: #4ade80;
+  text-shadow:
+    1px 1px 0 #000,
+    0 0 8px rgba(74, 222, 128, 0.7),
+    0 0 20px rgba(34, 197, 94, 0.4);
+  animation: tropicalWave 3s ease-in-out infinite;
+}
+
+.ep_island .icon { color: #22c55e; }
+
+.ep_island .glitch1 {
+  color: #22c55e;
+  text-shadow: 1px 0 #16a34a;
+  animation: glitchFlicker1 5s infinite;
+}
+.ep_island .glitch2 {
+  color: #86efac;
+  text-shadow: -1px 0 #4ade80;
+  animation: glitchFlicker2 5s infinite;
+}
+
+/* ═══════════════════════════════════════════
+   THEME: baby_oil — Toxic purple + drip
+   ═══════════════════════════════════════════ */
+.baby_oil {
+  color: #c084fc;
+  text-shadow:
+    1px 1px 0 #000,
+    0 0 10px rgba(192, 132, 252, 0.9),
+    0 0 25px rgba(168, 85, 247, 0.6),
+    0 0 50px rgba(126, 34, 206, 0.3);
+  animation: toxicPulse 2s ease-in-out infinite;
+}
+
+.baby_oil .icon { color: #a855f7; }
+
+.baby_oil .glitch1 {
+  color: #a855f7;
+  text-shadow: 3px 0 #7e22ce;
+  animation: glitchFlicker1 2s infinite;
+}
+.baby_oil .glitch2 {
+  color: #e879f9;
+  text-shadow: -2px 0 #c084fc;
+  animation: glitchFlicker2 2s infinite;
+}
+
+/* ═══════════════════════════════════════════
+   THEME: drift_king — Neon cyan + speed lines
+   ═══════════════════════════════════════════ */
+.drift_king {
+  color: #22d3ee;
+  text-shadow:
+    1px 1px 0 #000,
+    0 0 8px rgba(34, 211, 238, 0.8),
+    0 0 20px rgba(6, 182, 212, 0.5),
+    0 0 40px rgba(8, 145, 178, 0.3);
+  animation: speedBlur 0.08s infinite alternate;
+}
+
+.drift_king .icon { color: #06b6d4; }
+
+.drift_king .glitch1 {
+  color: #06b6d4;
+  text-shadow: 4px 0 #0891b2;
+  animation: glitchFlicker1 1.5s infinite;
+}
+.drift_king .glitch2 {
+  color: #67e8f9;
+  text-shadow: -3px 0 #22d3ee;
+  animation: glitchFlicker2 1.5s infinite;
+}
+
+/* ═══════════════════════════════════════════
+   THEME: f1_legend — Racing red + checkered
+   ═══════════════════════════════════════════ */
+.f1_legend {
+  color: #f43f5e;
+  text-shadow:
+    1px 1px 0 #000,
+    0 0 8px rgba(244, 63, 94, 0.8),
+    0 0 20px rgba(225, 29, 72, 0.5);
+  animation: racingPulse 1.5s ease-in-out infinite;
+}
+
+.f1_legend .icon { color: #e11d48; }
+
+.f1_legend .glitch1 {
+  color: #e11d48;
+  text-shadow: 2px 0 #be123c;
+  animation: glitchFlicker1 2s infinite;
+}
+.f1_legend .glitch2 {
+  color: #fb7185;
+  text-shadow: -2px 0 #f43f5e;
+  animation: glitchFlicker2 2s infinite;
+}
+
+/* ═══════════════════════════════════════════
+   THEME: collector — Legendary gold + sparkle
+   ═══════════════════════════════════════════ */
+.collector {
+  color: #eab308;
+  text-shadow:
+    1px 1px 0 #000,
+    0 0 10px rgba(234, 179, 8, 0.9),
+    0 0 25px rgba(202, 138, 4, 0.6),
+    0 0 50px rgba(161, 98, 7, 0.3);
+  animation: legendarySparkle 2s ease-in-out infinite;
+}
+
+.collector .icon { color: #f59e0b; }
+
+.collector .glitch1 {
+  color: #f59e0b;
+  text-shadow: 1px 0 #ca8a04;
+  animation: glitchFlicker1 6s infinite;
+}
+.collector .glitch2 {
+  color: #fde047;
+  text-shadow: -1px 0 #eab308;
+  animation: glitchFlicker2 6s infinite;
+}
+
+/* ═══════════════════════════════════════════
+   THEME: daredevil_girl — Hot pink + electric
+   ═══════════════════════════════════════════ */
+.daredevil_girl {
+  color: #ec4899;
+  text-shadow:
+    1px 1px 0 #000,
+    0 0 8px rgba(236, 72, 153, 0.8),
+    0 0 20px rgba(219, 39, 119, 0.5),
+    0 0 35px rgba(190, 24, 93, 0.3);
+  animation: electricPink 2.5s ease-in-out infinite;
+}
+
+.daredevil_girl .icon { color: #db2777; }
+
+.daredevil_girl .glitch1 {
+  color: #db2777;
+  text-shadow: 2px 0 #be185d;
+  animation: glitchFlicker1 2s infinite;
+}
+.daredevil_girl .glitch2 {
+  color: #f9a8d4;
+  text-shadow: -2px 0 #ec4899;
+  animation: glitchFlicker2 2s infinite;
+}
+
+/* ═══════════════════════════════════════════
+   THEME: mysterious — Ghostly white + flicker
+   ═══════════════════════════════════════════ */
+.mysterious {
+  color: #e2e8f0;
+  text-shadow:
+    1px 1px 0 #000,
+    0 0 6px rgba(226, 232, 240, 0.6),
+    0 0 15px rgba(148, 163, 184, 0.4),
+    0 0 30px rgba(100, 116, 139, 0.2);
+  animation: ghostFlicker 3s ease-in-out infinite;
+}
+
+.mysterious .icon { color: #94a3b8; }
+
+.mysterious .glitch1 {
+  color: #94a3b8;
+  text-shadow: 2px 0 #64748b;
+  animation: glitchFlicker1 3s infinite;
+}
+.mysterious .glitch2 {
+  color: #f1f5f9;
+  text-shadow: -1px 0 #cbd5e1;
+  animation: glitchFlicker2 3s infinite;
+}
+
+/* ═══════════════════════════════════════════
+   THEME: event — Warning yellow (default)
+   ═══════════════════════════════════════════ */
+.event {
+  color: #fbbf24;
+  text-shadow:
+    1px 1px 0 #000,
+    0 0 6px rgba(251, 191, 36, 0.6),
+    0 0 15px rgba(245, 158, 11, 0.3);
+  animation: warningPulse 2s ease-in-out infinite;
+}
+
+.event .icon { color: #f59e0b; }
+
+.event .glitch1 {
+  color: #f59e0b;
+  text-shadow: 1px 0 #d97706;
+  animation: glitchFlicker1 4s infinite;
+}
+.event .glitch2 {
+  color: #fde68a;
+  text-shadow: -1px 0 #fbbf24;
+  animation: glitchFlicker2 4s infinite;
+}
+
+/* ═══════════════════════════════════════════
+   THEME: npc — Regular customer (subtle)
+   ═══════════════════════════════════════════ */
+.npc {
+  color: #94a3b8;
+  text-shadow: 1px 1px 0 #000;
+}
+
+.npc .icon { color: #64748b; }
+
+
+/* ═══════════════════════════════════════════
+   Compact version (Workshop HUD)
+   ═══════════════════════════════════════════ */
+.compact {
+  font-weight: 800;
+  font-size: 12px;
+  line-height: 1;
+  letter-spacing: 0.5px;
+}
+
+.compact.npc {
+  color: #a5f3fc;
+}
+
+.compact.oil_gangster { color: #ff8c00; text-shadow: 0 0 6px rgba(255, 140, 0, 0.5); }
+.compact.kim { color: #f87171; text-shadow: 0 0 6px rgba(248, 113, 113, 0.5); }
+.compact.trump { color: #fde047; text-shadow: 0 0 6px rgba(253, 224, 71, 0.5); }
+.compact.russia { color: #7dd3fc; text-shadow: 0 0 6px rgba(125, 211, 252, 0.5); }
+.compact.ep_island { color: #4ade80; text-shadow: 0 0 6px rgba(74, 222, 128, 0.5); }
+.compact.baby_oil { color: #c084fc; text-shadow: 0 0 6px rgba(192, 132, 252, 0.5); }
+.compact.drift_king { color: #22d3ee; text-shadow: 0 0 6px rgba(34, 211, 238, 0.5); }
+.compact.f1_legend { color: #f43f5e; text-shadow: 0 0 6px rgba(244, 63, 94, 0.5); }
+.compact.collector { color: #eab308; text-shadow: 0 0 6px rgba(234, 179, 8, 0.5); }
+.compact.daredevil_girl { color: #ec4899; text-shadow: 0 0 6px rgba(236, 72, 153, 0.5); }
+.compact.mysterious { color: #e2e8f0; text-shadow: 0 0 6px rgba(226, 232, 240, 0.3); }
+.compact.event { color: #fbbf24; text-shadow: 0 0 6px rgba(251, 191, 36, 0.5); }
+
+
+/* ═══════════════════════════════════════════════
+   KEYFRAME ANIMATIONS
+   ═══════════════════════════════════════════════ */
+
+/* Icon pulse */
+@keyframes iconPulse {
+  0%, 100% { opacity: 0.8; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.15); }
+}
+
+/* Fire flicker (oil gangster) */
+@keyframes fireFlicker {
+  0% { transform: translateX(-0.5px) translateY(0.5px); }
+  100% { transform: translateX(0.5px) translateY(-0.5px); }
+}
+
+/* Military flash (kim) */
+@keyframes militaryFlash {
+  0%, 90%, 100% { opacity: 1; }
+  92% { opacity: 0.3; }
+  94% { opacity: 1; }
+  96% { opacity: 0.5; }
+}
+
+/* Gold sweep (trump) */
+@keyframes goldSweep {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Frost shimmer (russia) */
+@keyframes frostShimmer {
+  0%, 100% {
+    text-shadow:
+      1px 1px 0 #000,
+      0 0 8px rgba(125, 211, 252, 0.8),
+      0 0 20px rgba(56, 189, 248, 0.5);
+  }
+  50% {
+    text-shadow:
+      1px 1px 0 #000,
+      0 0 15px rgba(125, 211, 252, 1),
+      0 0 35px rgba(56, 189, 248, 0.8),
+      0 0 60px rgba(14, 165, 233, 0.4);
+  }
+}
+
+/* Tropical wave (ep_island) */
+@keyframes tropicalWave {
+  0%, 100% { transform: translateY(0); }
+  25% { transform: translateY(-1px); }
+  75% { transform: translateY(1px); }
+}
+
+/* Toxic pulse (baby_oil) */
+@keyframes toxicPulse {
+  0%, 100% {
+    text-shadow:
+      1px 1px 0 #000,
+      0 0 10px rgba(192, 132, 252, 0.9),
+      0 0 25px rgba(168, 85, 247, 0.6);
+    transform: scale(1);
+  }
+  50% {
+    text-shadow:
+      1px 1px 0 #000,
+      0 0 18px rgba(192, 132, 252, 1),
+      0 0 40px rgba(168, 85, 247, 0.9),
+      0 0 60px rgba(126, 34, 206, 0.5);
+    transform: scale(1.02);
+  }
+}
+
+/* Speed blur (drift_king) */
+@keyframes speedBlur {
+  0% { transform: translateX(-1px); letter-spacing: 2px; }
+  100% { transform: translateX(1px); letter-spacing: 3px; }
+}
+
+/* Racing pulse (f1_legend) */
+@keyframes racingPulse {
+  0%, 100% { opacity: 1; }
+  50% {
+    opacity: 0.85;
+    text-shadow:
+      1px 1px 0 #000,
+      0 0 15px rgba(244, 63, 94, 1),
+      0 0 30px rgba(225, 29, 72, 0.7);
+  }
+}
+
+/* Legendary sparkle (collector) */
+@keyframes legendarySparkle {
+  0%, 100% {
+    text-shadow:
+      1px 1px 0 #000,
+      0 0 10px rgba(234, 179, 8, 0.9),
+      0 0 25px rgba(202, 138, 4, 0.6);
+  }
+  33% {
+    text-shadow:
+      1px 1px 0 #000,
+      0 0 15px rgba(234, 179, 8, 1),
+      0 0 35px rgba(202, 138, 4, 0.9),
+      0 0 55px rgba(161, 98, 7, 0.5);
+  }
+  66% {
+    text-shadow:
+      1px 1px 0 #000,
+      0 0 8px rgba(234, 179, 8, 0.7),
+      0 0 20px rgba(202, 138, 4, 0.4);
+  }
+}
+
+/* Electric pink (daredevil_girl) */
+@keyframes electricPink {
+  0%, 100% {
+    text-shadow:
+      1px 1px 0 #000,
+      0 0 8px rgba(236, 72, 153, 0.8),
+      0 0 20px rgba(219, 39, 119, 0.5);
+  }
+  50% {
+    text-shadow:
+      1px 1px 0 #000,
+      0 0 15px rgba(236, 72, 153, 1),
+      0 0 30px rgba(219, 39, 119, 0.8),
+      0 0 50px rgba(190, 24, 93, 0.4);
+  }
+}
+
+/* Ghost flicker (mysterious) */
+@keyframes ghostFlicker {
+  0%, 100% { opacity: 1; }
+  20% { opacity: 0.6; }
+  25% { opacity: 1; }
+  40% { opacity: 0.8; }
+  45% { opacity: 1; }
+  80% { opacity: 0.7; }
+  85% { opacity: 1; }
+}
+
+/* Warning pulse (event default) */
+@keyframes warningPulse {
+  0%, 100% {
+    text-shadow:
+      1px 1px 0 #000,
+      0 0 6px rgba(251, 191, 36, 0.6);
+  }
+  50% {
+    text-shadow:
+      1px 1px 0 #000,
+      0 0 12px rgba(251, 191, 36, 1),
+      0 0 25px rgba(245, 158, 11, 0.6);
+  }
+}
+
+/* Glitch flicker — layer 1 */
+@keyframes glitchFlicker1 {
+  0%, 89%, 91%, 93%, 100% {
+    opacity: 0;
+    transform: translate(0, 0);
+    clip-path: inset(0);
+  }
+  90% {
+    opacity: 0.7;
+    transform: translate(2px, -1px);
+    clip-path: inset(20% 0 60% 0);
+  }
+  92% {
+    opacity: 0.5;
+    transform: translate(-3px, 1px);
+    clip-path: inset(50% 0 20% 0);
+  }
+}
+
+/* Glitch flicker — layer 2 */
+@keyframes glitchFlicker2 {
+  0%, 84%, 86%, 88%, 100% {
+    opacity: 0;
+    transform: translate(0, 0);
+    clip-path: inset(0);
+  }
+  85% {
+    opacity: 0.6;
+    transform: translate(-2px, 2px);
+    clip-path: inset(40% 0 30% 0);
+  }
+  87% {
+    opacity: 0.4;
+    transform: translate(3px, -1px);
+    clip-path: inset(10% 0 70% 0);
+  }
+}
+
+
+/* ═══ RESPONSIVE ═══ */
+@media (max-width: 768px) {
+  .bossTitle {
+    font-size: 12px;
+    letter-spacing: 1px;
+    gap: 4px;
+  }
+
+  .icon svg {
+    width: 10px;
+    height: 10px;
+  }
+
+  .compact {
+    font-size: 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .bossTitle {
+    font-size: 11px;
+    letter-spacing: 0.5px;
+  }
+
+  .compact {
+    font-size: 9px;
+  }
+}

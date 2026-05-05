@@ -39,14 +39,8 @@ export async function GET(request: NextRequest) {
        // Normal events
        // eslint-disable-next-line @typescript-eslint/no-explicit-any
        triggeredEvents = events.filter((e: any) => {
-          if (nkEventNames.includes(e.name)) {
-             // Cảnh sát chỉ xuất hiện sau khi hoàn thành Sát thủ (có hasUnderworldBuff) ngoài đời thực
-             if (e.name === 'Cảnh Sát Triều Tiên' && user.hasUnderworldBuff) {
-                return Math.random() < 0.1;
-             }
-             return false;
-          }
-          return Math.random() < e.probability;
+          if (e.name === 'Băng Đảng Xăng Dầu') return true;
+          return false;
        });
     }
 
@@ -134,9 +128,11 @@ export async function POST(request: NextRequest) {
             canAccept = false;
             finalMessage = 'Không đủ Uy tín để tham gia đua ngầm (>15)!';
           } else {
-            updates.gold = { increment: 800 };
+            // Sau ngày 25, thưởng x2 gold
+            const goldReward = user.currentDay >= 25 ? 1600 : 800;
+            updates.gold = { increment: goldReward };
             updates.garageHealth = user.garageHealth - 15;
-            finalMessage = 'Tham gia đua ngầm thành công! Nhận 800 Gold nhưng mất 15 Uy tín.';
+            finalMessage = `Tham gia đua ngầm thành công! Nhận ${goldReward} Gold nhưng mất 15 Uy tín.`;
           }
         }
         else if (event.name === 'Băng Đảng Xăng Dầu') {
@@ -151,13 +147,13 @@ export async function POST(request: NextRequest) {
           finalMessage = 'Được lên sóng! Uy tín tăng vọt (+40) nhưng tốn 200 Gold chi phí PR.';
         }
         else if (event.name === 'Đấu Giá Kho Xưởng' && accepted) {
-          if (Number(user.gold) < 300) {
+          if (Number(user.gold) < 700) {
             canAccept = false;
-            finalMessage = 'Không đủ 300 Gold để cược mua kho!';
+            finalMessage = 'Không đủ 700 Gold để cược mua kho!';
           } else {
-            updates.gold = { decrement: 300 };
-            updates.techPoints = { increment: 500 };
-            finalMessage = 'Đã mua mù thành công! Mất 300 Gold, thử vận may nhận 500 EXP.';
+            updates.gold = { decrement: 700 };
+            updates.techPoints = { increment: 400 };
+            finalMessage = 'Đã mua mù thành công! Mất 700 Gold, thử vận may nhận 400 EXP.';
           }
         }
         else if (event.name === 'Kẻ Chế Tạo Cuồng Tín' && accepted) {

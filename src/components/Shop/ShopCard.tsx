@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import { CrewIcon, ToolIcon } from '@/components/CategoryIcons';
 
 export interface ShopItemData {
   slotIndex: number | string;
@@ -156,7 +157,7 @@ function CardImage({ item, borderColor }: { item: ShopItemData; borderColor: str
   if (!item.card) {
     return (
       <div style={{ fontSize: '2rem', color: borderColor, fontFamily: 'var(--font-pixel)' }}>
-        {item.type === 'CREW' ? '👤' : '🔧'}
+        {item.type === 'CREW' ? <CrewIcon size={32} /> : <ToolIcon size={32} />}
       </div>
     );
   }
@@ -174,7 +175,7 @@ function CardImage({ item, borderColor }: { item: ShopItemData; borderColor: str
   if (imgError >= 3) {
     return (
       <div style={{ fontSize: '2rem', color: borderColor, fontFamily: 'var(--font-pixel)' }}>
-        {item.type === 'CREW' ? '👤' : '🔧'}
+        {item.type === 'CREW' ? <CrewIcon size={32} /> : <ToolIcon size={32} />}
       </div>
     );
   }
