@@ -8,9 +8,36 @@ const payos = new PayOS({
   checksumKey: process.env.PAYOS_CHECKSUM_KEY!,
 });
 
+// PayOS validates webhook by sending GET request first
+export async function GET() {
+  return NextResponse.json({ message: 'OK' });
+}
+
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
+    // Log raw body for debugging
+    const rawText = await req.text();
+    console.log('PayOS Webhook RAW:', rawText);
+    console.log('PayOS Webhook Headers:', JSON.stringify(Object.fromEntries(req.headers.entries())));
+
+    if (!rawText || rawText.trim() === '') {
+      console.log('PayOS Webhook: Empty body, returning 200');
+      return NextResponse.json({ message: 'OK' });
+    }
+
+    let body: any;
+    try {
+      body = JSON.parse(rawText);
+    } catch (parseErr) {
+      console.log('PayOS Webhook: Non-JSON body, returning 200');
+      return NextResponse.json({ message: 'OK' });
+    }
+
+    // PayOS webhook validation request (when registering webhook URL)
+    if (!body || !body.data || !body.signature) {
+      console.log('PayOS Webhook: Validation request, returning 200');
+      return NextResponse.json({ message: 'OK' });
+    }
 
     // Verify webhook signature using PayOS SDK
     let verifiedData;
@@ -29,8 +56,9 @@ export async function POST(req: NextRequest) {
     });
 
     if (!order) {
-      console.error('PayOS Webhook: Order not found:', orderCode);
-      return NextResponse.json({ error: 'Order not found' }, { status: 404 });
+      // PayOS test webhook uses fake orderCode (e.g. 123) to validate endpoint
+      console.log('PayOS Webhook: Order not found (likely test webhook):', orderCode);
+      return NextResponse.json({ message: 'OK' });
     }
 
     // Skip if already paid (idempotent)
