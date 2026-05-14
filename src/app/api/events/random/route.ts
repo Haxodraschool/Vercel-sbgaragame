@@ -36,10 +36,16 @@ export async function GET(request: NextRequest) {
           });
        }
     } else {
-       // Normal events
+       // Normal events with proper spawn rates per SKILL.md
        // eslint-disable-next-line @typescript-eslint/no-explicit-any
        triggeredEvents = events.filter((e: any) => {
-          if (e.name === 'Băng Đảng Xăng Dầu') return true;
+          if (e.name === 'Băng Đảng Xăng Dầu') return Math.random() < 0.15;
+          if (e.name === 'Tay Buôn Lậu Gõ Cửa') return Math.random() < 0.0;
+          if (e.name === 'Ánh Trăng Racing') return Math.random() < 0.15;
+          if (e.name === 'Độ Channel Bốc Phốt') return Math.random() < 0.10;
+          if (e.name === 'Đấu Giá Kho Xưởng') return Math.random() < 0.10;
+          if (e.name === 'Kẻ Chế Tạo Cuồng Tín') return Math.random() < 0.10;
+          if (e.name === 'Cảnh Sát Đột Kích') return Math.random() < 0.15;
           return false;
        });
     }

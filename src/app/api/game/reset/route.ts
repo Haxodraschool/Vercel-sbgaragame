@@ -21,17 +21,16 @@ export async function POST(request: NextRequest) {
     await prisma.userActiveEvent.deleteMany({ where: { userId: auth.userId } });
     await prisma.userInventory.deleteMany({ where: { userId: auth.userId } });
 
-    // Reset stats nhưng GIỮ tech_points, crew_slots, endings, totalShopSpent
+    // Reset stats nhưng GIỮ level, tech_points, crew_slots, endings, totalShopSpent
     const updatedUser = await prisma.user.update({
       where: { id: auth.userId },
       data: {
-        gold: 500,
-        level: 1,
-        exp: 0,
+        gold: 1500, // Base gold (perk effect will be applied when selecting perk)
+        exp: 0, // Reset exp to 0
         currentDay: 1,
         garageHealth: 100,
         isFinalRound: false,
-        activePerkCode: null, // Reset perk cho phép chọn lại
+        activePerkCode: null, // Reset về null để chọn lại perk
         // Reset NK + boss flags
         smugglerPenalty: 0,
         hasDefeatedEP: false,
@@ -46,7 +45,7 @@ export async function POST(request: NextRequest) {
         hasDefeatedDonaldTrump: false,
         hasMoscowBuff: false,
         moscowBuffDay: 0,
-        // GIỮ: techPoints, crewSlots, totalExplosions, totalShopSpent (Roguelite progression)
+        // GIỮ: level, techPoints, crewSlots, totalExplosions, totalShopSpent (Roguelite progression)
       },
     });
 

@@ -142,34 +142,34 @@ export async function POST(request: NextRequest) {
 
     const questsData = [];
 
-    // Determine fixed requirements for North Korea customers
-    const nkReqPower = randomInt(150, 300);
-    const nkRewGold = randomInt(50, 150);
+    // Determine modifiers for North Korea
+    const powerMod = user.isInNorthKorea ? 1.2 : 1.0;
+    const goldMod = user.isInNorthKorea ? 1.2 : 1.0;
 
     // Generate normal customer quests
     for (let i = 0; i < customerCount; i++) {
-      const baseGold = user.isInNorthKorea
-        ? nkRewGold
-        : (questConfig
-          ? randomInt(questConfig.minGoldReward, questConfig.maxGoldReward)
-          : randomInt(50, 200));
+      // Calculate base gold reward based on level config
+      const baseGold = questConfig
+        ? randomInt(questConfig.minGoldReward, questConfig.maxGoldReward)
+        : randomInt(50, 200);
+      
+      // Apply North Korea gold modifier and the global 1.5x boost
+      const boostedGold = Math.floor(baseGold * goldMod * 1.5);
 
-      // Tăng gold thưởng lên 1.5x cho tất cả ngày và level
-      const boostedGold = Math.floor(baseGold * 1.5);
-
-      // Ngân sách khách = 2x – 4x tiền thưởng (dựa trên gold đã tăng)
-      const budgetMultiplier = 2.0 + Math.random() * 2.0; // 2.0 – 4.0
+      // Customer budget = 2.0x – 4.0x reward gold
+      const budgetMultiplier = 2.0 + Math.random() * 2.0;
       const customerBudget = Math.floor(boostedGold * budgetMultiplier);
+
+      // Calculate required power based on level config
+      const basePower = questConfig
+        ? randomInt(questConfig.minPowerReq, questConfig.maxPowerReq)
+        : randomInt(100, 300);
 
       questsData.push({
         userId: auth.userId,
         dayNumber: user.currentDay,
         isBoss: false,
-        requiredPower: user.isInNorthKorea
-          ? nkReqPower
-          : (questConfig
-            ? randomInt(questConfig.minPowerReq, questConfig.maxPowerReq)
-            : randomInt(100, 300)),
+        requiredPower: Math.floor(basePower * powerMod),
         rewardGold: boostedGold,
         customerBudget,
         status: 'PENDING' as const,

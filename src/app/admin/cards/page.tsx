@@ -15,6 +15,13 @@ const RARITY_COLORS: Record<number,string> = { 1:'#9ca3af', 2:'#22c55e', 3:'#3b8
 const RARITY_NAMES: Record<number,string> = { 1:'Common', 2:'Uncommon', 3:'Rare', 4:'Epic', 5:'Legendary' };
 const getToken = () => localStorage.getItem('sb-admin-token') || '';
 
+/** Resolve card image path — handles relative filenames from DB */
+function resolveCardImg(id: number, imageUrl?: string | null): string {
+  if (!imageUrl) return `/componentcardimg/${id}.jpg`;
+  if (imageUrl.startsWith('/')) return imageUrl;
+  return `/componentcardimg/${imageUrl}`;
+}
+
 export default function CardsPage() {
   const [cards, setCards] = useState<CardData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -114,7 +121,7 @@ export default function CardsPage() {
                 {cards.map((c) => (
                   <tr key={c.id} className={selected?.id === c.id ? styles.rowSelected : ''} onClick={() => selectCard(c)}>
                     <td className={styles.idCell}>#{c.id}</td>
-                    <td><img src={c.imageUrl || `/componentcardimg/${c.id}.jpg`} alt="" className={styles.thumbImg} onError={(e) => { (e.target as HTMLImageElement).src = '/componentcardimg/placeholder.jpg'; }} /></td>
+                    <td><img src={resolveCardImg(c.id, c.imageUrl)} alt="" className={styles.thumbImg} onError={(e) => { (e.target as HTMLImageElement).src = '/componentcardimg/placeholder.jpg'; }} /></td>
                     <td className={styles.nameCell} style={{ color: RARITY_COLORS[c.rarity] }}>{c.name}</td>
                     <td className={styles.typeCell}>{c.type}</td>
                     <td style={{ color: RARITY_COLORS[c.rarity] }}>{'★'.repeat(c.rarity)}</td>
@@ -135,7 +142,7 @@ export default function CardsPage() {
             {/* Live Preview Card */}
             <div className={styles.previewCard}>
               <div className={styles.previewImgWrap} style={{ borderColor: RARITY_COLORS[previewData.rarity || 1] }}>
-                <img src={imagePreview || previewData.imageUrl || `/componentcardimg/${selected.id}.jpg`} alt={previewData.name || ''} onError={(e) => { (e.target as HTMLImageElement).src = '/componentcardimg/placeholder.jpg'; }} />
+                <img src={imagePreview || resolveCardImg(selected.id, previewData.imageUrl)} alt={previewData.name || ''} onError={(e) => { (e.target as HTMLImageElement).src = '/componentcardimg/placeholder.jpg'; }} />
               </div>
               <div className={styles.previewName}>{previewData.name}</div>
               <div className={styles.previewRarity} style={{ color: RARITY_COLORS[previewData.rarity || 1] }}>

@@ -567,18 +567,11 @@ export default function LootBoxModal({
   );
 }
 
-// Image component with .jpg → .jpeg → .png fallback — NO frame, raw card art
+// Image component — all card images are .jpg, fall back to icon
 function RevealCardImage({ cardId, name, rarity }: { cardId: number; name: string; rarity?: number }) {
-  const [imgError, setImgError] = useState(0);
+  const [hasError, setHasError] = useState(false);
 
-  const getSrc = () => {
-    if (imgError === 0) return `/componentcardimg/${cardId}.jpg`;
-    if (imgError === 1) return `/componentcardimg/${cardId}.jpeg`;
-    if (imgError === 2) return `/componentcardimg/${cardId}.png`;
-    return '';
-  };
-
-  if (imgError >= 3) {
+  if (hasError) {
     return (
       <div style={{ width: '100%', aspectRatio: '3 / 4', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '2rem', background: 'rgba(20,20,30,0.6)', borderRadius: 8 }}>
         <ToolIcon size={32} />
@@ -588,10 +581,10 @@ function RevealCardImage({ cardId, name, rarity }: { cardId: number; name: strin
 
   return (
     <img
-      src={getSrc()}
+      src={`/componentcardimg/${cardId}.jpg`}
       alt={name}
       style={{ width: '100%', height: 'auto', display: 'block', borderRadius: 6 }}
-      onError={() => setImgError((e) => e + 1)}
+      onError={() => setHasError(true)}
     />
   );
 }

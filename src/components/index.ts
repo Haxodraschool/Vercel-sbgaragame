@@ -10,3 +10,6 @@ export { default as ShopScreen } from './Shop/ShopScreen';
 export { default as WorkshopScreen } from './Workshop/WorkshopScreen';
 export { default as AccountInfoModal } from './AccountInfoModal/AccountInfoModal';
 export { default as EventScreen } from './EventScreen/EventScreen';
+export { default as EndingScreen } from './EndingScreen/EndingScreen';
+export { default as StarterPerkSelection } from './StarterPerkSelection/StarterPerkSelection';
+export { default as TutorialOverlay } from './Tutorial/TutorialOverlay';

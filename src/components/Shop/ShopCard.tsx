@@ -145,14 +145,16 @@ export default function ShopCard({ item, onClick }: ShopCardProps) {
   );
 }
 
-// Exported helper: resolve card image path by card ID
+// Exported helper: resolve card image path (handles relative filename or full path)
 export function getCardImageSrc(cardId: number, imageUrl?: string | null): string {
-  return imageUrl || `/componentcardimg/${cardId}.jpg`;
+  if (!imageUrl) return `/componentcardimg/${cardId}.jpg`;
+  if (imageUrl.startsWith('/')) return imageUrl;
+  return `/componentcardimg/${imageUrl}`;
 }
 
-// Helper: resolve card image from /componentcardimg/{id}
+// Helper: resolve card image from /componentcardimg/{id}.jpg
 function CardImage({ item, borderColor }: { item: ShopItemData; borderColor: string }) {
-  const [imgError, setImgError] = useState(0); // 0 = try jpg, 1 = try jpeg, 2 = fallback icon
+  const [hasError, setHasError] = useState(false);
 
   if (!item.card) {
     return (
@@ -164,15 +166,7 @@ function CardImage({ item, borderColor }: { item: ShopItemData; borderColor: str
 
   const cardId = item.card.id;
 
-  // Try: imageUrl from DB → /componentcardimg/{id}.jpg → .jpeg → .png → icon fallback
-  const getSrc = () => {
-    if (imgError === 0) return item.card!.imageUrl || `/componentcardimg/${cardId}.jpg`;
-    if (imgError === 1) return `/componentcardimg/${cardId}.jpeg`;
-    if (imgError === 2) return `/componentcardimg/${cardId}.png`;
-    return '';
-  };
-
-  if (imgError >= 3) {
+  if (hasError) {
     return (
       <div style={{ fontSize: '2rem', color: borderColor, fontFamily: 'var(--font-pixel)' }}>
         {item.type === 'CREW' ? <CrewIcon size={32} /> : <ToolIcon size={32} />}
@@ -182,10 +176,10 @@ function CardImage({ item, borderColor }: { item: ShopItemData; borderColor: str
 
   return (
     <img
-      src={getSrc()}
+      src={item.card.imageUrl || `/componentcardimg/${cardId}.jpg`}
       alt={item.card.name}
       style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-      onError={() => setImgError((e) => e + 1)}
+      onError={() => setHasError(true)}
     />
   );
 }

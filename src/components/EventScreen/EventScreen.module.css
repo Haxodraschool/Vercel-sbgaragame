@@ -126,6 +126,26 @@
   transform: translateY(-2px); 
 }
 
+/* Reject Button (Red) */
+.btnReject { 
+  background-color: #ef4444; 
+  color: #fff;
+  border-radius: 8px; /* Bo góc */
+  box-shadow: 
+    inset -4px -4px 0px 0px rgba(0,0,0,0.3),
+    inset 4px 4px 0px 0px rgba(255,255,255,0.3),
+    0 0 0 4px #1a1a1a;
+}
+.btnReject:hover { 
+  background-color: #f87171; 
+  box-shadow: 
+    inset -4px -4px 0px 0px rgba(0,0,0,0.3),
+    inset 4px 4px 0px 0px rgba(255,255,255,0.4),
+    0 0 0 4px #1a1a1a,
+    0 0 20px 8px rgba(239, 68, 68, 0.7); /* Red Glow */
+  transform: translateY(-2px); 
+}
+
 /* Tooltip */
 .tooltipText {
   visibility: hidden;

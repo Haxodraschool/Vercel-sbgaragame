@@ -284,14 +284,17 @@ Mỗi slot:
 
 #### Nga Đại Đế (`RUSSIA_EMPEROR`)
 
-- **Phase 1**: Chạy thử xe bình thường, Gold = totalPower × 1, Heat ≤ 36%
-- **Phase 2**: Hỏi "Có vodka không?"
-  - **YES**: Heat max 67%, Gold = totalPower × 2
-  - **NO**: 3 Gấu tấn công:
-    - 🐻 **Gấu nâu**: 50% chance giảm 20% Power mỗi thẻ
-    - 🐼 **Gấu trúc**: 30% chance nuốt mất thẻ mỗi slot
-    - 🐻‍❄️ **Gấu trắng**: Đóng băng thẻ cao sao nhất (power = 0)
+- **Phase 1**: Chạy thử xe bình thường, Gold = totalPower × 2, Heat ≤ 36%
+  - Nhạc: `russianbossp1.mp3`, BG: `workshop-russianboss.jpg`
+  - Thắng Phase 1 → Gold giữ lại (chưa cộng), hiện nút **"🍸 Vodka ở đây"**
+- **Phase 2**: Kích hoạt khi nhấn "Vodka ở đây" → **LUÔN bị 3 Gấu tấn công** (không có lựa chọn YES/NO)
+  - Nhạc chuyển sang: `russianbossp2.mp3`
+  - 🐻 **Gấu nâu**: 50% chance giảm 20% Power mỗi thẻ
+  - 🐼 **Gấu trúc**: 30% chance nuốt mất thẻ mỗi slot
+  - 🐻‍❄️ **Gấu trắng**: Đóng băng thẻ cao sao nhất (power = 0)
+  - Heat ≤ 36%, Gold = totalPower × 3
 - **Thắng cả 2 phase**: Buff Hào Quang Moskva (+20% Power ngày mai) + `hasMoscowBuff = true`
+  - Popup chuyên biệt hiển thị Phase 1 Gold + Phase 2 Gold + Tổng
 - **Spawn bonus +20%** khi Kim bị ám sát hoặc đã thắng Đỗ Nam Trung
 
 ---

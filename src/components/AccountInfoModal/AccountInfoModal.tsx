@@ -187,7 +187,7 @@ export default function AccountInfoModal({ isOpen, onClose }: AccountInfoModalPr
                   onClick={handleLogout}
                   className="flex-1 py-3 bg-gradient-to-r from-red-600/20 to-red-900/20 border border-red-500/50 hover:border-red-500 text-red-400 rounded-lg font-bold tracking-wider transition-all hover:shadow-[0_0_20px_rgba(239,68,68,0.3)]"
                 >
-                  � ĐĂNG XUẤT
+                  ĐĂNG XUẤT
                 </button>
               </div>
             </div>

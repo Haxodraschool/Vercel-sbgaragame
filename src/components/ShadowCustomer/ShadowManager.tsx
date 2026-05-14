@@ -6,6 +6,7 @@ import ShadowCustomer from './ShadowCustomer';
 import QuestDialog from './QuestDialog';
 import { useGameStore } from '@/stores/useGameStore';
 import type { BossChoiceData } from '@/stores/useGameStore';
+import { useTutorialStore } from '@/stores/useTutorialStore';
 import type { QuestData } from './ShadowCustomer';
 
 // ─── Boss Music Map — mỗi boss → file mp3 tương ứng ─────────────────────────
@@ -241,10 +242,30 @@ export default function ShadowManager({ quests, onQuestAccepted, onQuestRejected
     }
   }, [phase, showIndividuals, spawnedCount, visibleQuests.length]);
 
+  // ═══ Tutorial: activate lobby-shadow step after all shadows spawn on Day 1 ═══
+  useEffect(() => {
+    if (phase !== 'spawningInteractive' || !showIndividuals) return;
+    if (spawnedCount < visibleQuests.length) return;
+    if (visibleQuests.length === 0) return;
+
+    const tutorialStore = useTutorialStore.getState();
+    if (!tutorialStore.isCompleted && user?.currentDay === 1) {
+      tutorialStore.startStep('lobby-shadow');
+    }
+  }, [phase, showIndividuals, spawnedCount, visibleQuests.length, user?.currentDay]);
+
   // ═══ Click on a sitting shadow → show quest dialog ═══
   const handleShadowClick = useCallback((quest: QuestData) => {
     if (phase !== 'spawningInteractive') return;
     if (quest.status !== 'PENDING' || removedQuestIds.has(quest.id)) return;
+
+    // Tutorial: only allow clicking the first shadow during lobby-shadow step
+    const tutorialState = useTutorialStore.getState();
+    if (tutorialState.isActive && tutorialState.currentStep === 'lobby-shadow') {
+      const idx = visibleQuests.findIndex(q => q.id === quest.id);
+      if (idx !== 0) return;
+    }
+
     setSelectedQuest(quest);
 
     // Phát nhạc boss khi click vào shadow boss
@@ -252,7 +273,7 @@ export default function ShadowManager({ quests, onQuestAccepted, onQuestRejected
       const musicSrc = getBossMusic(quest);
       if (musicSrc) playBossMusic(musicSrc);
     }
-  }, [phase, removedQuestIds, playBossMusic]);
+  }, [phase, removedQuestIds, playBossMusic, visibleQuests]);
 
   // ═══ Accept quest → switch to workshop ═══
   // For boss with choices (EP, Baby Oil, Kim, Russia), YES = accept with bossChoice
@@ -348,6 +369,9 @@ export default function ShadowManager({ quests, onQuestAccepted, onQuestRejected
             // Game Over → redirect to ending screen after delay
             if (data.gameOver) {
               stopBossMusic(false); // Tắt nhạc boss, không phục hồi lobby
+              const setEndingUnlocked = useGameStore.getState().setEndingUnlocked;
+              setEndingUnlocked(data.endingUnlocked || 'Bị Tiêu Diệt Bởi Chủ Tịch');
+              // Keep current health, don't heal to 100
               setTimeout(() => {
                 setScreen('ending');
               }, 3500);
@@ -387,6 +411,9 @@ export default function ShadowManager({ quests, onQuestAccepted, onQuestRejected
 
             // Check for game over (uy tín = 0 after -45%)
             if (data.gameOver) {
+              const setEndingUnlocked = useGameStore.getState().setEndingUnlocked;
+              setEndingUnlocked(data.endingUnlocked || 'Wasted Potential');
+              // Keep current health, don't heal to 100
               setTimeout(() => { setScreen('ending'); }, 3500);
               return;
             }
@@ -440,7 +467,12 @@ export default function ShadowManager({ quests, onQuestAccepted, onQuestRejected
           const oldHealth = user.garageHealth || 0;
           const newHealth = data.userState?.garageHealth ?? oldHealth;
           const actualPenalty = oldHealth - newHealth;
-          setLastPenalty(actualPenalty > 0 ? actualPenalty : (quest.isBoss ? 20 : 10));
+          
+          let computedPenalty = actualPenalty;
+          if (actualPenalty <= 0) {
+            computedPenalty = quest.isBoss ? 20 : 10;
+          }
+          setLastPenalty(Math.max(0, computedPenalty));
 
           // Notify parent component that quest was rejected (to refresh quests)
           if (onQuestRejected) {
@@ -449,6 +481,9 @@ export default function ShadowManager({ quests, onQuestAccepted, onQuestRejected
 
           // Check for game over (uy tín = 0)
           if (data.gameOver) {
+            const setEndingUnlocked = useGameStore.getState().setEndingUnlocked;
+            setEndingUnlocked(data.endingUnlocked || 'Wasted Potential');
+            // Keep current health, don't heal to 100
             setTimeout(() => { setScreen('ending'); }, 3500);
             return;
           }
@@ -520,6 +555,7 @@ export default function ShadowManager({ quests, onQuestAccepted, onQuestRejected
                 isLeaving={leavingQuestIds.has(quest.id)}
                 onShadowClick={handleShadowClick}
                 zIndex={zIndexOverride}
+                dataTutorial={i === 0 ? 'shadow-0' : undefined}
               />
               {/* Angry text overlay for this specific shadow */}
               {angryInfo && angryInfo.questId === quest.id && (

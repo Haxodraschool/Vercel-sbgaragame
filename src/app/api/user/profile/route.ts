@@ -23,6 +23,8 @@ export async function GET(request: NextRequest) {
         techPoints: true,
         crewSlots: true,
         isFinalRound: true,
+        isInNorthKorea: true,
+        northKoreaDayCount: true,
         createdAt: true,
       },
     });

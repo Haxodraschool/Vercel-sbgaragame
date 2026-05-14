@@ -1,0 +1,123 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 350;
+  pointer-events: none;
+}
+
+/* ── Blur + dim overlay ── */
+/* Covers the entire screen; transparent spotlight hole via CSS mask */
+.blurOverlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  pointer-events: none;
+}
+
+/* ── Click blocker for workshop info steps ── */
+/* Blocks all clicks outside the spotlight */
+.clickBlocker {
+  position: absolute;
+  inset: 0;
+  pointer-events: auto;
+}
+
+/* ── Spotlight glow ring (visual only) ── */
+.spotlightGlow {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 3;
+  box-shadow:
+    0 0 0 3px rgba(6, 182, 212, 0.6),
+    0 0 20px rgba(6, 182, 212, 0.3),
+    0 0 40px rgba(6, 182, 212, 0.15);
+  animation: spotlightPulse 2s ease-in-out infinite;
+}
+
+@keyframes spotlightPulse {
+  0%, 100% {
+    box-shadow:
+      0 0 0 3px rgba(6, 182, 212, 0.6),
+      0 0 20px rgba(6, 182, 212, 0.3);
+  }
+  50% {
+    box-shadow:
+      0 0 0 5px rgba(6, 182, 212, 0.8),
+      0 0 30px rgba(6, 182, 212, 0.5);
+  }
+}
+
+/* ── Click-anywhere-to-advance overlay (workshop steps) ── */
+/* Sits above clickBlocker so clicks reach it */
+.clickAdvanceOverlay {
+  position: absolute;
+  inset: 0;
+  cursor: pointer;
+  pointer-events: auto;
+  z-index: 4;
+}
+
+/* ── Tooltip text bubble ── */
+.tooltip {
+  position: absolute;
+  font-family: 'VT323', monospace;
+  font-size: 16px;
+  color: #e2e8f0;
+  background: rgba(15, 23, 42, 0.95);
+  border: 2px solid rgba(6, 182, 212, 0.5);
+  padding: 12px 18px;
+  max-width: 280px;
+  line-height: 1.6;
+  text-shadow: 1px 1px 0 #000;
+  box-shadow: 0 0 15px rgba(6, 182, 212, 0.2);
+  animation: tooltipFadeIn 0.3s ease;
+  pointer-events: none;
+  white-space: pre-line;
+  z-index: 6;
+}
+
+@keyframes tooltipFadeIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Arrow ── */
+.arrowContainer {
+  position: absolute;
+  pointer-events: none;
+  z-index: 6;
+  /* Center the arrow on its position point */
+  transform: translate(-50%, 0);
+  animation: arrowBounce 1.2s ease-in-out infinite;
+}
+
+@keyframes arrowBounce {
+  0%, 100% { transform: translate(-50%, 0); }
+  50% { transform: translate(calc(-50% + var(--arrow-bounce-x, 0px)), var(--arrow-bounce-y, 6px)); }
+}
+
+/* ── Skip button ── */
+.skipBtn {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 400;
+  font-family: 'VT323', monospace;
+  font-size: 15px;
+  color: #94a3b8;
+  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid #334155;
+  padding: 8px 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+  pointer-events: auto;
+}
+
+.skipBtn:hover {
+  color: #e2e8f0;
+  border-color: #64748b;
+  background: rgba(30, 41, 59, 0.95);
+}

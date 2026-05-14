@@ -101,6 +101,8 @@ export async function POST(request: NextRequest) {
         currentDay: user.currentDay,
         garageHealth: user.garageHealth,
         crewSlots: user.crewSlots,
+        isInNorthKorea: user.isInNorthKorea,
+        northKoreaDayCount: user.northKoreaDayCount,
       },
     }, { status: 201 });
 

@@ -45,6 +45,7 @@ model User {
   activeEvents           UserActiveEvent[]
   endings                UserEnding[]
   inventory              UserInventory[]
+  paymentOrders          PaymentOrder[]
 
   @@map("users")
 }
@@ -308,4 +309,32 @@ enum EndingType {
   FINAL
   BOSS_HIDDEN
   BAD
+}
+
+/// Bảng payment_orders - Đơn hàng thanh toán PayOS
+model PaymentOrder {
+  id              Int               @id @default(autoincrement())
+  userId          Int               @map("user_id")
+  orderCode       BigInt            @unique @map("order_code")
+  packageId       String            @map("package_id") @db.VarChar(20)
+  amount          Int               // VND amount
+  goldAmount      Int               @map("gold_amount") // Gold to credit
+  status          PaymentOrderStatus @default(PENDING)
+  paymentLinkId   String?           @map("payment_link_id") @db.VarChar(100)
+  checkoutUrl     String?           @map("checkout_url") @db.VarChar(500)
+  paidAt          DateTime?         @map("paid_at")
+  createdAt       DateTime          @default(now()) @map("created_at")
+  updatedAt       DateTime          @updatedAt @map("updated_at")
+  user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([orderCode])
+  @@index([userId])
+  @@map("payment_orders")
+}
+
+enum PaymentOrderStatus {
+  PENDING
+  PAID
+  CANCELLED
+  EXPIRED
 }

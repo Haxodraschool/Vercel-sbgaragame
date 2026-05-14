@@ -135,6 +135,60 @@ export async function POST(request: Request) {
         updatedUser = user;
         break;
 
+      case 'GIVE_CARDS':
+        if (!value || typeof value !== 'object' || !value.targetUsername) {
+          return NextResponse.json({ error: 'Missing target username' }, { status: 400 });
+        }
+        
+        const targetUser = await prisma.user.findUnique({ where: { username: value.targetUsername } });
+        if (!targetUser) {
+          return NextResponse.json({ error: 'User not found' }, { status: 404 });
+        }
+
+        const qty = value.quantity ? Math.max(1, value.quantity) : 1;
+        const targetCard = value.cardId;
+
+        if (targetCard === 'ALL') {
+          // Give all cards
+          const allCards = await prisma.card.findMany();
+          for (const card of allCards) {
+            const existing = await prisma.userInventory.findUnique({
+              where: { userId_cardId: { userId: targetUser.id, cardId: card.id } }
+            });
+            if (existing) {
+              await prisma.userInventory.update({
+                where: { id: existing.id },
+                data: { quantity: existing.quantity + qty }
+              });
+            } else {
+              await prisma.userInventory.create({
+                data: { userId: targetUser.id, cardId: card.id, quantity: qty }
+              });
+            }
+          }
+        } else {
+          // Give specific card
+          const card = await prisma.card.findUnique({ where: { id: targetCard } });
+          if (!card) return NextResponse.json({ error: 'Card not found' }, { status: 404 });
+          
+          const existing = await prisma.userInventory.findUnique({
+            where: { userId_cardId: { userId: targetUser.id, cardId: card.id } }
+          });
+          
+          if (existing) {
+            await prisma.userInventory.update({
+              where: { id: existing.id },
+              data: { quantity: existing.quantity + qty }
+            });
+          } else {
+            await prisma.userInventory.create({
+              data: { userId: targetUser.id, cardId: card.id, quantity: qty }
+            });
+          }
+        }
+        updatedUser = user; // Current user remains the same
+        break;
+
       default:
         return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
     }

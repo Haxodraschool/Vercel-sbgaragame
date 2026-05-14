@@ -15,7 +15,7 @@ export async function POST(
 
     const params = await props.params;
     const questId = parseInt(params.id);
-    const { status, kimChoice, babyOilChoice, epIslandChoice, russiaPhase, vodkaChoice, usedCardIds } = await request.json();
+    const { status, kimChoice, babyOilChoice, epIslandChoice, russiaPhase, vodkaChoice, usedCardIds, budgetProfit, totalPower, phase1GoldWithheld } = await request.json();
 
     if (status !== 'SUCCESS' && status !== 'FAILED') {
       return NextResponse.json({ error: 'Status phải là SUCCESS hoặc FAILED' }, { status: 400 });
@@ -37,11 +37,16 @@ export async function POST(
       return NextResponse.json({ error: 'Không tìm thấy người chơi' }, { status: 404 });
     }
 
-    // Update quest status
-    await prisma.dailyQuest.update({
-      where: { id: questId },
-      data: { status: status as 'SUCCESS' | 'FAILED' },
-    });
+    // Update quest status (EXCEPT for Russia Emperor Phase 1, which must remain PENDING for Phase 2)
+    const isRussiaEmperor = quest.isBoss && quest.bossConfig?.specialCondition === 'RUSSIA_EMPEROR';
+    const actualRussiaPhase = (isRussiaEmperor && russiaPhase !== 2) ? 1 : russiaPhase;
+    
+    if (!(isRussiaEmperor && actualRussiaPhase === 1)) {
+      await prisma.dailyQuest.update({
+        where: { id: questId },
+        data: { status: status as 'SUCCESS' | 'FAILED' },
+      });
+    }
 
     // Consume used cards
     if (usedCardIds && Array.isArray(usedCardIds) && usedCardIds.length > 0) {
@@ -79,26 +84,81 @@ export async function POST(
     let endingUnlocked = null;
 
     if (status === 'SUCCESS') {
-      // Calculate rewards
-      goldReward = quest.rewardGold;
+      // Calculate base rewards
       expReward = quest.isBoss ? GAME_CONSTANTS.BOSS_SUCCESS_EXP : GAME_CONSTANTS.SUCCESS_EXP;
       garageHealthChange = quest.isBoss ? GAME_CONSTANTS.BOSS_SUCCESS_HEALTH_BONUS : GAME_CONSTANTS.SUCCESS_HEALTH_BONUS;
+
+      // Determine gold reward: Russia Emperor uses power-based formula, others use quest reward
+
+      if (isRussiaEmperor && actualRussiaPhase === 1) {
+        goldReward = (totalPower || 0) * 2; // Phase 1: power × 2
+      } else if (isRussiaEmperor && actualRussiaPhase === 2) {
+        goldReward = (totalPower || 0) * 3; // Phase 2: power × 3
+      } else {
+        goldReward = quest.rewardGold;
+      }
+
+      // Add budget profit from customer budget if provided
+      if (budgetProfit && typeof budgetProfit === 'number' && budgetProfit > 0) {
+        goldReward += budgetProfit;
+      }
 
       // Apply garage health bonus (capped at 100)
       const newHealth = Math.min(GAME_CONSTANTS.MAX_GARAGE_HEALTH, user.garageHealth + garageHealthChange);
       garageHealthChange = newHealth - user.garageHealth;
 
-      // Add gold and exp
-      await prisma.user.update({
-        where: { id: auth.userId },
-        data: {
-          gold: { increment: goldReward },
-          exp: { increment: expReward },
-          garageHealth: newHealth,
-        },
-      });
+      // ═══ Russia Emperor Phase 1: withhold gold, only give EXP + health ═══
+      if (isRussiaEmperor && actualRussiaPhase === 1) {
+        await prisma.user.update({
+          where: { id: auth.userId },
+          data: {
+            exp: { increment: expReward },
+            garageHealth: newHealth,
+          },
+        });
+        return NextResponse.json({
+          message: 'Phase 1 hoàn thành! Đang chuyển sang Phase 2...',
+          russiaPhase2Pending: true,
+          phase1GoldWithheld: goldReward,
+          userState: {
+            gold: Number(user.gold), // No gold added — withheld for Phase 2
+            exp: Number(user.exp) + expReward,
+            garageHealth: newHealth,
+          },
+        });
+      }
 
-      // Boss-specific logic on success
+      // ═══ Russia Emperor Phase 2: combine both phases' gold + Moscow buff ═══
+      if (isRussiaEmperor && actualRussiaPhase === 2) {
+        const p1Gold = (typeof phase1GoldWithheld === 'number' && phase1GoldWithheld > 0) ? phase1GoldWithheld : 0;
+        const combinedGold = goldReward + p1Gold;
+
+        await prisma.user.update({
+          where: { id: auth.userId },
+          data: {
+            gold: { increment: combinedGold },
+            exp: { increment: expReward },
+            garageHealth: newHealth,
+            hasMoscowBuff: true, // Always buff after completing Phase 2
+            moscowBuffDay: user.currentDay + 1,
+          },
+        });
+
+        goldReward = combinedGold; // Override for response
+        console.log(`Russia Emperor Phase 2: P1=${p1Gold}, P2=${goldReward - p1Gold}, Total=${combinedGold}`);
+      } else {
+        // ═══ Standard: add gold + exp + health ═══
+        await prisma.user.update({
+          where: { id: auth.userId },
+          data: {
+            gold: { increment: goldReward },
+            exp: { increment: expReward },
+            garageHealth: newHealth,
+          },
+        });
+      }
+
+      // Boss-specific logic on success (non-Russia)
       if (quest.isBoss && quest.bossConfig) {
         const condition = quest.bossConfig.specialCondition;
 
@@ -110,25 +170,39 @@ export async function POST(
           });
         }
 
-        // Russia Emperor: set Moscow buff if won phase 2 with vodka YES
-        if (condition === 'RUSSIA_EMPEROR' && russiaPhase === 2 && vodkaChoice === 'YES') {
+        // Kim Jong Un: Enter North Korea
+        if (condition === 'KIM_JONG_UN') {
           await prisma.user.update({
             where: { id: auth.userId },
-            data: {
-              hasMoscowBuff: true,
-              moscowBuffDay: user.currentDay + 1,
+            data: { 
+              isInNorthKorea: true,
+              northKoreaDayCount: 0
             },
           });
         }
       }
     } else {
       // FAILED
-      const penalty = quest.isBoss ? GAME_CONSTANTS.BOSS_FAIL_HEALTH_PENALTY : GAME_CONSTANTS.FAIL_HEALTH_PENALTY;
+      let penalty = quest.isBoss ? GAME_CONSTANTS.BOSS_FAIL_HEALTH_PENALTY : GAME_CONSTANTS.FAIL_HEALTH_PENALTY;
+      
       garageHealthChange = -penalty;
 
       // Special boss failure logic
       if (quest.isBoss && quest.bossConfig) {
         const condition = quest.bossConfig.specialCondition;
+
+        // BABY_OIL_CHOICE: NO = -45 Uy Tín + all customers auto-fail
+        if (condition === 'BABY_OIL_CHOICE' && babyOilChoice === 'NO') {
+          garageHealthChange = -45;
+          await prisma.dailyQuest.updateMany({
+            where: {
+              userId: auth.userId,
+              status: 'PENDING',
+              id: { not: quest.id }
+            },
+            data: { status: 'FAILED' }
+          });
+        }
 
         // Kim Jong Un: NO = immediate game over (BAD ENDING)
         if (condition === 'KIM_JONG_UN' && kimChoice === 'NO' && !user.isInNorthKorea) {
@@ -143,11 +217,6 @@ export async function POST(
           gameOver = true;
         }
 
-        // Baby Oil: NO = -45% garage health
-        if (condition === 'BABY_OIL_CHOICE' && babyOilChoice === 'NO') {
-          const penaltyPercent = Math.floor(user.garageHealth * 0.45);
-          garageHealthChange = -penaltyPercent;
-        }
 
         // KẾ BÍ ẨN trong FINAL ROUND: unlock ending Bóng Ma Tốc Độ
         if (condition === null && quest.bossConfig.name.includes('Bí Ẩn') && user.isFinalRound) {
@@ -185,13 +254,13 @@ export async function POST(
       }
     }
 
-    // Check level up
+    // Check level up (only if not game over)
     const updatedUser = await prisma.user.findUnique({ where: { id: auth.userId } });
     let leveledUp = false;
     let newLevel = updatedUser?.level || 1;
     let levelRewards = [];
 
-    if (updatedUser && Number(updatedUser.exp) >= newLevel * 500 && newLevel < 50) {
+    if (updatedUser && !gameOver && Number(updatedUser.exp) >= newLevel * 500 && newLevel < 50) {
       newLevel = newLevel + 1;
       const expNeeded = newLevel * 500;
       
@@ -230,7 +299,8 @@ export async function POST(
           update: { quantity: { increment: reward.quantity } },
         });
         levelRewards.push({
-          cardName: reward.card.name,
+          name: reward.card.name,
+          rarity: reward.card.rarity,
           quantity: reward.quantity,
           cardId: reward.cardId
         });
@@ -243,6 +313,12 @@ export async function POST(
         garageHealth: updatedUser?.garageHealth || 0,
         gold: Number(updatedUser?.gold || 0),
         level: updatedUser?.level || 1,
+      },
+      rewards: {
+        goldReward,
+        expReward,
+        garageHealthChange,
+        budgetProfit: budgetProfit || 0,
       },
       gameOver,
       endingUnlocked,

@@ -135,16 +135,12 @@ export async function POST(request: NextRequest) {
         );
       }
 
-      // MIN_RARITY_3: Chỉ thẻ ≥ 3 sao
+      // MIN_RARITY_3: Phải có ít nhất 3 thẻ ≥ 3 sao
       if (condition === 'MIN_RARITY_3') {
-        const lowRarityCard = filledCardIds.find((id: number) => {
-          const card = cardMap.get(id);
-          return card && card.rarity < 3;
-        });
-        if (lowRarityCard) {
-          const card = cardMap.get(lowRarityCard);
+        const highRarityCount = filledCardIds.filter((id: number) => cardMap.get(id)?.rarity >= 3).length;
+        if (highRarityCount < 3) {
           return NextResponse.json(
-            { error: `🚫 Boss "${quest.bossConfig.name}" yêu cầu thẻ ≥ 3 sao! Thẻ "${card?.name}" chỉ ${card?.rarity} sao.` },
+            { error: `🚫 Boss "${quest.bossConfig.name}" yêu cầu ít nhất 3 thẻ ≥ 3 sao! Hiện tại: ${highRarityCount} thẻ.` },
             { status: 400 }
           );
         }
@@ -244,7 +240,7 @@ export async function POST(request: NextRequest) {
     const removedSlots: number[] = [];       // Slots bị Gấu trúc xoá
     let frozenCardId: number | null = null;  // Thẻ bị Gấu trắng đóng băng
 
-    if (quest.bossConfig?.specialCondition === 'RUSSIA_EMPEROR' && russiaPhase === 2 && vodkaChoice === 'NO') {
+    if (quest.bossConfig?.specialCondition === 'RUSSIA_EMPEROR' && russiaPhase === 2) {
       bearBrownActive = true;
       bearPandaActive = true;
       bearPolarActive = true;
@@ -497,7 +493,7 @@ export async function POST(request: NextRequest) {
         const cond = quest.bossConfig.specialCondition;
         // RUSSIA_EMPEROR during-run: heat penalty
         if (cond === 'RUSSIA_EMPEROR') {
-          const maxHeatForPhase = (russiaPhase === 2 && vodkaChoice === 'YES') ? 67 : 36;
+          const maxHeatForPhase = 36; // Always 36% for Russia Emperor (both phases)
           if (currentHeat > maxHeatForPhase) {
             currentHeat += 15; // Penalty
           }
@@ -650,13 +646,24 @@ export async function POST(request: NextRequest) {
       }
       // RUSSIA_EMPEROR Post-run checks
       if (cond === 'RUSSIA_EMPEROR') {
-        const maxHeatForPhase = (russiaPhase === 2 && vodkaChoice === 'YES') ? 67 : 36;
+        const maxHeatForPhase = 36; // Always 36% for Russia Emperor (both phases)
         if (currentHeat > maxHeatForPhase) {
           conditionFailed = true;
           conditionMessage = `Nga Đại Đế yêu cầu Nhiệt độ không quá ${maxHeatForPhase}%! Hiện tại: ${Math.round(currentHeat)}%`;
         }
         // Power check không cần vì "power càng cao càng tốt" — gold = power
       }
+    }
+
+    // Calculate budget profit for normal quests
+    let budgetProfit = 0;
+    if (!quest.isBoss && quest.customerBudget > 0) {
+      const totalCardCost = filledCardIds.reduce((sum, id) => {
+        const card = cardMap.get(id);
+        const effectiveCost = card?.rarity === 5 ? Math.floor((card.cost || 0) * 0.5) : (card.cost || 0);
+        return sum + effectiveCost;
+      }, 0);
+      budgetProfit = Math.max(0, quest.customerBudget - totalCardCost);
     }
 
     // Determine result
@@ -687,6 +694,7 @@ export async function POST(request: NextRequest) {
         finalHeat: Math.round(currentHeat),
         stepsCompleted: steps.length,
         totalSlots: GAME_CONSTANTS.SLOTS_PER_CAR,
+        budgetProfit,
       },
       steps,
       questId: quest.id,
@@ -697,7 +705,7 @@ export async function POST(request: NextRequest) {
       // Extra info cho Russia boss
       ...(quest.bossConfig?.specialCondition === 'RUSSIA_EMPEROR' ? {
         russiaReward: {
-          dynamicGold: russiaPhase === 2 ? totalPower * 2 : totalPower,
+          dynamicGold: russiaPhase === 2 ? totalPower * 3 : totalPower * 2,
           phase: russiaPhase || 1,
           bearEffects: bearBrownActive ? {
             removedSlots: removedSlots.map(s => s + 1),

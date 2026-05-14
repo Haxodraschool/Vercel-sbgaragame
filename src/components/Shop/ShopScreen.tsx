@@ -146,7 +146,7 @@ export default function ShopScreen() {
   // Reroll handler
   const handleReroll = async () => {
     if (isRerolling) return;
-    const cost = REROLL_BASE_COST * Math.pow(2, rerollCount);
+    const cost = REROLL_BASE_COST * Math.pow(2, Math.floor(rerollCount / 3));
     if (gold < cost) {
       showToast(`Không đủ vàng! Cần ${cost}g`, 'error');
       return;
@@ -259,7 +259,7 @@ export default function ShopScreen() {
     transitionScreen('lobby');
   };
 
-  const rerollCost = REROLL_BASE_COST * Math.pow(2, rerollCount);
+  const rerollCost = REROLL_BASE_COST * Math.pow(2, Math.floor(rerollCount / 3));
 
   return (
     <AnimatePresence>

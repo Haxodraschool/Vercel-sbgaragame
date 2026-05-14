@@ -74,6 +74,9 @@
   --radius-lg: 16px;
   --radius-xl: 24px;
 
+  /* ─── Z-Index Layers ─── */
+  --z-tutorial: 350;
+
   /* ─── Transitions ─── */
   --transition-fast: 0.15s ease;
   --transition-normal: 0.3s ease;

@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import styles from './ShadowCustomer.module.css';
 import type { QuestData } from './ShadowCustomer';
 import { useGameStore } from '@/stores/useGameStore';
+import { useTutorialStore } from '@/stores/useTutorialStore';
 import BossTitle from '@/components/BossTitle/BossTitle';
 
 interface Props {
@@ -233,6 +234,14 @@ export default function QuestDialog({ quest, onAccept, onReject, onClose, penalt
     };
   }, [questDescription]);
 
+  // Tutorial: advance from lobby-shadow to lobby-accept when dialog opens
+  useEffect(() => {
+    const tutorialStore = useTutorialStore.getState();
+    if (!tutorialStore.isCompleted && tutorialStore.currentStep === 'lobby-shadow') {
+      tutorialStore.startStep('lobby-accept');
+    }
+  }, []);
+
   // ══════════════════════════════════════════════════════════════
   // Handle local rejection — picks boss-specific insult text
   // ══════════════════════════════════════════════════════════════
@@ -357,7 +366,13 @@ export default function QuestDialog({ quest, onAccept, onReject, onClose, penalt
                 <div className={`${styles.chatActions} ${!isTyping ? styles.showActions : ''}`}>
                    {/* ACCEPT */}
                    <div className={styles.actionBtnWrapper}>
-                       <button className={`${styles.pixelBtn} ${styles.btnAccept}`} onClick={onAccept}>
+                       <button className={`${styles.pixelBtn} ${styles.btnAccept}`} data-tutorial="quest-accept-btn" onClick={() => {
+                           const tutorialStore = useTutorialStore.getState();
+                           if (tutorialStore.isActive && tutorialStore.currentStep === 'lobby-accept') {
+                             tutorialStore.nextStep();
+                           }
+                           onAccept();
+                       }}>
                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
                                <rect x="4" y="10" width="4" height="4" />
                                <rect x="8" y="14" width="4" height="4" />

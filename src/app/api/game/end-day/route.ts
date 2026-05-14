@@ -157,7 +157,8 @@ export async function POST(request: NextRequest) {
           update: { quantity: { increment: reward.quantity } },
         });
         levelRewardsGiven.push({
-          cardName: reward.card.name,
+          name: reward.card.name,
+          rarity: reward.card.rarity,
           quantity: reward.quantity,
           cardId: reward.cardId
         });
@@ -175,9 +176,42 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Check if game should end (Day 50)
+    // Check if game should end (Day 50 normal run, or Day 51 Final Round)
     let ending = null;
-    if (nextDay > GAME_CONSTANTS.MAX_DAY && !user.isFinalRound) {
+
+    if (user.isFinalRound && user.currentDay === 51) {
+      // ─── FINAL ROUND ENDING LOGIC ───
+      // Đếm số boss bị thua (đã FAILED) trong ngày 51
+      // pendingQuests đã bị mark FAILED ở trên → đếm lại toàn bộ FAILED day 51
+      const failedBossCount = await prisma.dailyQuest.count({
+        where: { userId: auth.userId, dayNumber: 51, status: 'FAILED' },
+      });
+
+      // Mapping: số boss thua → ending
+      if (failedBossCount === 0) {
+        ending = 'Invictus'; // Hạ gục tất cả 8 boss
+      } else if (failedBossCount <= 2) {
+        ending = 'The Missing Percent'; // Thua 1-2 boss
+      } else if (failedBossCount <= 4) {
+        ending = 'Bóng Ma Tốc Độ'; // Thua 3-4 boss
+      } else if (failedBossCount <= 6) {
+        ending = 'Bí Sát Thủ Tiêu Diệt'; // Thua 5-6 boss
+      } else {
+        ending = 'Wasted Potential'; // Thua 7-8 boss
+      }
+
+      // Lưu ending vào DB
+      const endingRecord = await prisma.ending.findFirst({ where: { name: ending } });
+      if (endingRecord) {
+        await prisma.userEnding.upsert({
+          where: { userId_endingId: { userId: auth.userId, endingId: endingRecord.id } },
+          create: { userId: auth.userId, endingId: endingRecord.id },
+          update: {},
+        });
+      }
+
+    } else if (nextDay > GAME_CONSTANTS.MAX_DAY && !user.isFinalRound) {
+      // ─── NORMAL RUN ENDING LOGIC (sau Ngày 50) ───
       // Check for Absolute Victory (0 fails across all 50 days)
       const totalFails = await prisma.dailyQuest.count({
         where: { userId: auth.userId, status: 'FAILED' },
@@ -200,13 +234,27 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Update user day
+    // Update user day (chỉ khi chưa trigger ending)
     if (!ending) {
+      let stillInNK = user.isInNorthKorea;
+      let newNKDayCount = user.northKoreaDayCount;
+      let hasKimBuff = user.hasKimBuff;
+      if (stillInNK) {
+        newNKDayCount += 1;
+        if (newNKDayCount >= 10) {
+          stillInNK = false;
+          newNKDayCount = 0;
+          hasKimBuff = false; // Bỏ buff khi hết hạn NK
+        }
+      }
+
       await prisma.user.update({
         where: { id: auth.userId },
         data: { 
           currentDay: nextDay,
-          ...(user.isInNorthKorea ? { northKoreaDayCount: { increment: 1 } } : {})
+          isInNorthKorea: stillInNK,
+          northKoreaDayCount: newNKDayCount,
+          hasKimBuff: hasKimBuff,
         },
       });
     }
@@ -214,10 +262,14 @@ export async function POST(request: NextRequest) {
     // Refresh user for response
     const finalUser = await prisma.user.findUnique({ where: { id: auth.userId } });
 
+    const isFinalRoundEnding = user.isFinalRound && user.currentDay === 51 && !!ending;
+
     return NextResponse.json({
-      message: ending
-        ? `🏆 ${ending}! Bạn đã hoàn thành 50 ngày!`
-        : `Ngày ${user.currentDay} kết thúc. Chào mừng Ngày ${nextDay}!`,
+      message: isFinalRoundEnding
+        ? `🔥 FINAL ROUND KẾT THÚC! Ending: ${ending}`
+        : ending
+          ? `🏆 ${ending}! Bạn đã hoàn thành 50 ngày!`
+          : `Ngày ${user.currentDay} kết thúc. Chào mừng Ngày ${nextDay}!`,
       previousDay: user.currentDay,
       nextDay: ending ? null : nextDay,
       ending,
@@ -230,8 +282,8 @@ export async function POST(request: NextRequest) {
       garageHealth: finalUser?.garageHealth,
       gold: finalUser ? Number(finalUser.gold) : 0,
       showFinalRoundChoice: ending === 'Good Ending',
-      // Shop tự động mở sau event (Ngày 2+ và chưa ending)
-      shopPhase: !ending && (nextDay ?? 0) >= GAME_CONSTANTS.SHOP_UNLOCK_DAY,
+      // Shop tự động mở sau event (Ngày 2+ và chưa ending, không áp dụng Final Round)
+      shopPhase: !ending && !user.isFinalRound && (nextDay ?? 0) >= GAME_CONSTANTS.SHOP_UNLOCK_DAY,
     });
 
   } catch (error) {

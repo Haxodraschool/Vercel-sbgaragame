@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useGameStore } from '@/stores/useGameStore';
+import { useTutorialStore } from '@/stores/useTutorialStore';
 import { apiCall } from '@/lib/api';
 
 const DevTool = () => {
@@ -199,6 +200,45 @@ const DevTool = () => {
         <p className="text-[10px] text-gray-500 mt-1">If quests look bugged, reload page after clearing.</p>
       </div>
 
+      {/* Give Cards Section */}
+      <div className="mb-2 border-t border-gray-700 pt-3 mt-3">
+        <label className="block text-xs mb-1 text-gray-400">Give Cards</label>
+        <div className="flex flex-col gap-2">
+          <input 
+            type="text" 
+            id="targetUser"
+            placeholder="Target Username" 
+            className="bg-gray-800 border border-gray-600 rounded px-2 py-1 w-full outline-none focus:border-red-500 text-xs"
+          />
+          <div className="flex gap-2">
+            <input 
+              type="text" 
+              id="targetCard"
+              placeholder="Card ID or 'ALL'" 
+              className="bg-gray-800 border border-gray-600 rounded px-2 py-1 w-1/2 outline-none focus:border-red-500 text-xs"
+            />
+            <input 
+              type="number" 
+              id="cardQty"
+              defaultValue={1}
+              placeholder="Qty" 
+              className="bg-gray-800 border border-gray-600 rounded px-2 py-1 w-1/2 outline-none focus:border-red-500 text-xs"
+            />
+          </div>
+          <button 
+            onClick={() => {
+              const u = (document.getElementById('targetUser') as HTMLInputElement)?.value;
+              const c = (document.getElementById('targetCard') as HTMLInputElement)?.value;
+              const q = (document.getElementById('cardQty') as HTMLInputElement)?.value;
+              handleAction('GIVE_CARDS', { targetUsername: u, cardId: c, quantity: Number(q) || 1 });
+            }} 
+            className="bg-fuchsia-800 hover:bg-fuchsia-700 px-3 py-1 rounded w-full text-xs font-bold"
+          >
+            Give Cards
+          </button>
+        </div>
+      </div>
+
       {/* Screen Switcher */}
       <div className="mb-2 border-t border-gray-700 pt-3 mt-3">
         <label className="block text-xs mb-2 text-gray-400">Switch Screen <span className="text-yellow-400">[{currentScreen}]</span></label>
@@ -217,6 +257,23 @@ const DevTool = () => {
             </button>
           ))}
         </div>
+      </div>
+
+      {/* Tutorial Reset */}
+      <div className="mb-2 border-t border-gray-700 pt-3 mt-3">
+        <label className="block text-xs mb-2 text-gray-400">Tutorial (Day 1)</label>
+        <div className="flex gap-2">
+          <button
+            onClick={() => {
+              useTutorialStore.getState().devReset();
+              alert('Tutorial reset! Reload page to see tutorial on Day 1.');
+            }}
+            className="bg-cyan-800 hover:bg-cyan-700 px-3 py-1 rounded text-xs font-bold flex-1"
+          >
+            Reset Tutorial
+          </button>
+        </div>
+        <p className="text-[10px] text-gray-500 mt-1">Clears localStorage flag and re-enables tutorial.</p>
       </div>
 
     </div>

@@ -57,17 +57,17 @@ function getTriggerLabel(trigger: string): string {
   }
 }
 
-/** Resolves image with fallback cascade */
-function handleImageError(e: React.SyntheticEvent<HTMLImageElement>, cardId: number) {
+/** Resolves card image URL — handles full path, relative filename, or falls back to id-based path. */
+function resolveCardImg(id: number, imageUrl: string | null): string {
+  if (!imageUrl) return `/componentcardimg/${id}.jpg`;
+  if (imageUrl.startsWith('/')) return imageUrl;
+  return `/componentcardimg/${imageUrl}`;
+}
+
+/** Handles image load error — falls back to placeholder. */
+function handleImageError(e: React.SyntheticEvent<HTMLImageElement>) {
   const target = e.target as HTMLImageElement;
-  const src = target.src;
-  if (src.includes('.jpg') && !src.includes('.jpeg')) {
-    target.src = `/componentcardimg/${cardId}.jpeg`;
-  } else if (src.includes('.jpeg')) {
-    target.src = `/componentcardimg/${cardId}.png`;
-  } else {
-    target.src = '/componentcardimg/placeholder.jpg';
-  }
+  target.src = '/componentcardimg/placeholder.jpg';
 }
 
 export default function CardDetail({ card, quantity }: CardDetailProps) {
@@ -85,7 +85,7 @@ export default function CardDetail({ card, quantity }: CardDetailProps) {
 
   const owned = quantity > 0;
   const imgRarityClass = `imgRarity${card.rarity}` as keyof typeof styles;
-  const imgSrc = card.imageUrl || `/componentcardimg/${card.id}.jpg`;
+  const imgSrc = resolveCardImg(card.id, card.imageUrl);
 
   // Calculate bar widths (scaled to max values)
   const maxPower = 250;
@@ -104,7 +104,7 @@ export default function CardDetail({ card, quantity }: CardDetailProps) {
           src={imgSrc}
           alt={card.name}
           loading="lazy"
-          onError={(e) => handleImageError(e, card.id)}
+          onError={handleImageError}
         />
       </div>
 

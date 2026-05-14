@@ -197,49 +197,48 @@ async function main() {
   { id: 157, name: 'NOS Chợ Đen Rỉ Sét', type: 'NITROUS', rarity: 2, statPower: 15, statHeat: 23, statStability: -8, cost: 120, description: 'Vỏ bình rỉ sét, uy hiếp nổ tung.' },
   { id: 158, name: 'NOS Dỏm Tự Pha', type: 'NITROUS', rarity: 2, statPower: 18, statHeat: 29, statStability: -10, cost: 140, description: 'Pha tạp chất chạy cực sốc.' },
   { id: 159, name: 'NOS Nhỏ', type: 'NITROUS', rarity: 2, statPower: 25, statHeat: 21, statStability: -5, cost: 180, description: 'Bình NOS nhỏ, tăng sức mạnh tức thì!' },
-  { id: 160, name: 'Hệ Thống Phun Khô Cũ', type: 'NITROUS', rarity: 3, statPower: 20, statHeat: 12, statStability: -2, cost: 187, description: 'Phun không cầu kỳ, cực cháy.' },
-  { id: 161, name: 'Hệ Thống Phun Ướt Đi Phố', type: 'NITROUS', rarity: 3, statPower: 25, statHeat: 17, statStability: -5, cost: 240, description: 'Đục đường xăng trộn chung NOS.' },
-  { id: 162, name: 'Hệ Thống Phun Khô Racing', type: 'NITROUS', rarity: 3, statPower: 35, statHeat: 21, statStability: -8, cost: 262, description: 'Hệ thống phun khô chuyên nghiệp, tăng tốc tức thì.' },
-  { id: 163, name: 'Hệ Thống Phun Ướt Stage 2', type: 'NITROUS', rarity: 3, statPower: 40, statHeat: 26, statStability: -10, cost: 300, description: 'Cấp độ 2, cháy mạnh hơn.' },
-  { id: 164, name: 'Bình NOS Khổng Lồ', type: 'NITROUS', rarity: 4, statPower: 60, statHeat: 35, statStability: -12, cost: 562, description: 'Bình NOS cỡ lớn, tăng sức mạnh khổng lồ! Không có hiệu ứng — thuần chỉ số.' },
-  { id: 165, name: 'NOS Progressive Controller', type: 'NITROUS', rarity: 4, statPower: 45, statHeat: 23, statStability: -5, cost: 525, description: 'Điều khiển tăng dần. ⚡ **On-Test: Tăng Tốc Tiến Bộ** — Khi bắt đầu chạy thử, cộng thêm +20 Power vào tổng Power xe.' },
-  { id: 166, name: 'Hệ Thống Phun Ướt Stage 3', type: 'NITROUS', rarity: 4, statPower: 70, statHeat: 40, statStability: -15, cost: 637, description: 'Cấp độ 3, cực mạnh! Không có hiệu ứng — thuần chỉ số.' },
-  { id: 167, name: 'NOS Direct Port Injection', type: 'NITROUS', rarity: 5, statPower: 100, statHeat: 52, statStability: -20, cost: 1350, description: 'Phun trực tiếp từng xi-lanh! ⚡ **On-Test: Đột Phá** — Khi bắt đầu chạy thử, cộng thêm +40 Power vào tổng Power xe.' },
-  { id: 168, name: 'Hệ Thống NOS Nitro-Max', type: 'NITROUS', rarity: 5, statPower: 120, statHeat: 69, statStability: -25, cost: 1500, description: 'Hệ thống NOS tối đa! Không có hiệu ứng — thuần chỉ số cực lớn.' },
-  { id: 169, name: 'Plasma Nitrous Oxide', type: 'NITROUS', rarity: 5, statPower: 150, statHeat: 81, statStability: -30, cost: 1875, description: 'NOS plasma vũ trụ! ⚡ **On-Test: Plasma Surge** — Khi bắt đầu chạy thử, cộng thêm +50 Power vào tổng Power xe.' },
-  { id: 170, name: 'Cờ Lê Rỉ Trượt Ốc', type: 'TOOL', rarity: 1, statPower: -2, statHeat: 0, statStability: -2, cost: 5, description: 'Làm lỏng thêm chi tiết xe.' },
-  { id: 171, name: 'Búa Gò Móp Méo', type: 'TOOL', rarity: 1, statPower: 0, statHeat: 0, statStability: -3, cost: 10, description: 'Đập rách vỏ xe.' },
-  { id: 172, name: 'Băng Dính Vạn Năng Đen', type: 'TOOL', rarity: 1, statPower: 0, statHeat: 0, statStability: 5, cost: 20, description: 'Dán mọi khe hở tản mạn!' },
-  { id: 173, name: 'Bộ Cờ Lê', type: 'TOOL', rarity: 1, statPower: 2, statHeat: 0, statStability: 5, cost: 40, description: 'Bộ cờ lê cơ bản, lắp ráp chắc chắn.' },
-  { id: 174, name: 'Dây Rút Nhựa Trắng', type: 'TOOL', rarity: 2, statPower: 0, statHeat: 0, statStability: 8, cost: 50, description: 'Cố định ống xả rơi rụng.' },
-  { id: 175, name: 'Súng Bắn Ốc Pin Yếu', type: 'TOOL', rarity: 2, statPower: 2, statHeat: 0, statStability: 2, cost: 65, description: 'Thêm chút khí động học.' },
-  { id: 176, name: 'Kìm Chết Gãy Mỏ', type: 'TOOL', rarity: 2, statPower: 0, statHeat: -4, statStability: 0, cost: 85, description: 'Bóp gãy van xả nhiệt thừa.' },
-  { id: 177, name: 'Máy Chẩn Đoán OBD2', type: 'TOOL', rarity: 2, statPower: 6, statHeat: -3, statStability: 9, cost: 130, description: 'Máy quét lỗi, an tâm vặn ga.' },
-  { id: 178, name: 'Keo Dán AB Đa Dụng', type: 'TOOL', rarity: 3, statPower: 0, statHeat: -2, statStability: 15, cost: 150, description: 'Khóa cứng các lỗ hổng nhiệt.' },
-  { id: 179, name: 'Súng Đo Nhiệt', type: 'TOOL', rarity: 3, statPower: 0, statHeat: -13, statStability: 0, cost: 225, description: 'Tránh điểm mù nhiệt.' },
-  { id: 180, name: 'Bộ Chỉnh ECU Bỏ Túi', type: 'TOOL', rarity: 3, statPower: 10, statHeat: 6, statStability: 5, cost: 285, description: 'Hack map engine nhẹ.' },
-  { id: 181, name: 'Cánh Gió Gắn Tạm (Canards)', type: 'TOOL', rarity: 4, statPower: 0, statHeat: 0, statStability: 25, cost: 337, description: 'Lắp canard 3M. (Không có hiệu ứng)' },
-  { id: 182, name: 'Bản Đồ Mạch Điện Tử', type: 'TOOL', rarity: 4, statPower: 18, statHeat: 0, statStability: 0, cost: 412, description: 'Khơi thông dòng đánh lửa. (Không có hiệu ứng)' },
-  { id: 183, name: 'Hệ Thống Đo Lường Từ Xa', type: 'TOOL', rarity: 4, statPower: 5, statHeat: 0, statStability: 20, cost: 510, description: 'Telemetry xe đua. ⚡ **Passive: Định Giá Dữ Liệu** — Khi lắp thẻ này và hoàn thành màn thắng, nhận thêm +15% Gold thưởng.' },
-  { id: 184, name: 'Hộp Đồ Nghề Dát Vàng', type: 'TOOL', rarity: 5, statPower: 0, statHeat: -17, statStability: 45, cost: 3000, description: 'Snap-On Gold. ⚡ **Passive: Xa Xỉ Phẩm** — Khi hoàn thành màn thắng, hoàn trả 100% số Gold đã chi mua linh kiện trong màn đó (x2 Gold bonus).' },
-  { id: 185, name: 'Drone Phân Tích Đường Đua', type: 'TOOL', rarity: 5, statPower: 10, statHeat: -8, statStability: 30, cost: 900, description: 'Drone bay soi đường. Không có hiệu ứng — thuần chỉ số cân bằng: 10 Power, -8 Heat, 30 Stability.' },
-  { id: 186, name: 'Thiết Bị Hack Trụ Trạm', type: 'TOOL', rarity: 5, statPower: 50, statHeat: 57, statStability: -10, cost: 2625, description: 'Cướp quyền trạm xăng! ⚡ **Passive: Cướp Quyền Boss** — Bypass hoàn toàn mọi luật lệ khắt khe của Boss (VD: cấm dùng Cooling, yêu cầu tối thiểu sao, v.v).' },
-  { id: 187, name: 'Kỹ Sư Nhiệt (The Cooler)', type: 'CREW', rarity: 2, statPower: 0, statHeat: 0, statStability: 0, cost: 300, unlockType: 'SHOP', description: '⚡ **Passive: Giải Nhiệt Cấp Tốc** — Giảm 10% tổng Heat của tất cả thẻ TURBO được lắp trên xe.' },
-  { id: 188, name: 'Chuyên Gia Ống Xả (The Flow)', type: 'CREW', rarity: 3, statPower: 0, statHeat: 0, statStability: 0, cost: 800, unlockType: 'SHOP', description: '⚡ **Passive: Luồng Khí Mượt Mà** — Tất cả thẻ ỐNG XẢ được cộng thêm +15 Power mà KHÔNG tăng thêm Heat.' },
-  { id: 189, name: 'Kế Toán Trưởng (The Accountant)', type: 'CREW', rarity: 2, statPower: 0, statHeat: 0, statStability: 0, cost: 500, unlockType: 'SHOP', description: '⚡ **Passive: Tối Ưu Ngân Sách** — Sau mỗi màn thắng, hoàn trả 10% tổng số Gold đã chi mua linh kiện trong màn đó.' },
-  { id: 190, name: 'Tay Lái Thử (The Stuntman)', type: 'CREW', rarity: 3, statPower: 0, statHeat: 0, statStability: 0, cost: 1000, unlockType: 'SHOP', description: '⚡ **Passive: Kiểm Soát Giới Hạn** — Ngưỡng nổ máy tăng thêm +5 điểm (từ 100 lên 105). Chỉ kích hoạt khi currentHeat vượt 95.' },
-  { id: 191, name: 'Thợ Sơn (The Artist)', type: 'CREW', rarity: 2, statPower: 0, statHeat: 0, statStability: 0, cost: 400, unlockType: 'SHOP', description: '⚡ **Passive: Vẻ Ngoài Hào Nhoáng** — +15% sự hài lòng khách hàng, có cơ hội nhận thêm tiền tip ngẫu nhiên khi hoàn thành quest.' },
-  { id: 192, name: 'Chuyên Gia Lốp (The Grip)', type: 'CREW', rarity: 3, statPower: 0, statHeat: 0, statStability: 0, cost: 1200, unlockType: 'SHOP', description: '⚡ **Passive: Bám Đường Tuyệt Đối** — Nếu tổng Power xe vượt 400, cộng thêm +20 Stability.' },
-  { id: 193, name: 'Bác Sĩ Xăng (The Fuel Doctor)', type: 'CREW', rarity: 3, statPower: 0, statHeat: 0, statStability: 0, cost: 900, unlockType: 'SHOP', description: '⚡ **Passive: Pha Chế Hoàn Hảo** — Tất cả slot FUEL được nhân đôi (x2) Power, nhưng Heat của các slot FUEL cũng tăng x1.5. Đánh đổi sức mạnh lấy nhiệt.' },
-  { id: 194, name: 'Thợ Hàn Ngầm (The Welder)', type: 'CREW', rarity: 2, statPower: 0, statHeat: 0, statStability: 0, cost: 350, unlockType: 'SHOP', description: '⚡ **Passive: Mối Hàn Hoàn Hảo** — Tất cả slot EXHAUST được cộng thêm +10 Stability.' },
-  { id: 195, name: 'Thợ Điện Ngầm (The Wireman)', type: 'CREW', rarity: 4, statPower: 0, statHeat: 0, statStability: 0, cost: 1800, unlockType: 'SHOP', description: '⚡ **Passive: Đấu Nối Thần Tốc** — Tất cả slot NITROUS được xóa hoàn toàn chỉ số âm Stability (giữ Stability ≥ 0).' },
-  { id: 196, name: 'Chiến Binh Đêm (The Night Rider)', type: 'CREW', rarity: 4, statPower: 0, statHeat: 0, statStability: 0, cost: 2500, unlockType: 'SHOP', description: '⚡ **Passive: Bóng Đêm Tốc Độ** — Từ Ngày 25 trở đi, mỗi slot TIRE và slot TURBO đều được cộng thêm +15 Power.' },
-  { id: 197, name: 'Thầy Phong Thuỷ Xe (The Feng Shui)', type: 'CREW', rarity: 2, statPower: 0, statHeat: 0, statStability: 0, cost: 450, unlockType: 'SHOP', description: '⚡ **Passive: Ngũ Hành Cân Bằng** — Nếu cả 3 slot FILTER + ENGINE + COOLING đều có thẻ cùng độ hiếm (rarity) → cộng thêm +25 Stability tổng xe.' },
-  { id: 198, name: 'Kẻ Đào Tẩu (The Fugitive)', type: 'CREW', rarity: 4, statPower: 0, statHeat: 0, statStability: 0, cost: 0, unlockType: 'ACHIEVEMENT', description: '🔒Ẩn (Achievement). ⚡ **Passive: Chạy Trốn** — Bypass hoàn toàn mọi điều kiện đặc biệt của Boss (cấm thẻ, yêu cầu rarity tối thiểu, v.v).' },
-  { id: 199, name: 'Linh Hồn Gara (Ghost Mechanic)', type: 'CREW', rarity: 5, statPower: 0, statHeat: 0, statStability: 0, cost: 0, unlockType: 'ACHIEVEMENT', description: '🔒Ẩn (Achievement). ⚡ **Passive: Hồi Sinh** — 1 lần/lượt chạy thử, khi currentHeat vượt 100 (nổ máy), tự động reset Heat về 50 và tiếp tục duyệt slot kế tiếp thay vì kết thúc sớm.' },
-  { id: 200, name: 'Chủ Tịch Tập Đoàn (The CEO)', type: 'CREW', rarity: 4, statPower: 0, statHeat: 0, statStability: 0, cost: 0, unlockType: 'ACHIEVEMENT', description: '🔒Ẩn (Achievement). ⚡ **Passive: Đầu Tư Mạo Hiểm** — Mỗi màn, được mượn miễn phí 1 linh kiện Legendary (5 sao) ngẫu nhiên để dùng. Hết màn trả lại.' },
-  { id: 201, name: 'Hacker Mũ Đen (Black-Hat)', type: 'CREW', rarity: 5, statPower: 0, statHeat: 0, statStability: 0, cost: 0, unlockType: 'ACHIEVEMENT', description: '🔒Ẩn (Achievement). ⚡ **Passive: Chỉnh Sửa Mã Nguồn** — Đảo ngược chỉ số Heat ↔ Stability của MỌI thẻ trên xe. (VD: thẻ có 100 Heat + 50 Stability → 50 Heat + 100 Stability)' },
-  { id: 202, name: 'Huyền Thoại Giải Nghệ (The Legend)', type: 'CREW', rarity: 5, statPower: 0, statHeat: 0, statStability: 0, cost: 0, unlockType: 'ACHIEVEMENT', description: '🔒Ẩn (Achievement). ⚡ **Passive: Bàn Tay Vàng** — Tự động nâng chỉ số của mọi thẻ Common (★) và Uncommon (★★) lên ngang bằng mức Rare (★★★).' },
+  { id: 160, name: 'Hệ Thống Phun Khô Cũ', type: 'NITROUS', rarity: 3, statPower: 20, statHeat: 12, statStability: -2, cost: 250, description: 'Phun không cầu kỳ, cực cháy.' },
+  { id: 161, name: 'Hệ Thống Phun Ướt Đi Phố', type: 'NITROUS', rarity: 3, statPower: 25, statHeat: 17, statStability: -5, cost: 320, description: 'Đục đường xăng trộn chung NOS.' },
+  { id: 162, name: 'NOS Dual-Stage Tiêu Chuẩn', type: 'NITROUS', rarity: 4, statPower: 35, statHeat: 23, statStability: -5, cost: 500, description: 'Xịt hai giai đoạn chuẩn thi đấu. (Không có hiệu ứng)' },
+  { id: 163, name: 'Bình NOS Sợi Carbon', type: 'NITROUS', rarity: 4, statPower: 30, statHeat: 12, statStability: 0, cost: 580, description: 'Nhẹ nhàng điều tốc an toàn. ⚡ **Passive: Bình Ổn** — Xóa hoàn toàn chỉ số âm Stability của bình NOS này (đưa về 0 thay vì trừ).' },
+  { id: 164, name: 'NOS Tri-Stage Xịt Liên Tục', type: 'NITROUS', rarity: 4, statPower: 45, statHeat: 40, statStability: -15, cost: 750, description: 'Liên hoàn xịt ba nấc đầy bạo lực. Không có hiệu ứng — thuần chỉ số Power 45 cao.' },
+  { id: 165, name: 'NOS Mega', type: 'NITROUS', rarity: 4, statPower: 80, statHeat: 46, statStability: -20, cost: 650, description: 'Bình NOS cỡ lớn! Không có hiệu ứng — thuần Power 80 nhưng Heat 46 và -20 Stability rất nguy hiểm.' },
+  { id: 166, name: 'NOS Hỗn Hợp Oxy Lỏng', type: 'NITROUS', rarity: 5, statPower: 60, statHeat: 35, statStability: -10, cost: 1300, description: 'Biến buồng đốt thành dung nham. ⚡ **On-Test: Xung Lực Vi Dấu** — Lấy 10 Stability từ tổng Stability xe để chuyển thành +40 Power. Đánh đổi ổn định lấy sức mạnh.' },
+  { id: 167, name: 'Nitro Kích Quang Pha Lê', type: 'NITROUS', rarity: 5, statPower: 85, statHeat: 52, statStability: -20, cost: 1800, description: 'Khoa học viễn tưởng siêu tưởng. Không có hiệu ứng — thuần chỉ số Power 85 cao.' },
+  { id: 168, name: 'Lõi Phản Vật Chất Xịt Cấp Tốc', type: 'NITROUS', rarity: 5, statPower: 120, statHeat: 103, statStability: -40, cost: 2500, description: 'Chạm là nổ! ⚡ **On-Test: Đỉnh Điểm** — Khi chạy thử, cộng thêm +100 Power vào tổng xe. Nhưng 103 Heat + -40 Stability = rủi ro cực đại!' },
+  { id: 169, name: 'Cờ Lê Rỉ Trượt Ốc', type: 'TOOL', rarity: 1, statPower: -2, statHeat: 0, statStability: -2, cost: 5, description: 'Làm lỏng thêm chi tiết xe.' },
+  { id: 170, name: 'Búa Gò Móp Méo', type: 'TOOL', rarity: 1, statPower: 0, statHeat: 0, statStability: -3, cost: 10, description: 'Đập rách vỏ xe.' },
+  { id: 171, name: 'Băng Dính Vạn Năng Đen', type: 'TOOL', rarity: 1, statPower: 0, statHeat: 0, statStability: 5, cost: 20, description: 'Dán mọi khe hở tản mạn!' },
+  { id: 172, name: 'Bộ Cờ Lê', type: 'TOOL', rarity: 1, statPower: 2, statHeat: 0, statStability: 5, cost: 40, description: 'Bộ cờ lê cơ bản, lắp ráp chắc chắn.' },
+  { id: 173, name: 'Dây Rút Nhựa Trắng', type: 'TOOL', rarity: 2, statPower: 0, statHeat: 0, statStability: 8, cost: 50, description: 'Cố định ống xả rơi rụng.' },
+  { id: 174, name: 'Súng Bắn Ốc Pin Yếu', type: 'TOOL', rarity: 2, statPower: 2, statHeat: 0, statStability: 2, cost: 65, description: 'Thêm chút khí động học.' },
+  { id: 175, name: 'Kìm Chết Gãy Mỏ', type: 'TOOL', rarity: 2, statPower: 0, statHeat: -4, statStability: 0, cost: 85, description: 'Bóp gãy van xả nhiệt thừa.' },
+  { id: 176, name: 'Máy Chẩn Đoán OBD2', type: 'TOOL', rarity: 2, statPower: 6, statHeat: -3, statStability: 9, cost: 130, description: 'Máy quét lỗi, an tâm vặn ga.' },
+  { id: 177, name: 'Keo Dán AB Đa Dụng', type: 'TOOL', rarity: 3, statPower: 0, statHeat: -2, statStability: 15, cost: 200, description: 'Khóa cứng các lỗ hổng nhiệt.' },
+  { id: 178, name: 'Súng Đo Nhiệt', type: 'TOOL', rarity: 3, statPower: 0, statHeat: -13, statStability: 0, cost: 300, description: 'Tránh điểm mù nhiệt.' },
+  { id: 179, name: 'Bộ Chỉnh ECU Bỏ Túi', type: 'TOOL', rarity: 3, statPower: 10, statHeat: 6, statStability: 5, cost: 380, description: 'Hack map engine nhẹ.' },
+  { id: 180, name: 'Cánh Gió Gắn Tạm (Canards)', type: 'TOOL', rarity: 4, statPower: 0, statHeat: 0, statStability: 25, cost: 450, description: 'Lắp canard 3M. (Không có hiệu ứng)' },
+  { id: 181, name: 'Bản Đồ Mạch Điện Tử', type: 'TOOL', rarity: 4, statPower: 18, statHeat: 0, statStability: 0, cost: 550, description: 'Khơi thông dòng đánh lửa. (Không có hiệu ứng)' },
+  { id: 182, name: 'Hệ Thống Đo Lường Từ Xa', type: 'TOOL', rarity: 4, statPower: 5, statHeat: 0, statStability: 20, cost: 680, description: 'Telemetry xe đua. ⚡ **Passive: Định Giá Dữ Liệu** — Khi lắp thẻ này và hoàn thành màn thắng, nhận thêm +15% Gold thưởng.' },
+  { id: 183, name: 'Hộp Đồ Nghề Dát Vàng', type: 'TOOL', rarity: 5, statPower: 0, statHeat: -17, statStability: 45, cost: 4000, description: 'Snap-On Gold. ⚡ **Passive: Xa Xỉ Phẩm** — Khi hoàn thành màn thắng, hoàn trả 100% số Gold đã chi mua linh kiện trong màn đó (x2 Gold bonus).' },
+  { id: 184, name: 'Drone Phân Tích Đường Đua', type: 'TOOL', rarity: 5, statPower: 10, statHeat: -8, statStability: 30, cost: 1200, description: 'Drone bay soi đường. Không có hiệu ứng — thuần chỉ số cân bằng: 10 Power, -8 Heat, 30 Stability.' },
+  { id: 185, name: 'Thiết Bị Hack Trụ Trạm', type: 'TOOL', rarity: 5, statPower: 50, statHeat: 57, statStability: -10, cost: 3500, description: 'Cướp quyền trạm xăng! ⚡ **Passive: Cướp Quyền Boss** — Bypass hoàn toàn mọi luật lệ khắt khe của Boss (VD: cấm dùng Cooling, yêu cầu tối thiểu sao, v.v).' },
+  { id: 186, name: 'Kỹ Sư Nhiệt (The Cooler)', type: 'CREW', rarity: 2, statPower: 0, statHeat: 0, statStability: 0, cost: 300, unlockType: 'PURCHASE', description: '⚡ **Passive: Giải Nhiệt Cấp Tốc** — Giảm 10% tổng Heat của tất cả thẻ TURBO được lắp trên xe.' },
+  { id: 187, name: 'Chuyên Gia Ống Xả (The Flow)', type: 'CREW', rarity: 3, statPower: 0, statHeat: 0, statStability: 0, cost: 800, unlockType: 'PURCHASE', description: '⚡ **Passive: Luồng Khí Mượt Mà** — Tất cả thẻ ỐNG XẢ được cộng thêm +15 Power mà KHÔNG tăng thêm Heat.' },
+  { id: 188, name: 'Kế Toán Trưởng (The Accountant)', type: 'CREW', rarity: 2, statPower: 0, statHeat: 0, statStability: 0, cost: 500, unlockType: 'PURCHASE', description: '⚡ **Passive: Tối Ưu Ngân Sách** — Sau mỗi màn thắng, hoàn trả 10% tổng số Gold đã chi mua linh kiện trong màn đó.' },
+  { id: 189, name: 'Tay Lái Thử (The Stuntman)', type: 'CREW', rarity: 3, statPower: 0, statHeat: 0, statStability: 0, cost: 1000, unlockType: 'PURCHASE', description: '⚡ **Passive: Kiểm Soát Giới Hạn** — Ngưỡng nổ máy tăng thêm +5 điểm (từ 100 lên 105). Chỉ kích hoạt khi currentHeat vượt 95.' },
+  { id: 190, name: 'Thợ Sơn (The Artist)', type: 'CREW', rarity: 2, statPower: 0, statHeat: 0, statStability: 0, cost: 400, unlockType: 'PURCHASE', description: '⚡ **Passive: Vẻ Ngoài Hào Nhoáng** — +15% sự hài lòng khách hàng, có cơ hội nhận thêm tiền tip ngẫu nhiên khi hoàn thành quest.' },
+  { id: 191, name: 'Chuyên Gia Lốp (The Grip)', type: 'CREW', rarity: 3, statPower: 0, statHeat: 0, statStability: 0, cost: 1200, unlockType: 'PURCHASE', description: '⚡ **Passive: Bám Đường Tuyệt Đối** — Nếu tổng Power xe vượt 400, cộng thêm +20 Stability.' },
+  { id: 192, name: 'Bác Sĩ Xăng (The Fuel Doctor)', type: 'CREW', rarity: 3, statPower: 0, statHeat: 0, statStability: 0, cost: 900, unlockType: 'PURCHASE', description: '⚡ **Passive: Pha Chế Hoàn Hảo** — Tất cả slot FUEL được nhân đôi (x2) Power, nhưng Heat của các slot FUEL cũng tăng x1.5. Đánh đổi sức mạnh lấy nhiệt.' },
+  { id: 193, name: 'Thợ Hàn Ngầm (The Welder)', type: 'CREW', rarity: 2, statPower: 0, statHeat: 0, statStability: 0, cost: 350, unlockType: 'PURCHASE', description: '⚡ **Passive: Mối Hàn Hoàn Hảo** — Tất cả slot EXHAUST được cộng thêm +10 Stability.' },
+  { id: 194, name: 'Thợ Điện Ngầm (The Wireman)', type: 'CREW', rarity: 4, statPower: 0, statHeat: 0, statStability: 0, cost: 1800, unlockType: 'PURCHASE', description: '⚡ **Passive: Đấu Nối Thần Tốc** — Tất cả slot NITROUS được xóa hoàn toàn chỉ số âm Stability (giữ Stability ≥ 0).' },
+  { id: 195, name: 'Chiến Binh Đêm (The Night Rider)', type: 'CREW', rarity: 4, statPower: 0, statHeat: 0, statStability: 0, cost: 2500, unlockType: 'PURCHASE', description: '⚡ **Passive: Bóng Đêm Tốc Độ** — Từ Ngày 25 trở đi, mỗi slot TIRE và slot TURBO đều được cộng thêm +15 Power.' },
+  { id: 196, name: 'Thầy Phong Thuỷ Xe (The Feng Shui)', type: 'CREW', rarity: 2, statPower: 0, statHeat: 0, statStability: 0, cost: 450, unlockType: 'PURCHASE', description: '⚡ **Passive: Ngũ Hành Cân Bằng** — Nếu cả 3 slot FILTER + ENGINE + COOLING đều có thẻ cùng độ hiếm (rarity) → cộng thêm +25 Stability tổng xe.' },
+  { id: 197, name: 'Kẻ Đào Tẩu (The Fugitive)', type: 'CREW', rarity: 4, statPower: 0, statHeat: 0, statStability: 0, cost: 0, unlockType: 'ACHIEVEMENT', description: '🔒Ẩn (Achievement). ⚡ **Passive: Chạy Trốn** — Bypass hoàn toàn mọi điều kiện đặc biệt của Boss (cấm thẻ, yêu cầu rarity tối thiểu, v.v).' },
+  { id: 198, name: 'Linh Hồn Gara (Ghost Mechanic)', type: 'CREW', rarity: 5, statPower: 0, statHeat: 0, statStability: 0, cost: 0, unlockType: 'ACHIEVEMENT', description: '🔒Ẩn (Achievement). ⚡ **Passive: Hồi Sinh** — 1 lần/lượt chạy thử, khi currentHeat vượt 100 (nổ máy), tự động reset Heat về 50 và tiếp tục duyệt slot kế tiếp thay vì kết thúc sớm.' },
+  { id: 199, name: 'Chủ Tịch Tập Đoàn (The CEO)', type: 'CREW', rarity: 4, statPower: 0, statHeat: 0, statStability: 0, cost: 0, unlockType: 'ACHIEVEMENT', description: '🔒Ẩn (Achievement). ⚡ **Passive: Đầu Tư Mạo Hiểm** — Mỗi màn, được mượn miễn phí 1 linh kiện Legendary (5 sao) ngẫu nhiên để dùng. Hết màn trả lại.' },
+  { id: 200, name: 'Hacker Mũ Đen (Black-Hat)', type: 'CREW', rarity: 5, statPower: 0, statHeat: 0, statStability: 0, cost: 0, unlockType: 'ACHIEVEMENT', description: '🔒Ẩn (Achievement). ⚡ **Passive: Chỉnh Sửa Mã Nguồn** — Đảo ngược chỉ số Heat ↔ Stability của MỌI thẻ trên xe. (VD: thẻ có 100 Heat + 50 Stability → 50 Heat + 100 Stability)' },
+  { id: 201, name: 'Huyền Thoại Giải Nghệ (The Legend)', type: 'CREW', rarity: 5, statPower: 0, statHeat: 0, statStability: 0, cost: 0, unlockType: 'ACHIEVEMENT', description: '🔒Ẩn (Achievement). ⚡ **Passive: Bàn Tay Vàng** — Tự động nâng chỉ số của mọi thẻ Common (★) và Uncommon (★★) lên ngang bằng mức Rare (★★★).' },
 ];;
 
   const cards = [];
@@ -590,39 +589,39 @@ async function main() {
 
     // 17. Kỹ Sư Nhiệt (187) + Intercooler Carbon (91)
     prisma.cardCombo.create({
-      data: { cardId1: 187, cardId2: 91, effectType: 'REDUCE_HEAT', effectValue: 0.5, name: '🧪 Phòng Thí Nghiệm Lạnh', description: 'Kỹ sư nhiệt vận hành Intercooler ở hiệu suất tối đa, giảm 50% tổng Heat!' },
+      data: { cardId1: 186, cardId2: 91, effectType: 'REDUCE_HEAT', effectValue: 0.5, name: '🧪 Phòng Thí Nghiệm Lạnh', description: 'Kỹ sư nhiệt vận hành Intercooler ở hiệu suất tối đa, giảm 50% tổng Heat!' },
     }),
     // 18. Chuyên Gia Ống Xả (188) + Ống Xả Titan Racing (78)
     prisma.cardCombo.create({
-      data: { cardId1: 188, cardId2: 78, effectType: 'BONUS_POWER', effectValue: 30, name: '🎵 Bản Giao Hưởng Titan', description: 'Chuyên gia tinh chỉnh ống xả Titan đạt âm thanh hoàn hảo, +30 Power.' },
+      data: { cardId1: 187, cardId2: 78, effectType: 'BONUS_POWER', effectValue: 30, name: '🎵 Bản Giao Hưởng Titan', description: 'Chuyên gia tinh chỉnh ống xả Titan đạt âm thanh hoàn hảo, +30 Power.' },
     }),
     // 19. Tay Lái Thử (190) + NOS Mega (164)
     prisma.cardCombo.create({
-      data: { cardId1: 190, cardId2: 164, effectType: 'REDUCE_HEAT', effectValue: 0.8, name: '🎯 Drift Tử Thần', description: 'Tay lái kiểm soát NOS bằng kỹ năng drift, giảm 20% Heat từ NOS.' },
+      data: { cardId1: 189, cardId2: 164, effectType: 'REDUCE_HEAT', effectValue: 0.8, name: '🎯 Drift Tử Thần', description: 'Tay lái kiểm soát NOS bằng kỹ năng drift, giảm 20% Heat từ NOS.' },
     }),
     // 20. Kế Toán Trưởng (189) + Bộ Cờ Lê (173)
     prisma.cardCombo.create({
-      data: { cardId1: 189, cardId2: 173, effectType: 'BONUS_GOLD', effectValue: 20, name: '💰 Tiết Kiệm Là Làm Giàu', description: 'Kế toán tối ưu chi phí công cụ, +20% Gold thưởng mỗi màn thắng.' },
+      data: { cardId1: 188, cardId2: 173, effectType: 'BONUS_GOLD', effectValue: 20, name: '💰 Tiết Kiệm Là Làm Giàu', description: 'Kế toán tối ưu chi phí công cụ, +20% Gold thưởng mỗi màn thắng.' },
     }),
     // 21. Chuyên Gia Lốp (192) + Lốp Racing Slick (148)
     prisma.cardCombo.create({
-      data: { cardId1: 192, cardId2: 148, effectType: 'MULTIPLY_STABILITY', effectValue: 2.0, name: '🏆 Vua Đường Đua', description: 'Chuyên gia lốp + slick chuyên nghiệp = x2 Stability từ lốp!' },
+      data: { cardId1: 191, cardId2: 148, effectType: 'MULTIPLY_STABILITY', effectValue: 2.0, name: '🏆 Vua Đường Đua', description: 'Chuyên gia lốp + slick chuyên nghiệp = x2 Stability từ lốp!' },
     }),
     // 22. Huyền Thoại Giải Nghệ (202) + W16 Quad-Turbo (42)
     prisma.cardCombo.create({
-      data: { cardId1: 202, cardId2: 42, effectType: 'MULTIPLY_POWER', effectValue: 1.5, name: '👑 Bàn Tay Vàng W16', description: 'Huyền thoại chạm vào W16, mọi stat của W16 được nhân x1.5!' },
+      data: { cardId1: 201, cardId2: 42, effectType: 'MULTIPLY_POWER', effectValue: 1.5, name: '👑 Bàn Tay Vàng W16', description: 'Huyền thoại chạm vào W16, mọi stat của W16 được nhân x1.5!' },
     }),
     // 23. Ghost Mechanic (199) + Cryo Cooling System (98)
     prisma.cardCombo.create({
-      data: { cardId1: 199, cardId2: 98, effectType: 'NEGATE_HEAT', effectValue: 0.5, name: '👻 Linh Hồn Đông Lạnh', description: 'Linh hồn gara + Cryo = xóa 50% tổng Heat toàn bộ xe.' },
+      data: { cardId1: 198, cardId2: 98, effectType: 'NEGATE_HEAT', effectValue: 0.5, name: '👻 Linh Hồn Đông Lạnh', description: 'Linh hồn gara + Cryo = xóa 50% tổng Heat toàn bộ xe.' },
     }),
     // 24. Hacker Mũ Đen (201) + Máy Chẩn Đoán OBD2 (177)
     prisma.cardCombo.create({
-      data: { cardId1: 201, cardId2: 177, effectType: 'BONUS_POWER', effectValue: 25, name: '💻 Hack Hệ Thống', description: 'Hack OBD2 → overclock toàn bộ hệ thống xe, +25 Power.' },
+      data: { cardId1: 200, cardId2: 176, effectType: 'BONUS_POWER', effectValue: 25, name: '💻 Hack Hệ Thống', description: 'Hack OBD2 → overclock toàn bộ hệ thống xe, +25 Power.' },
     }),
     // 25. Thợ Sơn (191) + Lốp Semi-Slick (141)
     prisma.cardCombo.create({
-      data: { cardId1: 191, cardId2: 141, effectType: 'BONUS_GOLD', effectValue: 15, name: '🎨 Show Car', description: 'Xe đẹp + lốp đẹp = khách hàng mê mẩn, +15% Gold thêm.' },
+      data: { cardId1: 190, cardId2: 141, effectType: 'BONUS_GOLD', effectValue: 15, name: '🎨 Show Car', description: 'Xe đẹp + lốp đẹp = khách hàng mê mẩn, +15% Gold thêm.' },
     }),
 
     // ========== NEW POWER-GIVING COMBOS (12 new combos) ==========
@@ -661,7 +660,7 @@ async function main() {
     }),
     // 34. Súng Đo Nhiệt (179) + Lọc Gió Màng Dầu (10)
     prisma.cardCombo.create({
-      data: { cardId1: 179, cardId2: 10, effectType: 'BONUS_POWER', effectValue: 17, name: '🌡️ Tinh Chỉnh Nhiệt', description: 'Súng đo nhiệt + lọc gió màng dầu = tinh chỉnh nhiệt độ, +17 Power.' },
+      data: { cardId1: 178, cardId2: 10, effectType: 'BONUS_POWER', effectValue: 17, name: '🌡️ Tinh Chỉnh Nhiệt', description: 'Súng đo nhiệt + lọc gió màng dầu = tinh chỉnh nhiệt độ, +17 Power.' },
     }),
     // 35. Nước Làm Mát Ngoại Cỡ (92) + Xăng Sinh Học E5 (104)
     prisma.cardCombo.create({

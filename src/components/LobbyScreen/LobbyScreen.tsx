@@ -208,8 +208,14 @@ export default function LobbyScreen() {
       });
       const data = await res.json();
       if (res.ok) {
+        if (data.user) {
+          useGameStore.getState().setUser(data.user);
+        }
+
         // Nếu có ending, chuyển sang màn hình ending
         if (data.ending) {
+          const setEndingUnlocked = useGameStore.getState().setEndingUnlocked;
+          setEndingUnlocked(data.ending);
           transitionScreen('ending');
           return;
         }
@@ -446,14 +452,14 @@ export default function LobbyScreen() {
       {/* Background blur layer — fills letterbox areas on non-16:9 screens */}
       <div
         className="absolute inset-0 bg-cover bg-center opacity-30 blur-md scale-105 pointer-events-none"
-        style={{ backgroundImage: 'url("/bg-lobby.jpg")' }}
+        style={{ backgroundImage: `url("${user?.isInNorthKorea ? '/bg-NK.jpg' : '/bg-lobby.jpg'}")` }}
       />
 
       {/* Game container — locked to 16:9 aspect ratio, always shows full image */}
       <div
         className="relative z-10 w-full h-full max-w-[177.78vh] max-h-[56.25vw] bg-center bg-no-repeat bg-cover shadow-[0_0_40px_rgba(0,0,0,1)] flex flex-col justify-between overflow-visible"
         style={{
-          backgroundImage: 'url("/bg-lobby.jpg")',
+          backgroundImage: `url("${user?.isInNorthKorea ? '/bg-NK.jpg' : '/bg-lobby.jpg'}")`,
           imageRendering: 'pixelated',
           paddingBottom: '50px',
         }}

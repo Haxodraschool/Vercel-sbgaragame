@@ -212,18 +212,11 @@ export default function CardPreviewModal({
   );
 }
 
-// Image with .jpg → .jpeg → .png fallback — NO border/frame, raw card art
+// Image with .jpg only — NO border/frame, raw card art
 function PreviewCardImage({ cardId, name, type }: { cardId: number; name: string; type: string }) {
-  const [imgError, setImgError] = useState(0);
+  const [hasError, setHasError] = useState(false);
 
-  const getSrc = () => {
-    if (imgError === 0) return `/componentcardimg/${cardId}.jpg`;
-    if (imgError === 1) return `/componentcardimg/${cardId}.jpeg`;
-    if (imgError === 2) return `/componentcardimg/${cardId}.png`;
-    return '';
-  };
-
-  if (imgError >= 3) {
+  if (hasError) {
     return (
       <div
         style={{
@@ -244,7 +237,7 @@ function PreviewCardImage({ cardId, name, type }: { cardId: number; name: string
 
   return (
     <img
-      src={getSrc()}
+      src={`/componentcardimg/${cardId}.jpg`}
       alt={name}
       style={{
         height: '100%',
@@ -252,7 +245,7 @@ function PreviewCardImage({ cardId, name, type }: { cardId: number; name: string
         objectFit: 'contain',
         borderRadius: 8,
       }}
-      onError={() => setImgError((e) => e + 1)}
+      onError={() => setHasError(true)}
     />
   );
 }

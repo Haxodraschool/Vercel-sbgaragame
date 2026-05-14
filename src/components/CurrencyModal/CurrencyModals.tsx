@@ -3,7 +3,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGameStore } from '@/stores/useGameStore';
-import { ToolIcon } from '@/components/CategoryIcons';
 
 // ═══════════════════════════════════════════════════════════
 // 1. BUY TECHPOINTS MODAL (Gold -> TP)
@@ -72,18 +71,18 @@ export function BuyTpModal() {
           initial={{ scale: 0.9, opacity: 0, y: 20 }}
           animate={{ scale: 1, opacity: 1, y: 0 }}
           exit={{ scale: 0.9, opacity: 0, y: 20 }}
-          className="relative w-full max-w-2xl bg-[#0a0a12] border-2 border-emerald-500/40 rounded-sm overflow-hidden shadow-[0_0_50px_rgba(16,185,129,0.2)]"
+          className="relative w-full max-w-md bg-gradient-to-b from-[#111827] to-[#0a0a12] border-2 border-emerald-500/50 rounded-2xl overflow-hidden shadow-[0_0_50px_rgba(16,185,129,0.3)] p-1"
         >
           {/* Header */}
-          <div className="bg-emerald-900/20 border-b border-emerald-500/30 p-6 flex justify-between items-center">
-            <h2 className="text-xl text-emerald-400 font-bold tracking-widest flex items-center gap-2">
-              <ToolIcon size={20} className="inline-block" /> TRẠM QUY ĐỔI TECHPOINTS
+          <div className="bg-gradient-to-r from-emerald-900/60 to-emerald-950/20 border-b border-emerald-500/30 p-5 rounded-t-xl flex justify-between items-center">
+            <h2 className="text-emerald-400 font-black tracking-widest flex items-center gap-2 drop-shadow-[0_0_10px_rgba(52,211,153,0.8)]">
+              <span>⚡</span> TRẠM QUY ĐỔI TECHPOINTS
             </h2>
-            <button onClick={() => setOpen(false)} className="text-emerald-500/50 hover:text-emerald-400 transition-colors">✕</button>
+            <button onClick={() => setOpen(false)} className="text-emerald-500/60 hover:text-emerald-300 transition-colors text-xl font-bold hover:scale-110">✕</button>
           </div>
 
-          <div className="p-6 space-y-6">
-            <div className="flex justify-around items-center bg-emerald-950/20 p-4 rounded-lg border border-emerald-500/10">
+          <div className="p-6 space-y-7 bg-black/20 rounded-b-xl">
+            <div className="flex justify-around items-center bg-gradient-to-r from-emerald-950/40 via-emerald-900/20 to-emerald-950/40 p-5 rounded-xl border border-emerald-500/20 shadow-inner">
               <div className="text-center">
                 <div className="text-[10px] text-emerald-500/60 uppercase tracking-tighter mb-1">Hiện có</div>
                 <div className="text-xl font-bold text-yellow-500">{user?.gold?.toLocaleString() ?? 0} G</div>
@@ -133,9 +132,9 @@ export function BuyTpModal() {
               <button
                 disabled={!canAfford || isProcessing}
                 onClick={handleExchange}
-                className={`w-full py-4 rounded-lg font-bold tracking-[0.2em] transition-all shadow-lg ${
+                className={`w-full py-4 rounded-xl font-bold tracking-[0.2em] transition-all shadow-lg text-lg ${
                   canAfford && !isProcessing
-                  ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-900/20'
+                  ? 'bg-gradient-to-r from-emerald-600 to-emerald-500 hover:from-emerald-500 hover:to-emerald-400 text-white shadow-[0_0_20px_rgba(16,185,129,0.4)] hover:shadow-[0_0_30px_rgba(16,185,129,0.6)] transform hover:-translate-y-1'
                   : 'bg-slate-800 text-slate-500 cursor-not-allowed opacity-50'
                 }`}
               >
@@ -162,19 +161,19 @@ export function BuyTpModal() {
 // 2. TOPUP GOLD MODAL (Real $ -> Gold)
 // ═══════════════════════════════════════════════════════════
 const GOLD_PACKAGES = [
-  { id: 'pkg_1',  price: 1,  gold: 2000,   bonus: 0,    label: 'Gói Khởi Đầu' },
-  { id: 'pkg_5',  price: 5,  gold: 10000,  bonus: 500,  label: 'Gói Thợ Sửa' },
-  { id: 'pkg_10', price: 10, gold: 20000,  bonus: 2000, label: 'Gói Chuyên Nghiệp' },
-  { id: 'pkg_20', price: 20, gold: 40000,  bonus: 5000, label: 'Gói Đại Gia' },
-  { id: 'pkg_50', price: 50, gold: 100000, bonus: 20000, label: 'Gói Trùm Garage' },
+  { id: 'pkg_10k',  price: 10000,  gold: 1000,  bonus: 0,    label: 'Gói Khởi Đầu' },
+  { id: 'pkg_20k',  price: 20000,  gold: 2200,  bonus: 200,  label: 'Gói Thợ Sửa' },
+  { id: 'pkg_50k',  price: 50000,  gold: 6000,  bonus: 1000, label: 'Gói Chuyên Nghiệp' },
+  { id: 'pkg_100k', price: 100000, gold: 13000, bonus: 3000, label: 'Gói Đại Gia' },
+  { id: 'pkg_200k', price: 200000, gold: 28000, bonus: 8000, label: 'Gói Trùm Garage' },
+  { id: 'pkg_500k', price: 500000, gold: 75000, bonus: 25000, label: 'Gói VIP' },
 ];
 
 export function TopupGoldModal() {
   const isOpen = useGameStore((s) => s.isTopupGoldModalOpen);
   const setOpen = useGameStore((s) => s.setTopupGoldModalOpen);
   const token = useGameStore((s) => s.token);
-  const updateGold = useGameStore((s) => s.updateGold);
-  
+
   const [isProcessing, setIsProcessing] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
@@ -186,9 +185,9 @@ export function TopupGoldModal() {
     setMessage(null);
 
     try {
-      const res = await fetch('/api/user/topup-gold', {
+      const res = await fetch('/api/payment/create-link', {
         method: 'POST',
-        headers: { 
+        headers: {
             'Content-Type': 'application/json',
             ...(token ? { 'Authorization': `Bearer ${token}` } : {})
         },
@@ -196,19 +195,15 @@ export function TopupGoldModal() {
       });
       const data = await res.json();
 
-      if (res.ok) {
-        updateGold(data.gold);
-        setMessage({ type: 'success', text: data.message });
-        setTimeout(() => {
-            setMessage(null);
-            setOpen(false);
-        }, 1500);
+      if (res.ok && data.checkoutUrl) {
+        // Redirect to PayOS checkout page
+        window.location.href = data.checkoutUrl;
       } else {
-        setMessage({ type: 'error', text: data.error || 'Lỗi giao dịch!' });
+        setMessage({ type: 'error', text: data.error || 'Lỗi tạo link thanh toán!' });
+        setIsProcessing(false);
       }
     } catch (err) {
       setMessage({ type: 'error', text: 'Lỗi kết nối server!' });
-    } finally {
       setIsProcessing(false);
     }
   };
@@ -226,38 +221,40 @@ export function TopupGoldModal() {
           initial={{ scale: 0.9, opacity: 0, y: 20 }}
           animate={{ scale: 1, opacity: 1, y: 0 }}
           exit={{ scale: 0.9, opacity: 0, y: 20 }}
-          className="relative w-full max-w-2xl bg-[#0a0a12] border-2 border-yellow-500/40 rounded-sm overflow-hidden shadow-[0_0_50px_rgba(252,161,0,0.2)]"
+          className="relative w-full max-w-lg bg-gradient-to-b from-[#18110b] to-[#0a0a12] border-2 border-yellow-500/50 rounded-2xl overflow-hidden shadow-[0_0_50px_rgba(252,161,0,0.3)] p-1"
         >
           {/* Header */}
-          <div className="bg-yellow-900/20 border-b border-yellow-500/30 p-6 flex justify-between items-center">
-            <h2 className="text-xl text-yellow-400 font-bold tracking-widest flex items-center gap-2">
-              <span>💰</span> NẠP VÀNG HỆ THỐNG
+          <div className="bg-gradient-to-r from-yellow-900/60 to-yellow-950/20 border-b border-yellow-500/30 p-5 rounded-t-xl flex justify-between items-center">
+            <h2 className="text-yellow-400 font-black tracking-widest flex items-center gap-2 drop-shadow-[0_0_10px_rgba(250,204,21,0.8)]">
+              <span>💎</span> NẠP VÀNG HỆ THỐNG
             </h2>
-            <button onClick={() => setOpen(false)} className="text-yellow-500/50 hover:text-yellow-400 transition-colors">✕</button>
+            <button onClick={() => setOpen(false)} className="text-yellow-500/60 hover:text-yellow-300 transition-colors text-xl font-bold hover:scale-110">✕</button>
           </div>
 
-          <div className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
-            <div className="grid grid-cols-1 gap-3">
+          <div className="p-6 space-y-5 max-h-[70vh] overflow-y-auto bg-black/20 rounded-b-xl">
+            <div className="grid grid-cols-1 gap-4">
               {GOLD_PACKAGES.map((pkg) => (
                 <motion.div
                   key={pkg.id}
-                  whileHover={{ scale: 1.01, backgroundColor: 'rgba(252,161,0,0.05)' }}
-                  className="flex items-center justify-between p-4 bg-slate-900/40 border border-yellow-500/20 rounded-lg group cursor-pointer"
+                  whileHover={{ scale: 1.02, backgroundColor: 'rgba(252,161,0,0.1)' }}
+                  className="flex items-center justify-between p-5 bg-gradient-to-r from-yellow-950/30 to-transparent border border-yellow-500/30 rounded-xl group cursor-pointer transition-colors shadow-sm"
                   onClick={() => handlePurchase(pkg.id)}
                 >
-                  <div className="flex flex-col">
-                    <span className="text-[10px] text-yellow-500/60 uppercase font-bold tracking-wider">{pkg.label}</span>
-                    <span className="text-xl font-black text-yellow-400">
+                  <div className="flex flex-col gap-1">
+                    <span className="text-[11px] text-yellow-500/80 uppercase font-black tracking-widest">{pkg.label}</span>
+                    <span className="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-yellow-500 drop-shadow-md">
                       {(pkg.gold + pkg.bonus).toLocaleString()} Vàng
                     </span>
                     {pkg.bonus > 0 && (
-                      <span className="text-[10px] text-emerald-400 font-bold italic">+ Khuyến mãi {pkg.bonus.toLocaleString()} Vàng</span>
+                      <span className="text-[11px] text-emerald-400 font-bold italic bg-emerald-500/10 w-fit px-2 py-0.5 rounded-full border border-emerald-500/20 mt-1">
+                        + Bonus {pkg.bonus.toLocaleString()} Vàng
+                      </span>
                     )}
                   </div>
                   
                   <div className="flex flex-col items-end gap-2">
-                    <div className="px-4 py-2 bg-yellow-500 text-black font-black rounded shadow-[0_0_10px_rgba(252,161,0,0.4)] group-hover:scale-110 transition-transform">
-                      {pkg.price}$
+                    <div className="px-5 py-2.5 bg-gradient-to-r from-yellow-500 to-yellow-400 text-yellow-950 font-black rounded-lg shadow-[0_0_15px_rgba(252,161,0,0.5)] group-hover:shadow-[0_0_25px_rgba(252,161,0,0.8)] group-hover:scale-105 transition-all">
+                      {pkg.price.toLocaleString()}đ
                     </div>
                   </div>
                 </motion.div>
@@ -274,7 +271,7 @@ export function TopupGoldModal() {
             )}
 
             <p className="text-[9px] text-slate-500 text-center italic mt-4 uppercase tracking-widest">
-              * Tỷ giá mô phỏng: 1 USD = 2,000 Vàng. Các gói lớn nhận thêm bonus.
+              * Thanh toán qua PayOS (VietQR). Các gói lớn nhận thêm bonus.
             </p>
           </div>
         </motion.div>

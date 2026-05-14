@@ -107,13 +107,11 @@ export async function POST(request: NextRequest) {
     });
     if (!user) return NextResponse.json({ error: 'User not found' }, { status: 404 });
 
-    // Chỉ được chọn perk khi day = 1 và chưa chọn
+    // Chỉ được chọn perk khi day = 1
     if (user.currentDay !== 1) {
       return NextResponse.json({ error: 'Chỉ được chọn đặc quyền vào Ngày 1!' }, { status: 400 });
     }
-    if (user.activePerkCode) {
-      return NextResponse.json({ error: 'Đã chọn đặc quyền cho run này rồi!' }, { status: 400 });
-    }
+    // Allow re-selecting perk (remove check for activePerkCode)
 
     // Verify perk exists
     const perk = await prisma.starterPerk.findUnique({ where: { code: perkCode } });
@@ -155,15 +153,26 @@ export async function POST(request: NextRequest) {
     const updates: Record<string, any> = { activePerkCode: perkCode };
     let message = `Đã chọn đặc quyền: ${perk.name}!`;
 
+    // Check if re-selecting same perk - don't stack effects
+    const isReselecting = user.activePerkCode === perkCode;
+
     switch (perkCode) {
       case GAME_CONSTANTS.PERK_CODES.STARTUP_FUND:
-        updates.gold = { increment: 200 };
-        message += ' +200 Gold!';
+        if (!isReselecting) {
+          updates.gold = { increment: 200 };
+          message += ' +200 Gold!';
+        } else {
+          message += ' (Đã áp dụng)';
+        }
         break;
 
       case GAME_CONSTANTS.PERK_CODES.OLD_STASH: {
         // Give 5 random 2-3★ cards (applied after update)
-        message += ' Nhận 5 thẻ 2-3★ ngẫu nhiên!';
+        if (!isReselecting) {
+          message += ' Nhận 5 thẻ 2-3★ ngẫu nhiên!';
+        } else {
+          message += ' (Đã áp dụng)';
+        }
         break;
       }
 
@@ -173,8 +182,12 @@ export async function POST(request: NextRequest) {
         break;
 
       case GAME_CONSTANTS.PERK_CODES.CONNECTIONS:
-        updates.crewSlots = { increment: 1 };
-        message += ` +1 Crew Slot! (Hiện có: ${user.crewSlots + 1})`;
+        if (!isReselecting) {
+          updates.crewSlots = { increment: 1 };
+          message += ` +1 Crew Slot! (Hiện có: ${user.crewSlots + 1})`;
+        } else {
+          message += ' (Đã áp dụng)';
+        }
         break;
 
       case GAME_CONSTANTS.PERK_CODES.VIP_CARD:
@@ -183,8 +196,12 @@ export async function POST(request: NextRequest) {
         break;
 
       case GAME_CONSTANTS.PERK_CODES.TECH_GENIUS:
-        updates.techPoints = { increment: 100 };
-        message += ' +100 Tech Points!';
+        if (!isReselecting) {
+          updates.techPoints = { increment: 100 };
+          message += ' +100 Tech Points!';
+        } else {
+          message += ' (Đã áp dụng)';
+        }
         break;
     }
 
@@ -193,8 +210,8 @@ export async function POST(request: NextRequest) {
       data: updates,
     });
 
-    // OLD_STASH: Give 5 random 2-3★ cards
-    if (perkCode === GAME_CONSTANTS.PERK_CODES.OLD_STASH) {
+    // OLD_STASH: Give 5 random 2-3★ cards (only if not re-selecting)
+    if (perkCode === GAME_CONSTANTS.PERK_CODES.OLD_STASH && !isReselecting) {
       const rarity2Cards = await prisma.card.findMany({ where: { rarity: 2, type: { not: 'CREW' } } });
       const rarity3Cards = await prisma.card.findMany({ where: { rarity: 3, type: { not: 'CREW' } } });
       const pool = [...rarity2Cards, ...rarity3Cards];

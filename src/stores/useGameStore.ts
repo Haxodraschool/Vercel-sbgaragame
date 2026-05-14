@@ -15,6 +15,8 @@ interface UserProfile {
   crewSlots: number;
   isFinalRound: boolean;
   activePerkCode: string | null;
+  isInNorthKorea: boolean;
+  northKoreaDayCount: number;
 }
 
 // Boss-specific choice data passed from dialog to workshop
@@ -36,7 +38,7 @@ interface GameState {
   user: UserProfile | null;
 
   // UI State
-  currentScreen: 'login' | 'lobby' | 'workshop' | 'testrun' | 'shop' | 'event' | 'endday' | 'ending';
+  currentScreen: 'login' | 'lobby' | 'workshop' | 'testrun' | 'shop' | 'event' | 'endday' | 'ending' | 'perkSelection';
   isLoading: boolean;
   isTransitioning: boolean; // true when a loading screen should cover the destination until resources ready
   transitionKey: number; // increments per transition — destination screens use this to guard stale markReady() calls
@@ -49,6 +51,9 @@ interface GameState {
 
   // Music State — nhạc boss được chọn ở Lobby, tiếp tục phát sang Workshop
   activeBossMusic: string | null; // e.g. '/gamemusic/babyoilboss.mp3'
+
+  // Ending State
+  endingUnlocked: string | null; // Name of the ending that was unlocked
 
   // Modals
   isTopupGoldModalOpen: boolean;
@@ -85,6 +90,7 @@ interface GameState {
   setBossChoice: (choice: BossChoiceData | null) => void;
   setSkipShadowIntro: (skip: boolean) => void;
   setActiveBossMusic: (track: string | null) => void;
+  setEndingUnlocked: (ending: string | null) => void;
   updateGold: (gold: number) => void;
   updateGarageHealth: (health: number) => void;
   updateTechPoints: (tp: number) => void;
@@ -107,6 +113,7 @@ export const useGameStore = create<GameState>((set) => ({
   bossChoice: null,
   skipShadowIntro: false,
   activeBossMusic: null,
+  endingUnlocked: null,
   isTopupGoldModalOpen: false,
   isBuyTpModalOpen: false,
   isAccountInfoModalOpen: false,
@@ -180,6 +187,7 @@ export const useGameStore = create<GameState>((set) => ({
   setBossChoice: (choice) => set({ bossChoice: choice }),
   setSkipShadowIntro: (skip) => set({ skipShadowIntro: skip }),
   setActiveBossMusic: (track) => set({ activeBossMusic: track }),
+  setEndingUnlocked: (ending) => set({ endingUnlocked: ending }),
 
   updateGold: (gold) => set((state) => ({
     user: state.user ? { ...state.user, gold } : null,

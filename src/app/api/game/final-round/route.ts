@@ -59,9 +59,13 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Không tìm thấy người chơi' }, { status: 404 });
     }
 
-    if (user.currentDay <= GAME_CONSTANTS.MAX_DAY) {
+    const pendingQuests = await prisma.dailyQuest.count({
+      where: { userId: auth.userId, dayNumber: user.currentDay, status: 'PENDING' }
+    });
+
+    if (user.currentDay < GAME_CONSTANTS.MAX_DAY || (user.currentDay === GAME_CONSTANTS.MAX_DAY && pendingQuests > 0)) {
       return NextResponse.json(
-        { error: 'Chưa đủ điều kiện vào Final Round (cần qua Ngày 50)' },
+        { error: 'Chưa đủ điều kiện vào Final Round (cần hoàn thành Ngày 50)' },
         { status: 400 }
       );
     }
@@ -79,12 +83,25 @@ export async function POST(request: NextRequest) {
       data: { isFinalRound: true, currentDay: 51 },
     });
 
-    // Generate 8 boss quests for Final Round
-    const bosses = await prisma.bossConfig.findMany();
-    const shuffledBosses = bosses.sort(() => Math.random() - 0.5);
-    const finalBosses = shuffledBosses.slice(0, GAME_CONSTANTS.FINAL_ROUND_BOSSES);
+    // Lấy toàn bộ boss từ database
+    const allBosses = await prisma.bossConfig.findMany();
+    
+    // Thuật toán Fisher-Yates Shuffle để trộn ngẫu nhiên mảng boss
+    const shuffled = [...allBosses];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
 
-    // Create quests (all bosses on day 51 = Final Round)
+    // Lấy ra 8 con boss duy nhất (hoặc ít hơn nếu database không đủ 8 con)
+    const finalBosses = shuffled.slice(0, GAME_CONSTANTS.FINAL_ROUND_BOSSES);
+
+    // Xóa các quest cũ của ngày 51 nếu có (để tránh lỗi khi bấm vào final round nhiều lần)
+    await prisma.dailyQuest.deleteMany({
+      where: { userId: auth.userId, dayNumber: 51 }
+    });
+
+    // Tạo các quest mới cho Final Round
     await prisma.dailyQuest.createMany({
       data: finalBosses.map((boss) => ({
         userId: auth.userId,
@@ -92,7 +109,7 @@ export async function POST(request: NextRequest) {
         isBoss: true,
         bossConfigId: boss.id,
         requiredPower: boss.requiredPower,
-        rewardGold: boss.rewardGold * 2, // Double reward in final round
+        rewardGold: boss.rewardGold * 2,
         status: 'PENDING' as const,
       })),
     });

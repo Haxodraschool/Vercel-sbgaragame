@@ -6,7 +6,7 @@ import { BuyTpModal, TopupGoldModal } from '@/components/CurrencyModal/CurrencyM
 import { DndContext, DragOverlay, useDraggable, useDroppable, DragStartEvent, DragEndEvent, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
 import { motion, AnimatePresence } from 'framer-motion';
 import BossDetailModal from '../BossDetailModal/BossDetailModal';
-import RussiaPhase2Dialog from '../RussiaPhase2Dialog/RussiaPhase2Dialog';
+// No longer need RussiaPhase2Dialog
 import { CategoryIcon } from '@/components/CategoryIcons';
 import { BossTitleCompact } from '@/components/BossTitle/BossTitle';
 
@@ -40,19 +40,14 @@ const MAX_CREW_SLOTS = 5;
 // UTILITIES
 // ═══════════════════════════════════════════════════════════
 
-const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>, cardId: number) => {
+/** Handles image load error — all card images are .jpg, fall back to placeholder. */
+const handleImageError = (e: React.SyntheticEvent<HTMLImageElement>) => {
     const target = e.target as HTMLImageElement;
-    const src = target.src;
-    if (src.includes('.jpg') && !src.includes('.jpeg')) {
-        target.src = `/componentcardimg/${cardId}.jpeg`;
-    } else if (src.includes('.jpeg')) {
-        target.src = `/componentcardimg/${cardId}.png`;
-    } else {
-        target.src = '/componentcardimg/placeholder.jpg';
-    }
+    target.src = '/componentcardimg/placeholder.jpg';
 };
 
-const getImageUrl = (card: any) => {
+/** Returns the correct image URL: prefer imageUrl from DB, else /componentcardimg/{id}.jpg */
+const getImageUrl = (card: any): string => {
     if (card.imageUrl) return card.imageUrl.startsWith('/') ? card.imageUrl : `/componentcardimg/${card.imageUrl}`;
     return `/componentcardimg/${card.id}.jpg`;
 };
@@ -207,7 +202,7 @@ function DraggableInventoryCard({ card, quantity, onHoverPreview }: {
                     alt={card.name}
                     loading="lazy"
                     decoding="async"
-                    onError={(e) => handleImageError(e, card.id)}
+                    onError={handleImageError}
                     className={`w-full h-auto object-contain drop-shadow-lg transition-all pointer-events-none ${
                         card.rarity === 5 ? 'drop-shadow-[0_0_15px_rgba(251,191,36,0.6)]' :
                         card.rarity === 4 ? 'drop-shadow-[0_0_12px_rgba(217,70,239,0.5)]' :
@@ -233,7 +228,7 @@ function DraggableInventoryCard({ card, quantity, onHoverPreview }: {
 // WORKSHOP SLOT (10 khe xe)
 // ═══════════════════════════════════════════════════════════
 
-function WorkshopSlot({ index, card, isScanning, isTested, vfxText, disabledDnd, rejected, isCombo, comboName, onHoverCard }: {
+function WorkshopSlot({ index, card, isScanning, isTested, vfxText, disabledDnd, rejected, isCombo, comboName, onHoverCard, isFrozen }: {
     index: number;
     card: any | null;
     isScanning?: boolean;
@@ -244,6 +239,7 @@ function WorkshopSlot({ index, card, isScanning, isTested, vfxText, disabledDnd,
     isCombo?: boolean;
     comboName?: string;
     onHoverCard?: (card: any | null, rect: DOMRect | null) => void;
+    isFrozen?: boolean;
 }) {
     const { isOver, setNodeRef: setDropRef } = useDroppable({
         id: `slot-${index}`,
@@ -330,14 +326,21 @@ function WorkshopSlot({ index, card, isScanning, isTested, vfxText, disabledDnd,
                 className={`absolute inset-0 flex items-center justify-center w-full h-full touch-none ${card && !isDragging ? 'cursor-grab hover:scale-105 transition-transform hover:z-20' : ''} ${isDragging ? 'opacity-20' : ''}`}
             >
                 {card ? (
-                    <img
-                        src={getImageUrl(card)}
-                        alt={card.name}
-                        loading="lazy"
-                        decoding="async"
-                        onError={(e) => handleImageError(e, card.id)}
-                        className="w-[90%] h-[90%] object-contain drop-shadow-md pointer-events-none"
-                    />
+                    <>
+                        <img
+                            src={getImageUrl(card)}
+                            alt={card.name}
+                            loading="lazy"
+                            decoding="async"
+                            onError={handleImageError}
+                            className={`w-[90%] h-[90%] object-contain drop-shadow-md pointer-events-none ${isFrozen ? 'brightness-50 sepia-[0.3] hue-rotate-[180deg]' : ''}`}
+                        />
+                        {isFrozen && (
+                            <div className="absolute inset-0 bg-blue-500/20 backdrop-blur-[1px] flex items-center justify-center rounded-md border-2 border-blue-400 z-10 pointer-events-none">
+                                <span className="text-3xl animate-pulse drop-shadow-[0_0_10px_rgba(59,130,246,0.8)]">❄️</span>
+                            </div>
+                        )}
+                    </>
                 ) : (
                     <>
                         <span className="absolute inset-0 bg-cyan-400/5 opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -414,7 +417,7 @@ function CrewSlot({ index, card, isUnlocked, disabledDnd, onLockedClick }: {
                         alt={card.name}
                         loading="lazy"
                         decoding="async"
-                        onError={(e) => handleImageError(e, card.id)}
+                        onError={handleImageError}
                         className="w-[90%] h-[90%] object-contain drop-shadow-md pointer-events-none"
                     />
                 )}
@@ -457,7 +460,7 @@ function MissingTypesTooltip({ slots, crewSlots, activeQuest }: {
     const hasAnyIssue = missingTypes.length > 0 || bannedTypes.length > 0;
 
     return (
-        <div className="absolute left-[118px] top-6 w-[220px] bg-slate-950/90 border border-slate-700/60 p-3 shadow-2xl z-40 backdrop-blur-md">
+        <div data-tutorial="ws-analysis" className="absolute left-[118px] top-6 w-[220px] bg-slate-950/90 border border-slate-700/60 p-3 shadow-2xl z-40 backdrop-blur-md">
             <div className="text-[9px] font-bold text-cyan-400 tracking-[0.15em] border-b border-slate-700 pb-1.5 mb-2 flex items-center gap-1.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_6px_rgba(34,211,238,0.8)]" />
                 PHÂN TÍCH HỆ THỐNG
@@ -571,6 +574,12 @@ export default function WorkshopScreen() {
     const setActiveBossMusic = useGameStore((state) => state.setActiveBossMusic);
     const bossChoice = useGameStore((state) => state.bossChoice);
 
+    // Debug bossChoice
+    useEffect(() => {
+        console.log('Workshop bossChoice:', bossChoice);
+        console.log('Workshop activeQuest:', activeQuest);
+    }, [bossChoice, activeQuest]);
+
     // --- Loading readiness (global LoadingScreen) ---
     const [inventoryLoaded, setInventoryLoaded] = useState(false);
     const [combosLoaded, setCombosLoaded] = useState(false);
@@ -610,8 +619,7 @@ export default function WorkshopScreen() {
             bgm.pause();
             bgm.currentTime = 0;
         };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [activeBossMusic]);
 
     const [inventory, setInventory] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -650,6 +658,7 @@ export default function WorkshopScreen() {
     const [testSteps, setTestSteps] = useState<any[] | null>(null);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [testFinalResult, setTestFinalResult] = useState<any | null>(null);
+    const [testBudgetProfit, setTestBudgetProfit] = useState<number>(0);
     const [testErrorMsg, setTestErrorMsg] = useState<string | null>(null);
 
     // Coins animation state
@@ -666,8 +675,13 @@ export default function WorkshopScreen() {
     // Boss detail modal
     const [showBossDetail, setShowBossDetail] = useState(false);
 
-    // Russia Phase 2 dialog
-    const [showRussiaPhase2Dialog, setShowRussiaPhase2Dialog] = useState(false);
+    // Phase 1 gold withheld by backend (to send back in Phase 2 request)
+    const [storedPhase1GoldWithheld, setStoredPhase1GoldWithheld] = useState<number>(0);
+    // Russia Phase 2 complete → show dedicated popup
+    const [russiaPhase2Complete, setRussiaPhase2Complete] = useState(false);
+    const [russiaTotalGold, setRussiaTotalGold] = useState<number>(0);
+    const [russiaPhase1GoldDisplay, setRussiaPhase1GoldDisplay] = useState<number>(0);
+    const [russiaPhase2GoldDisplay, setRussiaPhase2GoldDisplay] = useState<number>(0);
 
     // ─── Install VFX (chớp / tóe lửa / rung) khi lắp thẻ vào slot ───
     // flashKey: increment mỗi lần để re-trigger animation overlay
@@ -753,7 +767,7 @@ export default function WorkshopScreen() {
     // ─── Preload workshop background image ───
     useEffect(() => {
         let cancelled = false;
-        const urls = ['/workshop-bg.png'];
+        const urls = ['/workshop-bg.png', '/workshop-epboss.jpg', '/workshop-russianboss.jpg'];
         let remaining = urls.length;
         const done = () => {
             if (cancelled) return;
@@ -821,62 +835,7 @@ export default function WorkshopScreen() {
         return totalOwned - usedInSlots - usedInCrew;
     };
 
-    // ─── Russia Phase 2 Choice Handler ───
-    const handleRussiaPhase2Choice = useCallback(async (choice: 'YES' | 'NO') => {
-        setShowRussiaPhase2Dialog(false);
-        
-        if (!activeQuest || !token) return;
-        
-        // Send phase 2 choice to backend
-        try {
-            const res = await fetch(`/api/quest/${activeQuest.id}/complete`, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    status: 'SUCCESS',
-                    russiaPhase: 2,
-                    vodkaChoice: choice,
-                    usedCardIds: [],
-                    russiaPendingPhase2: true,
-                }),
-            });
-            
-            if (res.ok) {
-                const data = await res.json();
-                // Update user state
-                if (data.userState?.gold !== undefined) {
-                    updateGold(data.userState.gold);
-                }
-                if (data.userState?.garageHealth !== undefined) {
-                    updateGarageHealth(data.userState.garageHealth);
-                }
-                
-                // Show boss rewards if any
-                if (data.bossRewards && data.bossRewards.length > 0) {
-                    const setLevelUpModalOpen = useGameStore.getState().setLevelUpModalOpen;
-                    setLevelUpModalOpen(true, {
-                        newLevel: data.newLevel || user?.level || 1,
-                        goldReward: 0,
-                        garageHealthGain: 0,
-                        cardRewards: [],
-                        bossRewards: data.bossRewards
-                    });
-                }
-            }
-        } catch (err) {
-            console.error('Error submitting Russia Phase 2 choice:', err);
-        }
-        
-        // Return to lobby after phase 2
-        setSkipShadowIntro(true);
-        setActiveBossMusic(null);
-        transitionScreen('lobby');
-    }, [activeQuest, token, user, updateGold, updateGarageHealth, setSkipShadowIntro, setActiveBossMusic, transitionScreen]);
-
-    // ─── Unlock Crew Slot Handler ───
+    // ─── Russia Phase 2 is now triggered directly from "Vodka ở đây" button ───    // ─── Unlock Crew Slot Handler ───
     const handleLockedCrewClick = async () => {
         if (!token) return;
         try {
@@ -1176,6 +1135,7 @@ export default function WorkshopScreen() {
         setTestErrorMsg(null);
         setTestSteps(null);
         setTestFinalResult(null);
+        setTestBudgetProfit(0);
         setAccumulatedPower(0);
         setAccumulatedHeat(0);
         setShowVFX(null);
@@ -1208,6 +1168,11 @@ export default function WorkshopScreen() {
                     cardIds,
                     questId: activeQuest.id,
                     crewCardIds,
+                    russiaPhase: bossChoice?.russiaPhase,
+                    vodkaChoice: bossChoice?.vodkaChoice,
+                    epIslandChoice: bossChoice?.epIslandChoice,
+                    babyOilChoice: bossChoice?.babyOilChoice,
+                    kimChoice: bossChoice?.kimChoice,
                 }),
             });
             const data = await res.json();
@@ -1217,7 +1182,10 @@ export default function WorkshopScreen() {
                 return;
             }
             setTestSteps(data.steps || []);
-            setTestFinalResult(data.result || null);
+            setTestFinalResult(data.result ? { ...data.result, ...data.russiaReward } : null);
+            if (data.result?.budgetProfit) {
+                setTestBudgetProfit(data.result.budgetProfit);
+            }
             setScanIndex(0); // kích hoạt animation
         } catch (err: any) {
             setIsTesting(false);
@@ -1278,7 +1246,14 @@ export default function WorkshopScreen() {
                     body: JSON.stringify({ 
                         status, 
                         usedCardIds,
-                        ...bossChoice
+                        budgetProfit: testBudgetProfit,
+                        totalPower: testFinalResult?.totalPower || 0,
+                        russiaPhase: bossChoice?.russiaPhase,
+                        vodkaChoice: bossChoice?.vodkaChoice,
+                        phase1GoldWithheld: storedPhase1GoldWithheld || 0,
+                        epIslandChoice: bossChoice?.epIslandChoice,
+                        babyOilChoice: bossChoice?.babyOilChoice,
+                        kimChoice: bossChoice?.kimChoice,
                     }),
                 });
                 if (res.ok) {
@@ -1306,9 +1281,25 @@ export default function WorkshopScreen() {
                             bossRewards: data.bossRewards
                         });
                     }
-                    // Show Russia Phase 2 dialog if pending
+                    // ═══ Russia Emperor Phase 1 completed ═══
                     if (data.russiaPhase2Pending) {
-                        setShowRussiaPhase2Dialog(true);
+                        return; // Handled by handleVodkaClick now, but keep just in case
+                    }
+                    
+                    // ═══ Russia Emperor Phase 2 completed ═══
+                    if (bossChoice?.russiaPhase === 2 && activeQuest?.bossConfig?.specialCondition === 'RUSSIA_EMPEROR') {
+                        // Calculate display values
+                        const p1Gold = storedPhase1GoldWithheld || 0;
+                        const p2Gold = data.rewards?.goldReward ? (data.rewards.goldReward - p1Gold) : 0;
+                        const total = data.rewards?.goldReward || (p1Gold + p2Gold);
+                        
+                        setRussiaPhase1GoldDisplay(p1Gold);
+                        setRussiaPhase2GoldDisplay(p2Gold > 0 ? p2Gold : (testFinalResult?.totalPower || 0) * 3);
+                        setRussiaTotalGold(total);
+                        setTestResult('none'); // Hide the normal success popup to avoid overlap
+                        setRussiaPhase2Complete(true);
+                        // Don't transition to lobby — Phase 2 popup will show
+                        return;
                     }
                     // Show level up popup if leveled up
                     if (data.leveledUp && data.levelRewards) {
@@ -1323,6 +1314,9 @@ export default function WorkshopScreen() {
                     }
                     // Game over check
                     if (data.gameOver) {
+                        const setEndingUnlocked = useGameStore.getState().setEndingUnlocked;
+                        setEndingUnlocked(data.endingUnlocked || 'Wasted Potential');
+                        // Keep current health, don't heal to 100
                         setScreen('ending');
                         return;
                     }
@@ -1340,7 +1334,7 @@ export default function WorkshopScreen() {
         setSkipShadowIntro(true);
         setActiveBossMusic(null); // Reset boss music khi về lobby
         transitionScreen('lobby');
-    }, [activeQuest, token, testResult, user, slots, crewSlots, updateGarageHealth, updateGold, setSkipShadowIntro, setActiveBossMusic, setScreen, transitionScreen]);
+    }, [activeQuest, token, testResult, user, slots, crewSlots, updateGarageHealth, updateGold, setSkipShadowIntro, setActiveBossMusic, setScreen, transitionScreen, testFinalResult, bossChoice, testBudgetProfit]);
 
     // ─── NPC image của quest hiện tại ───
     const isInNK = !!(user as any)?.isInNorthKorea;
@@ -1463,7 +1457,28 @@ export default function WorkshopScreen() {
             onDragEnd={!isTesting ? handleDragEnd : undefined}
         >
         <div
-            className={`relative min-h-screen bg-[url('/workshop-bg.png')] bg-cover bg-center overflow-hidden font-mono text-cyan-50 ${shakeActive ? styles.installShakeRoot : ''}`}
+            className={`relative min-h-screen bg-cover bg-center overflow-hidden font-mono text-cyan-50 ${shakeActive ? styles.installShakeRoot : ''}`}
+            style={{
+                backgroundImage: (() => {
+                    // Check bossChoice first
+                    if (bossChoice?.epIslandChoice === 'YES') {
+                        return "url('/workshop-epboss.jpg')";
+                    }
+                    if (bossChoice?.vodkaChoice === 'NO') {
+                        return "url('/workshop-russianboss.jpg')";
+                    }
+                    // Fallback: check activeQuest bossConfig condition
+                    const condition = activeQuest?.bossConfig?.specialCondition;
+                    if (condition === 'RUSSIA_EMPEROR') {
+                        return "url('/workshop-russianboss.jpg')";
+                    }
+                    if (condition === 'EP_ISLAND_CHOICE') {
+                        // Default to YES for EP Island if no choice set yet
+                        return "url('/workshop-epboss.jpg')";
+                    }
+                    return "url('/workshop-bg.png')";
+                })()
+            }}
         >
             {/* Note: Gold/TP display removed from Workshop - only shown in Lobby */}
             {/* Modals kept for unlock crew slot functionality */}
@@ -1500,7 +1515,7 @@ export default function WorkshopScreen() {
                                 <img
                                     src={getImageUrl(hoverPreviewCard)}
                                     alt={hoverPreviewCard.name}
-                                    onError={(e) => handleImageError(e, hoverPreviewCard.id)}
+                                    onError={handleImageError}
                                     className="w-full h-auto object-contain"
                                 />
                                 <div className="mt-2 px-1">
@@ -1525,7 +1540,7 @@ export default function WorkshopScreen() {
                                             <img
                                                 src={getImageUrl(partner)}
                                                 alt={partner.name}
-                                                onError={(e) => handleImageError(e, partner.id)}
+                                                onError={handleImageError}
                                                 className="w-full h-auto object-contain"
                                             />
                                             <div className="mt-2 px-1">
@@ -1562,53 +1577,21 @@ export default function WorkshopScreen() {
                             top: Math.max(10, hoverSlotCard.rect.top - 270),
                         }}
                     >
-                        <div className="w-[200px] bg-slate-950/97 border-2 border-cyan-500/50 p-3 shadow-[0_0_40px_rgba(34,211,238,0.35),0_15px_40px_rgba(0,0,0,0.9)] backdrop-blur-xl rounded-lg">
-                            <img
-                                src={getImageUrl(hoverSlotCard.card)}
-                                alt={hoverSlotCard.card.name}
-                                onError={(e) => handleImageError(e, hoverSlotCard.card.id)}
-                                className="w-full h-auto object-contain rounded"
-                            />
-                            <div className="mt-2 px-0.5">
-                                <div className="text-[11px] font-bold text-cyan-300 text-center leading-tight truncate">{hoverSlotCard.card.name}</div>
-                                <div className="flex items-center justify-center gap-0.5 mt-1">
-                                    {Array.from({ length: hoverSlotCard.card.rarity || 1 }).map((_, i) => (
-                                        <span key={i} className="text-amber-400 text-[10px]">★</span>
-                                    ))}
-                                </div>
-                                <div className="flex justify-between mt-2 px-1 py-1.5 bg-slate-900/80 rounded border border-slate-700/50">
-                                    <div className="flex flex-col items-center">
-                                        <span className="text-[8px] text-slate-500 tracking-wider">PWR</span>
-                                        <span className="text-[11px] font-bold text-amber-400">⚡ {hoverSlotCard.card.statPower || 0}</span>
-                                    </div>
-                                    <div className="flex flex-col items-center">
-                                        <span className="text-[8px] text-slate-500 tracking-wider">HEAT</span>
-                                        <span className="text-[11px] font-bold text-red-400">🌡 {hoverSlotCard.card.statHeat || 0}</span>
-                                    </div>
-                                    <div className="flex flex-col items-center">
-                                        <span className="text-[8px] text-slate-500 tracking-wider">STB</span>
-                                        <span className="text-[11px] font-bold text-blue-400">❄ {hoverSlotCard.card.statStability || 0}</span>
-                                    </div>
-                                </div>
-                                {hoverSlotCard.card.description && (
-                                    <div className="text-[8px] text-slate-400 text-center mt-1.5 leading-tight line-clamp-2 italic">
-                                        {hoverSlotCard.card.description}
-                                    </div>
-                                )}
-                            </div>
-                            {/* Arrow pointing down */}
-                            <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-slate-950/97 border-b-2 border-r-2 border-cyan-500/50 transform rotate-45" />
-                        </div>
+                        <img
+                            src={getImageUrl(hoverSlotCard.card)}
+                            alt={hoverSlotCard.card.name}
+                            onError={handleImageError}
+                            className="w-[200px] h-auto object-contain"
+                        />
                     </motion.div>
                 )}
             </AnimatePresence>
-
             <div className="relative w-full h-screen flex p-6 gap-6">
 
                 {/* ══════════════════════════════════════════════
                     LEFT PANEL: Kho Thẻ Sidebar (z-50 — above dim)
                 ═══════════════════════════════════════════════*/}
-                <div className="w-[100px] h-full flex flex-col items-center bg-slate-950/90 border-2 border-slate-700/60 py-4 shadow-[20px_0_30px_rgba(0,0,0,0.8)] z-50">
+                <div data-tutorial="ws-sidebar" className="w-[100px] h-full flex flex-col items-center bg-slate-950/90 border-2 border-slate-700/60 py-4 shadow-[20px_0_30px_rgba(0,0,0,0.8)] z-50">
                     <div className="text-center border-b border-cyan-800/50 w-full pb-2 mb-4 shrink-0">
                         <div className="text-[10px] text-cyan-400 font-bold tracking-widest drop-shadow-[0_0_8px_rgba(34,211,238,0.5)]">
                             KHO THẺ
@@ -1742,7 +1725,7 @@ export default function WorkshopScreen() {
                         </div>
 
                         {/* 1. Heat Bar (ngay dưới Crew) */}
-                        <div className={`w-[55%] max-w-xl relative transition-all ${isOverheated ? 'animate-pulse' : ''}`}>
+                        <div data-tutorial="ws-heat-bar" className={`w-[55%] max-w-xl relative transition-all ${isOverheated ? 'animate-pulse' : ''}`}>
                             <div className={`h-5 bg-slate-950 border-2 rounded-full overflow-hidden relative shadow-[inset_0_2px_4px_rgba(0,0,0,0.6)] ${isOverheated ? 'border-red-500' : 'border-slate-700/80'}`}>
                                 <div
                                     className={`h-full relative transition-all duration-300 ${isOverheated ? 'bg-gradient-to-r from-red-600 via-red-500 to-red-400' : heatPercentage > 75 ? 'bg-gradient-to-r from-amber-500 via-amber-400 to-orange-500' : 'bg-gradient-to-r from-emerald-400 via-emerald-300 to-emerald-500'}`}
@@ -1772,7 +1755,7 @@ export default function WorkshopScreen() {
                                 : 0;
                             const powerMet = powerActive && questPower > 0 && accumulatedPower >= questPower;
                             return (
-                                <div className="w-[42%] max-w-md relative">
+                                <div data-tutorial="ws-power-bar" className="w-[42%] max-w-md relative">
                                     <div className={`h-3 border rounded-full overflow-hidden relative shadow-[inset_0_2px_3px_rgba(0,0,0,0.5)] ${
                                         powerActive
                                             ? (powerMet ? 'bg-slate-950 border-emerald-500' : 'bg-slate-950 border-amber-600/70')
@@ -1805,7 +1788,7 @@ export default function WorkshopScreen() {
                         })()}
 
                         {/* 2. 10 Slots Panel (ngay dưới Heat Bar) */}
-                        <div className="flex justify-center gap-1 lg:gap-1.5 relative z-10 w-full px-4">
+                        <div data-tutorial="ws-slots" className="flex justify-center gap-1 lg:gap-1.5 relative z-10 w-full px-4">
                             {/* SVG Combo Neon Lines Overlay */}
                             {activeSlotCombos.length > 0 && (
                                 <svg className={styles.comboSvgOverlay} style={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 25 }}>
@@ -1849,6 +1832,7 @@ export default function WorkshopScreen() {
                                         isCombo={comboSlotSet.has(i)}
                                         comboName={comboSlotBadgeMap.get(i)}
                                         onHoverCard={handleSlotHover}
+                                        isFrozen={testFinalResult?.bearEffects?.frozenCard === card?.name}
                                     />
                                     {/* Install spark burst — tóe lửa khi vừa lắp thẻ vào slot này */}
                                     {sparkSlot?.index === i && (
@@ -1896,7 +1880,8 @@ export default function WorkshopScreen() {
                 <div className="absolute top-6 right-6 w-[240px] flex flex-col gap-3 z-30 pointer-events-none">
 
                     {/* Active Quest Box */}
-                    <div 
+                    <div
+                        data-tutorial="ws-quest-box"
                         className={`border p-3 backdrop-blur-md shadow-2xl pointer-events-auto relative overflow-hidden transition-all ${
                             isBossQuest
                                 ? 'bg-red-950/80 border-red-700/60'
@@ -2050,7 +2035,7 @@ export default function WorkshopScreen() {
                         {testResult === 'none' && !isTesting && (
                             <div className="flex gap-2 w-full">
                                 <button
-                                    onClick={() => { setSlots(Array(10).fill(null)); setCrewSlots(Array(MAX_CREW_SLOTS).fill(null)); setIsTesting(false); setScanIndex(-1); setTestResult('none'); setFailureReason(null); setTestSteps(null); setTestFinalResult(null); setTestErrorMsg(null); setAccumulatedPower(0); setAccumulatedHeat(0); setShowVFX(null); }}
+                                    onClick={() => { setSlots(Array(10).fill(null)); setCrewSlots(Array(MAX_CREW_SLOTS).fill(null)); setIsTesting(false); setScanIndex(-1); setTestResult('none'); setFailureReason(null); setTestSteps(null); setTestFinalResult(null); setTestBudgetProfit(0); setTestErrorMsg(null); setAccumulatedPower(0); setAccumulatedHeat(0); setShowVFX(null); }}
                                     className="flex-1 py-2.5 bg-red-950/60 text-red-400 border border-red-800/50 flex items-center justify-center font-bold tracking-widest hover:bg-red-900 transition-colors uppercase text-[10px]"
                                 >
                                     XOÁ TẤT CẢ
@@ -2188,6 +2173,7 @@ export default function WorkshopScreen() {
 
             {/* ══════════════════════════════════════════════
                 WIN STATE MODAL — Beautiful glassmorphism
+                Shows for ALL successes including Russia Phase 1 (with Vodka button)
             ═══════════════════════════════════════════════*/}
             <AnimatePresence>
             {testResult === 'success' && (
@@ -2319,18 +2305,93 @@ export default function WorkshopScreen() {
                             </div>
                         </div>
 
-                        {/* Footer CTA */}
+                        {/* Removed Russia Phase 1 notice as we transition directly */}                        {/* Footer CTA — Russia Phase 1: "Vodka ở đây" | Standard: "VỀ LOBBY" */}
                         <div className="px-6 pb-6">
-                            <motion.button
-                                onClick={goToLobby}
-                                whileHover={{ scale: 1.02, boxShadow: '0 0 30px rgba(16,185,129,0.6)' }}
-                                whileTap={{ scale: 0.97 }}
-                                initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.7 }}
-                                className="w-full py-3.5 bg-emerald-900/70 border-2 border-emerald-500/80 text-emerald-200 font-black tracking-[0.2em] uppercase text-sm transition-all flex items-center justify-center gap-2"
-                            >
-                                <span>▶</span>
-                                <span>VỀ LOBBY</span>
-                            </motion.button>
+                            {(activeQuest?.bossConfig?.specialCondition === 'RUSSIA_EMPEROR' && (!bossChoice?.russiaPhase || bossChoice.russiaPhase === 1)) ? (
+                                <motion.button
+                                    onClick={async () => {
+                                        // 1. Call complete API for Phase 1 to get withheld gold
+                                        if (activeQuest?.id && token) {
+                                            const usedCardIds: number[] = [];
+                                            for (const slot of slots) if (slot?.id) usedCardIds.push(slot.id);
+                                            for (const crew of crewSlots) if (crew?.id) usedCardIds.push(crew.id);
+
+                                            try {
+                                                const res = await fetch(`/api/quest/${activeQuest.id}/complete`, {
+                                                    method: 'POST',
+                                                    headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+                                                    body: JSON.stringify({ 
+                                                        status: 'SUCCESS', 
+                                                        usedCardIds,
+                                                        budgetProfit: testBudgetProfit,
+                                                        totalPower: testFinalResult?.totalPower || 0,
+                                                        russiaPhase: 1
+                                                    }),
+                                                });
+                                                if (res.ok) {
+                                                    const data = await res.json();
+                                                    setStoredPhase1GoldWithheld(data.phase1GoldWithheld || 0);
+                                                    if (data.userState?.garageHealth !== undefined) updateGarageHealth(data.userState.garageHealth);
+                                                    if (data.userState?.level !== undefined && user) setUser({ ...user, level: data.userState.level });
+                                                    
+                                                    // Sync inventory immediately to prevent using P1 cards in P2
+                                                    try {
+                                                        const invRes = await fetch('/api/user/inventory', { headers: { Authorization: `Bearer ${token}` } });
+                                                        if (invRes.ok) {
+                                                            const invData = await invRes.json();
+                                                            if (invData.inventory) setInventory(invData.inventory);
+                                                        }
+                                                    } catch (err) {
+                                                        console.error('Failed to sync inventory for Phase 2 transition', err);
+                                                    }
+                                                }
+                                            } catch (e) {
+                                                console.error('Phase 1 complete error', e);
+                                            }
+                                        }
+
+                                        // 2. Start Phase 2 directly
+                                        setTestResult('none');
+                                        const setBossChoice = useGameStore.getState().setBossChoice;
+                                        setBossChoice({ russiaPhase: 2 }); 
+                                        
+                                        // Reset workshop state for Phase 2 run
+                                        setSlots(Array(10).fill(null));
+                                        setCrewSlots(Array(MAX_CREW_SLOTS).fill(null));
+                                        setTestFinalResult(null);
+                                        setTestBudgetProfit(0);
+                                        setFailureReason(null);
+                                        setTestSteps(null);
+                                        setTestErrorMsg(null);
+                                        setAccumulatedPower(0);
+                                        setAccumulatedHeat(0);
+                                        setShowVFX(null);
+                                        setIsTesting(false);
+                                        setScanIndex(-1);
+                                        
+                                        // Change background music
+                                        setActiveBossMusic('/gamemusic/russianbossp2.mp3');
+                                    }}
+                                    whileHover={{ scale: 1.02, boxShadow: '0 0 30px rgba(239,68,68,0.8)' }}
+                                    whileTap={{ scale: 0.97 }}
+                                    initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.7 }}
+                                    className="w-full py-3.5 bg-gradient-to-r from-red-900/90 to-red-800/90 border-2 border-red-500/80 text-red-100 font-black tracking-[0.15em] uppercase text-sm transition-all flex items-center justify-center gap-2 shadow-[0_0_25px_rgba(239,68,68,0.4)]"
+                                >
+                                    <span className="text-lg">🍸</span>
+                                    <span>Vodka ở đây</span>
+                                </motion.button>
+                            ) : (
+                                <motion.button
+                                    onClick={goToLobby}
+                                    whileHover={{ scale: 1.02, boxShadow: '0 0 30px rgba(16,185,129,0.6)' }}
+                                    whileTap={{ scale: 0.97 }}
+                                    initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.7 }}
+                                    className="w-full py-3.5 bg-emerald-900/70 border-2 border-emerald-500/80 text-emerald-200 font-black tracking-[0.2em] uppercase text-sm transition-all flex items-center justify-center gap-2"
+                                >
+                                    <span>▶</span>
+                                    <span>VỀ LOBBY</span>
+                                </motion.button>
+                            )}
                         </div>
 
                         {/* Bottom glow */}
@@ -2344,13 +2405,158 @@ export default function WorkshopScreen() {
             )}
             </AnimatePresence>
 
+            {/* ══════════════════════════════════════════════
+                RUSSIA EMPEROR PHASE 2 COMPLETION POPUP
+                Dedicated glassmorphism with Russia red/gold theme
+            ═══════════════════════════════════════════════*/}
+            <AnimatePresence>
+            {russiaPhase2Complete && (
+                <motion.div
+                    key="russia-phase2-overlay"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="absolute inset-0 z-[90] flex items-center justify-center"
+                    style={{ backdropFilter: 'blur(8px)', background: 'radial-gradient(ellipse at center, rgba(80,10,10,0.6) 0%, rgba(0,0,0,0.85) 100%)' }}
+                >
+                    {/* Scanline */}
+                    <div className="absolute inset-0 pointer-events-none opacity-10"
+                        style={{ backgroundImage: 'repeating-linear-gradient(transparent,transparent 2px,rgba(255,45,85,0.2) 3px)', backgroundSize: '100% 4px' }} />
+
+                    <motion.div
+                        initial={{ scale: 0.7, opacity: 0, y: -50 }}
+                        animate={{ scale: 1, opacity: 1, y: 0 }}
+                        exit={{ scale: 0.85, opacity: 0, y: -30 }}
+                        transition={{ type: 'spring', stiffness: 240, damping: 20 }}
+                        className="relative w-[480px] max-w-[90vw] bg-gradient-to-b from-[#1a0808]/98 to-red-950/60 border-2 border-red-500/70 shadow-[0_0_80px_rgba(255,45,85,0.5),0_0_200px_rgba(255,45,85,0.15)] overflow-hidden"
+                    >
+                        {/* Top glow strip */}
+                        <motion.div
+                            animate={{ opacity: [0.6, 1, 0.6] }}
+                            transition={{ duration: 2, repeat: Infinity }}
+                            className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-transparent via-red-400 to-transparent"
+                        />
+
+                        {/* Corner accents */}
+                        <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-red-400" />
+                        <div className="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-red-400" />
+                        <div className="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-red-700/60" />
+                        <div className="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-red-700/60" />
+
+                        {/* Header */}
+                        <div className="px-6 pt-6 pb-4 border-b border-red-900/50">
+                            <div className="flex items-center gap-3">
+                                <motion.div
+                                    animate={{ rotate: [0, 10, -10, 0], scale: [1, 1.2, 1] }}
+                                    transition={{ duration: 1, delay: 0.3 }}
+                                    className="text-4xl"
+                                >
+                                    🇷🇺
+                                </motion.div>
+                                <div>
+                                    <div className="text-[10px] text-red-400/70 tracking-[0.3em] font-bold uppercase mb-0.5">NGA ĐẠI ĐẾ</div>
+                                    <motion.div
+                                        animate={{ textShadow: ['0 0 20px rgba(255,45,85,0.6)', '0 0 40px rgba(255,45,85,1)', '0 0 20px rgba(255,45,85,0.6)'] }}
+                                        transition={{ duration: 2, repeat: Infinity }}
+                                        className="text-2xl font-black text-red-400 tracking-wider leading-tight"
+                                    >
+                                        HOÀN THÀNH CẢ 2 PHASE!
+                                    </motion.div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Body — Phase breakdown */}
+                        <div className="px-6 py-5 space-y-3">
+                            {/* Phase 1 Gold */}
+                            <motion.div
+                                initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3 }}
+                                className="flex items-center justify-between p-3 bg-amber-950/40 border border-amber-700/40 rounded"
+                            >
+                                <div className="flex items-center gap-2">
+                                    <span className="text-amber-400 text-base">⚡</span>
+                                    <span className="text-[11px] text-amber-300/80 font-bold tracking-wider">PHASE 1 (Power ×2)</span>
+                                </div>
+                                <span className="text-lg font-black text-amber-400"
+                                    style={{ textShadow: '0 0 12px rgba(251,191,36,0.7)' }}>
+                                    +{russiaPhase1GoldDisplay.toLocaleString()} G
+                                </span>
+                            </motion.div>
+
+                            {/* Phase 2 Gold */}
+                            <motion.div
+                                initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.45 }}
+                                className="flex items-center justify-between p-3 bg-red-950/40 border border-red-700/40 rounded"
+                            >
+                                <div className="flex items-center gap-2">
+                                    <span className="text-red-400 text-base">🍸</span>
+                                    <span className="text-[11px] text-red-300/80 font-bold tracking-wider">PHASE 2 (Power ×3)</span>
+                                </div>
+                                <span className="text-lg font-black text-red-400"
+                                    style={{ textShadow: '0 0 12px rgba(255,45,85,0.7)' }}>
+                                    +{russiaPhase2GoldDisplay.toLocaleString()} G
+                                </span>
+                            </motion.div>
+
+                            {/* Divider */}
+                            <div className="border-t border-red-800/50 my-2" />
+
+                            {/* Total Gold */}
+                            <motion.div
+                                initial={{ opacity: 0, y: 10, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} transition={{ delay: 0.6, type: 'spring' }}
+                                className="flex items-center justify-between p-4 bg-gradient-to-r from-amber-950/60 to-red-950/60 border-2 border-amber-500/50 rounded shadow-[0_0_20px_rgba(251,191,36,0.3)]"
+                            >
+                                <div className="flex items-center gap-2">
+                                    <span className="text-amber-400 text-xl">💰</span>
+                                    <span className="text-sm text-amber-200 font-black tracking-wider">TỔNG THƯỞNG</span>
+                                </div>
+                                <motion.span
+                                    animate={{ textShadow: ['0 0 15px rgba(251,191,36,0.5)', '0 0 30px rgba(251,191,36,1)', '0 0 15px rgba(251,191,36,0.5)'] }}
+                                    transition={{ duration: 2, repeat: Infinity }}
+                                    className="text-2xl font-black text-amber-400">
+                                    +{russiaTotalGold.toLocaleString()} G
+                                </motion.span>
+                            </motion.div>
+                        </div>
+
+                        {/* Footer — VỀ LOBBY */}
+                        <div className="px-6 pb-6">
+                            <motion.button
+                                onClick={() => {
+                                    setRussiaPhase2Complete(false);
+                                    setStoredPhase1GoldWithheld(0);
+                                    setSkipShadowIntro(true);
+                                    setActiveBossMusic(null);
+                                    transitionScreen('lobby');
+                                }}
+                                whileHover={{ scale: 1.02, boxShadow: '0 0 30px rgba(255,45,85,0.6)' }}
+                                whileTap={{ scale: 0.97 }}
+                                initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8 }}
+                                className="w-full py-3.5 bg-red-900/70 border-2 border-red-500/80 text-red-200 font-black tracking-[0.2em] uppercase text-sm transition-all flex items-center justify-center gap-2"
+                            >
+                                <span>▶</span>
+                                <span>VỀ LOBBY</span>
+                            </motion.button>
+                        </div>
+
+                        {/* Bottom glow */}
+                        <motion.div
+                            animate={{ opacity: [0.4, 0.9, 0.4] }}
+                            transition={{ duration: 2, repeat: Infinity }}
+                            className="absolute bottom-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-red-500/60 to-transparent"
+                        />
+                    </motion.div>
+                </motion.div>
+            )}
+            </AnimatePresence>
+
             <DragOverlay dropAnimation={{ duration: 250, easing: 'cubic-bezier(0.18, 0.67, 0.6, 1.22)' }}>
                 {activeDragCard ? (
                     <div className="w-20 h-28 lg:w-24 lg:h-32 flex items-center justify-center opacity-90 drop-shadow-[0_20px_30px_rgba(34,211,238,0.5)]">
                         <img
                             src={getImageUrl(activeDragCard)}
                             alt={activeDragCard.name}
-                            onError={(e) => handleImageError(e, activeDragCard.id)}
+                            onError={handleImageError}
                             className="w-full h-auto object-contain scale-110"
                         />
                     </div>
@@ -2417,13 +2623,7 @@ export default function WorkshopScreen() {
                 />
             )}
 
-            {/* Russia Phase 2 Dialog */}
-            {showRussiaPhase2Dialog && (
-                <RussiaPhase2Dialog
-                    isOpen={showRussiaPhase2Dialog}
-                    onChoice={handleRussiaPhase2Choice}
-                />
-            )}
+            {/* Russia Phase 2 Dialog removed */}
         </div>
         </DndContext>
     );

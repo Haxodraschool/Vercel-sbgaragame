@@ -26,6 +26,7 @@ interface Props {
   isLeaving: boolean;
   onShadowClick: (quest: QuestData) => void;
   zIndex?: number;
+  dataTutorial?: string;
 }
 
 // Sprite atlas types
@@ -40,6 +41,7 @@ export default function ShadowCustomer({
   isLeaving,
   onShadowClick,
   zIndex,
+  dataTutorial,
 }: Props) {
   const atlas = (spriteAtlas as unknown as SpriteAtlas).frames;
   const spriteKey = seatPosition.sofa === 'right' ? 'shadowsitright' : 'shadowsitleft';
@@ -64,6 +66,7 @@ export default function ShadowCustomer({
 
   return (
     <div
+      data-tutorial={dataTutorial}
       className={containerClass}
       style={{
         left: seatPosition.left,

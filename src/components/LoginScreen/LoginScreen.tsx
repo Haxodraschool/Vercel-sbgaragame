@@ -231,7 +231,9 @@ export default function LoginScreen() {
         transition: { duration: 0.5 },
       });
 
-      setTimeout(() => transitionScreen('lobby'), 200);
+      // New users go to perk selection, existing users go to lobby
+      const targetScreen = isLoginMode ? 'lobby' : 'perkSelection';
+      setTimeout(() => transitionScreen(targetScreen), 200);
     } catch (err: any) {
       setHasError(true);
       const msg = err?.message || (isLoginMode ? 'Sai tài khoản hoặc mật khẩu!' : 'Tạo tài khoản thất bại!');

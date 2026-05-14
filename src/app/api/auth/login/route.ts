@@ -51,6 +51,8 @@ export async function POST(request: NextRequest) {
         techPoints: Number(user.techPoints),
         crewSlots: user.crewSlots,
         isFinalRound: user.isFinalRound,
+        isInNorthKorea: user.isInNorthKorea,
+        northKoreaDayCount: user.northKoreaDayCount,
       },
     });
 
